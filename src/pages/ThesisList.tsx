@@ -58,7 +58,8 @@ interface Thesis {
 
 const ThesisList = () => {
   // States
-  const [searchText, setSearchText] = useState("");
+  const [searchAllTheses, setSearchAllTheses] = useState("");
+  const [searchMyTheses, setSearchMyTheses] = useState("");
   const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
@@ -81,17 +82,21 @@ const ThesisList = () => {
   // Filter theses based on search text
   const filteredAllTheses = allTheses.filter(
     (thesis) =>
-      thesis.title.toLowerCase().includes(searchText.toLowerCase()) ||
-      thesis.supervisor.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      thesis.description.toLowerCase().includes(searchText.toLowerCase())
+      thesis.title.toLowerCase().includes(searchAllTheses.toLowerCase()) ||
+      thesis.supervisor.name
+        .toLowerCase()
+        .includes(searchAllTheses.toLowerCase()) ||
+      thesis.description.toLowerCase().includes(searchAllTheses.toLowerCase())
   );
 
   // Filter my theses based on search text
   const filteredMyTheses = myTheses.filter(
     (thesis) =>
-      thesis.title.toLowerCase().includes(searchText.toLowerCase()) ||
-      thesis.supervisor.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      thesis.description.toLowerCase().includes(searchText.toLowerCase())
+      thesis.title.toLowerCase().includes(searchMyTheses.toLowerCase()) ||
+      thesis.supervisor.name
+        .toLowerCase()
+        .includes(searchMyTheses.toLowerCase()) ||
+      thesis.description.toLowerCase().includes(searchMyTheses.toLowerCase())
   );
 
   // Handle registering for a thesis
@@ -263,19 +268,25 @@ const ThesisList = () => {
             <BookOutlined /> Luận văn
           </Title>
         }
-        extra={
-          <Input
-            placeholder="Tìm kiếm đề tài..."
-            prefix={<SearchOutlined />}
-            style={{ width: 250 }}
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            allowClear
-          />
-        }
       >
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
           <TabPane tab="Tất cả luận văn" key="all">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginBottom: 16,
+              }}
+            >
+              <Input
+                placeholder="Tìm kiếm đề tài..."
+                prefix={<SearchOutlined />}
+                style={{ width: 300 }}
+                value={searchAllTheses}
+                onChange={(e) => setSearchAllTheses(e.target.value)}
+                allowClear
+              />
+            </div>
             {allTheses.length === 0 && !isLoadingAll ? (
               <Empty
                 description="Không có đề tài nào khả dụng"
@@ -292,6 +303,22 @@ const ThesisList = () => {
             )}
           </TabPane>
           <TabPane tab="Luận văn của tôi" key="my">
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                marginBottom: 16,
+              }}
+            >
+              <Input
+                placeholder="Tìm kiếm luận văn của tôi..."
+                prefix={<SearchOutlined />}
+                style={{ width: 300 }}
+                value={searchMyTheses}
+                onChange={(e) => setSearchMyTheses(e.target.value)}
+                allowClear
+              />
+            </div>
             {myTheses.length === 0 && !isLoadingMy ? (
               <Empty
                 description="Bạn chưa đăng ký đề tài nào"
