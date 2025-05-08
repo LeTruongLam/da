@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { EyeOutlined, UserOutlined } from "@ant-design/icons";
 
-// Giả lập dữ liệu luận văn
+// Giả lập dữ liệu đồ án
 const mockTheses = Array.from({ length: 15 }).map((_, i) => ({
   id: String(i + 1),
   title: `Đề tài nghiên cứu về ${
@@ -148,7 +148,7 @@ const ThesisManagement = () => {
   return (
     <>
       <Card
-        title="Quản lý luận văn"
+        title="Quản lý đồ án"
         extra={
           <Button type="primary" onClick={() => navigate("/create-thesis")}>
             Tạo mới đề tài

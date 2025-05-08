@@ -50,7 +50,7 @@ const MainLayout = () => {
           {
             key: "/thesis-list",
             icon: <FileTextOutlined />,
-            label: "Danh sách luận văn",
+            label: "Danh sách đồ án",
           },
           {
             key: "/teacher-list",
@@ -64,7 +64,7 @@ const MainLayout = () => {
           {
             key: "/thesis-management",
             icon: <FileTextOutlined />,
-            label: "Quản lý luận văn",
+            label: "Quản lý đồ án",
           },
           {
             key: "/approve-requests",

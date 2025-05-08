@@ -46,7 +46,7 @@ const { Dragger } = Upload;
 
 const PAGE_SIZE = 5;
 
-// Mock dữ liệu luận văn
+// Mock dữ liệu đồ án
 const mockThesis = {
   id: "1",
   title: "Ứng dụng AI trong giáo dục",
@@ -114,7 +114,7 @@ const mockSubTasks = [
     name: "Nộp đề cương",
     startDate: "2024-06-01",
     deadline: "2024-06-15",
-    description: "Nộp đề cương chi tiết của luận văn",
+    description: "Nộp đề cương chi tiết của đồ án",
     status: "completed",
     score: 8,
     feedback: "Đề cương tốt, cần bổ sung thêm mục tiêu cụ thể hơn",
@@ -347,7 +347,7 @@ const ThesisDetail = () => {
           <TabPane tab="Tổng quan" key="overview">
             <Row gutter={[24, 24]}>
               <Col xs={24} md={16}>
-                <Card title="Thông tin luận văn">
+                <Card title="Thông tin đồ án">
                   <Paragraph>
                     <Text strong>Mô tả: </Text>
                     {thesis.description}

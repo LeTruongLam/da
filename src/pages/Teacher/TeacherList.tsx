@@ -28,7 +28,7 @@ import {
   ExperimentOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { api } from "../services/api";
+import { api } from "../../services/api";
 
 const { Title, Text, Paragraph } = Typography;
 

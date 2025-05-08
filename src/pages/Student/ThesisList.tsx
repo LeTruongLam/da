@@ -29,8 +29,8 @@ import {
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import type { RootState } from "../store";
-import { api } from "../services/api";
+import type { RootState } from "../../store";
+import { api } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 
 const { Title, Text, Paragraph } = Typography;
@@ -265,12 +265,12 @@ const ThesisList = () => {
       <Card
         title={
           <Title level={4}>
-            <BookOutlined /> Luận văn
+            <BookOutlined /> Đồ án
           </Title>
         }
       >
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab="Tất cả luận văn" key="all">
+          <TabPane tab="Tất cả đồ án" key="all">
             <div
               style={{
                 display: "flex",
@@ -302,7 +302,7 @@ const ThesisList = () => {
               />
             )}
           </TabPane>
-          <TabPane tab="Luận văn của tôi" key="my">
+          <TabPane tab="Đồ án của tôi" key="my">
             <div
               style={{
                 display: "flex",
@@ -311,7 +311,7 @@ const ThesisList = () => {
               }}
             >
               <Input
-                placeholder="Tìm kiếm luận văn của tôi..."
+                placeholder="Tìm kiếm đồ án của tôi..."
                 prefix={<SearchOutlined />}
                 style={{ width: 300 }}
                 value={searchMyTheses}

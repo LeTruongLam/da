@@ -339,7 +339,7 @@ const mockDocuments: Document[] = [
   },
   {
     key: "2",
-    name: "Mẫu báo cáo luận văn.docx",
+    name: "Mẫu báo cáo đồ án.docx",
     type: "Word",
     uploadedBy: "Giảng viên",
     uploadedAt: "2024-05-20",
@@ -349,7 +349,7 @@ const mockDocuments: Document[] = [
   // Tài liệu do sinh viên nộp
   {
     key: "3",
-    name: "Đề cương luận văn.pdf",
+    name: "Đề cương đồ án.pdf",
     type: "PDF",
     uploadedBy: "Nguyễn Văn A",
     uploadedAt: "2024-06-12",
