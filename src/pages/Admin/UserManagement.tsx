@@ -11,16 +11,9 @@ import {
   message,
 } from "antd";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../../services/api";
 import { useState } from "react";
 import type { UserRole } from "../../store/slices/authSlice";
-
-interface UserForm {
-  email: string;
-  name: string;
-  role: UserRole;
-  password: string;
-}
+import type { UserForm } from "../../types/pages/Admin/UserManagement";
 
 const UserManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
