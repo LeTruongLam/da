@@ -14,6 +14,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import type { UserRole } from "../../store/slices/authSlice";
 import type { UserForm } from "../../types/pages/Admin/UserManagement";
+import {
+  USER_ROLES,
+  USER_ROLE_LABELS,
+  USER_ROLE_COLORS,
+  TABLE_PAGE_SIZE,
+} from "../../lib/constants";
 
 const UserManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -78,12 +84,8 @@ const UserManagement = () => {
       dataIndex: "role",
       key: "role",
       render: (role: UserRole) => {
-        const roleMap = {
-          student: { color: "blue", text: "Sinh viên" },
-          teacher: { color: "green", text: "Giảng viên" },
-          admin: { color: "red", text: "Admin" },
-        };
-        const { color, text } = roleMap[role];
+        const color = USER_ROLE_COLORS[role];
+        const text = USER_ROLE_LABELS[role];
         return <Tag color={color}>{text}</Tag>;
       },
     },
@@ -116,6 +118,7 @@ const UserManagement = () => {
         dataSource={users}
         loading={isLoading}
         rowKey="id"
+        pagination={{ pageSize: TABLE_PAGE_SIZE }}
       />
 
       <Modal
@@ -154,9 +157,15 @@ const UserManagement = () => {
             rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
           >
             <Select>
-              <Select.Option value="student">Sinh viên</Select.Option>
-              <Select.Option value="teacher">Giảng viên</Select.Option>
-              <Select.Option value="admin">Admin</Select.Option>
+              <Select.Option value={USER_ROLES.STUDENT}>
+                {USER_ROLE_LABELS[USER_ROLES.STUDENT]}
+              </Select.Option>
+              <Select.Option value={USER_ROLES.TEACHER}>
+                {USER_ROLE_LABELS[USER_ROLES.TEACHER]}
+              </Select.Option>
+              <Select.Option value={USER_ROLES.ADMIN}>
+                {USER_ROLE_LABELS[USER_ROLES.ADMIN]}
+              </Select.Option>
             </Select>
           </Form.Item>
 
