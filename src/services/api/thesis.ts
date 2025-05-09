@@ -1,4 +1,4 @@
-import { get, post, put, del } from "../../lib/base-api";
+import { get, post, put, del } from "@/lib/base-api";
 
 export interface Thesis {
   id: string;

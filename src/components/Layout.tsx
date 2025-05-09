@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import type { RootState } from "../store";
-import { logout } from "../store/slices/authSlice";
+import type { RootState } from "@/store";
+import { logout } from "@/store/slices/authSlice";
 import {
   Layout,
   Menu,
@@ -10,6 +10,7 @@ import {
   Button,
   theme,
   Space,
+  Tag,
   type MenuProps,
 } from "antd";
 import {
@@ -26,6 +27,20 @@ import {
 import { useState } from "react";
 
 const { Header, Sider, Content } = Layout;
+
+// Function to get role tag color
+const getRoleTagColor = (role: string) => {
+  switch (role) {
+    case "admin":
+      return "red";
+    case "teacher":
+      return "blue";
+    case "student":
+      return "green";
+    default:
+      return "default";
+  }
+};
 
 const MainLayout = () => {
   const [collapsed, setCollapsed] = useState(false);
@@ -205,6 +220,14 @@ const MainLayout = () => {
               placement="bottomRight"
             >
               <Space style={{ cursor: "pointer" }}>
+                {user?.role && (
+                  <Tag
+                    color={getRoleTagColor(user.role)}
+                    style={{ textTransform: "capitalize" }}
+                  >
+                    {user.role}
+                  </Tag>
+                )}
                 <Avatar icon={<UserOutlined />} />
                 <span>{user?.name}</span>
               </Space>

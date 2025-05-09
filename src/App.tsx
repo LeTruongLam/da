@@ -1,21 +1,21 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import type { RootState } from "./store";
-import Layout from "./components/Layout";
-import Login from "./pages/Login";
-import StudentDashboard from "./pages/Student/Dashboard";
-import TeacherDashboard from "./pages/Teacher/Dashboard";
-import ThesisList from "./pages/Student/ThesisList";
-import ThesisDetail from "./pages/Student/ThesisDetail";
-import ThesisManagement from "./pages/Teacher/ThesisManagement";
-import CreateThesis from "./pages/Teacher/CreateThesis";
-import UserManagement from "./pages/Admin/UserManagement";
-import SystemSettings from "./pages/Admin/SystemSettings";
-import ApproveRequests from "./pages/Teacher/ApproveRequests";
-import TeacherThesisDetail from "./pages/Teacher/ThesisDetail";
-import TeacherList from "./pages/Student/TeacherList";
-import MeetingApproval from "./pages/Teacher/MeetingApproval";
-import SystemNotifications from "./pages/Admin/SystemNotifications";
+import type { RootState } from "@/store";
+import Layout from "@/components/Layout";
+import Login from "@/pages/Login";
+import StudentDashboard from "@/pages/Student/Dashboard";
+import TeacherDashboard from "@/pages/Teacher/Dashboard";
+import ThesisList from "@/pages/Student/ThesisList";
+import ThesisDetail from "@/pages/Student/ThesisDetail";
+import ThesisManagement from "@/pages/Teacher/ThesisManagement";
+import CreateThesis from "@/pages/Teacher/CreateThesis";
+import UserManagement from "@/pages/Admin/UserManagement";
+import SystemSettings from "@/pages/Admin/SystemSettings";
+import ApproveRequests from "@/pages/Teacher/ApproveRequests";
+import TeacherThesisDetail from "@/pages/Teacher/ThesisDetail";
+import TeacherList from "@/pages/Student/TeacherList";
+import MeetingApproval from "@/pages/Teacher/MeetingApproval";
+import SystemNotifications from "@/pages/Admin/SystemNotifications";
 
 const App = () => {
   const { user } = useSelector((state: RootState) => state.auth);

@@ -1,4 +1,4 @@
-import axiosClient from "./axios-client";
+import axiosClient from "@/lib/axios-client";
 
 /**
  * Generic API functions for making requests

@@ -1,6 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { Thesis } from "../../types";
+import type { Thesis as BaseThesis } from "@/services/api/thesis";
+
+// Extended Thesis interface with progress
+interface Thesis extends BaseThesis {
+  progress?: number;
+}
 
 interface ThesisState {
   theses: Thesis[];
@@ -36,7 +41,9 @@ const thesisSlice = createSlice({
       state,
       action: PayloadAction<{ thesisId: string; progress: number }>
     ) => {
-      const thesis = state.theses.find((t) => t.id === action.payload.thesisId);
+      const thesis = state.theses.find(
+        (t: Thesis) => t.id === action.payload.thesisId
+      );
       if (thesis) {
         thesis.progress = action.payload.progress;
       }

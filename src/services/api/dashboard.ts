@@ -1,4 +1,4 @@
-import { get } from "../../lib/base-api";
+import { get } from "@/lib/base-api";
 import type { Thesis } from "./thesis";
 import type { User } from "./auth";
 
