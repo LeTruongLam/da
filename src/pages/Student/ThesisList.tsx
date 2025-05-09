@@ -187,7 +187,6 @@ const ThesisList = () => {
           <Button type="primary" onClick={() => showThesisDetails(record)}>
             Chi tiết
           </Button>
-          <Button onClick={() => showThesisDetails(record)}>Đăng ký</Button>
         </Space>
       ),
     },
@@ -390,10 +389,10 @@ const ThesisList = () => {
                       <Text strong>SĐT: </Text>
                       {selectedThesis.supervisor.phone}
                     </Paragraph>
-                    <Paragraph>
+                    {/* <Paragraph>
                       <Text strong>Chuyên môn: </Text>
                       {selectedThesis.supervisor.expertise}
-                    </Paragraph>
+                    </Paragraph> */}
                   </Space>
                 </Card>
               </Col>

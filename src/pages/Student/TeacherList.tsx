@@ -179,16 +179,16 @@ const TeacherList = () => {
           <Button key="back" onClick={() => setIsModalVisible(false)}>
             Đóng
           </Button>,
-          <Button
-            key="contact"
-            type="primary"
-            onClick={() => {
-              message.success("Chức năng liên hệ đang được phát triển");
-              setIsModalVisible(false);
-            }}
-          >
-            Liên hệ
-          </Button>,
+          // <Button
+          //   key="contact"
+          //   type="primary"
+          //   onClick={() => {
+          //     message.success("Chức năng liên hệ đang được phát triển");
+          //     setIsModalVisible(false);
+          //   }}
+          // >
+          //   Liên hệ
+          // </Button>,
         ]}
         width={700}
       >
@@ -265,7 +265,7 @@ const TeacherList = () => {
 
             <Divider />
 
-            <Badge.Ribbon text="Thông tin đề tài" color="blue">
+            {/* <Badge.Ribbon text="Thông tin đề tài" color="blue">
               <Card>
                 <Paragraph>
                   Giảng viên này hiện đang hướng dẫn{" "}
@@ -286,7 +286,7 @@ const TeacherList = () => {
                   </Paragraph>
                 )}
               </Card>
-            </Badge.Ribbon>
+            </Badge.Ribbon> */}
           </div>
         )}
       </Modal>
