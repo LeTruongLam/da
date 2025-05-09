@@ -1,4 +1,4 @@
-import { get, put } from "../../lib/api";
+import { get, put } from "../../lib/base-api";
 import type { User } from "./auth";
 
 export interface ProfileUpdateRequest {

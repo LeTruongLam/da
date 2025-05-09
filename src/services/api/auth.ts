@@ -1,4 +1,4 @@
-import { get, post } from "../../lib/api";
+import { get, post } from "../../lib/base-api";
 
 // Define User type since it's not exported from types.ts
 export interface User {
