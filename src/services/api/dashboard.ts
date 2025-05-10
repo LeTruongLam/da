@@ -32,17 +32,15 @@ export interface RecentActivity {
 
 // Get dashboard statistics
 export const getDashboardStats = () =>
-  get<DashboardStats>(`${API_CONFIG.BASE_URL}/dashboard/stats`);
+  get<DashboardStats>(API_CONFIG.ENDPOINTS.DASHBOARD.STATS);
 
 // Get recent theses
 export const getRecentTheses = (limit = 5) =>
-  get<Thesis[]>(`${API_CONFIG.BASE_URL}/dashboard/recent-theses`, { limit });
+  get<Thesis[]>(API_CONFIG.ENDPOINTS.DASHBOARD.RECENT_THESES, { limit });
 
 // Get recent activities
 export const getRecentActivities = (limit = 10) =>
-  get<RecentActivity[]>(`${API_CONFIG.BASE_URL}/dashboard/activities`, {
-    limit,
-  });
+  get<RecentActivity[]>(API_CONFIG.ENDPOINTS.DASHBOARD.ACTIVITIES, { limit });
 
 // Admin only: Get user statistics
 export const getUserStats = () =>
@@ -51,11 +49,11 @@ export const getUserStats = () =>
     activeUsers: number;
     newUsersThisMonth: number;
     usersByRole: { role: string; count: number }[];
-  }>(`${API_CONFIG.BASE_URL}/dashboard/user-stats`);
+  }>(API_CONFIG.ENDPOINTS.DASHBOARD.USER_STATS);
 
 // Teacher only: Get assigned students
 export const getAssignedStudents = () =>
-  get<User[]>(`${API_CONFIG.BASE_URL}/dashboard/assigned-students`);
+  get<User[]>(API_CONFIG.ENDPOINTS.DASHBOARD.ASSIGNED_STUDENTS);
 
 // Student only: Get thesis progress
 export const getThesisProgress = () =>
@@ -64,4 +62,4 @@ export const getThesisProgress = () =>
     progress: number;
     nextMilestone?: string;
     dueDates: { title: string; date: string }[];
-  }>(`${API_CONFIG.BASE_URL}/dashboard/thesis-progress`);
+  }>(API_CONFIG.ENDPOINTS.DASHBOARD.THESIS_PROGRESS);

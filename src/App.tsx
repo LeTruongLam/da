@@ -16,6 +16,7 @@ import TeacherThesisDetail from "@/pages/Teacher/ThesisDetail";
 import TeacherList from "@/pages/Student/TeacherList";
 import MeetingApproval from "@/pages/Teacher/MeetingApproval";
 import SystemNotifications from "@/pages/Admin/SystemNotifications";
+import { USER_ROLES } from "./lib/constants";
 
 const App = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -28,18 +29,18 @@ const App = () => {
         ) : (
           <Route path="/" element={<Layout />}>
             {/* Dashboard động theo vai trò */}
-            {user.role === "student" && (
+            {user.role === USER_ROLES.STUDENT && (
               <Route index element={<StudentDashboard />} />
             )}
-            {user.role === "teacher" && (
+            {user.role === USER_ROLES.TEACHER && (
               <Route index element={<TeacherDashboard />} />
             )}
-            {user.role === "admin" && (
+            {user.role === USER_ROLES.ADMIN && (
               <Route index element={<UserManagement />} />
             )}
 
             {/* Routes cho Sinh viên */}
-            {user.role === "student" && (
+            {user.role === USER_ROLES.STUDENT && (
               <>
                 <Route path="thesis-list" element={<ThesisList />} />
                 <Route path="teacher-list" element={<TeacherList />} />
@@ -48,7 +49,7 @@ const App = () => {
             )}
 
             {/* Routes cho Giảng viên */}
-            {user.role === "teacher" && (
+            {user.role === USER_ROLES.TEACHER && (
               <>
                 <Route
                   path="thesis-management"
@@ -69,7 +70,7 @@ const App = () => {
             )}
 
             {/* Routes cho Admin */}
-            {user.role === "admin" && (
+            {user.role === USER_ROLES.ADMIN && (
               <>
                 <Route path="user-management" element={<UserManagement />} />
                 <Route path="system-settings" element={<SystemSettings />} />

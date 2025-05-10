@@ -21,6 +21,7 @@ import { setCredentials } from "../store/slices/authSlice";
 import { useState } from "react";
 import { login } from "../services/api/auth";
 import { USER_ROLES } from "../lib/constants";
+import { AxiosError } from "axios";
 
 const { Title, Text } = Typography;
 
@@ -64,8 +65,29 @@ const Login = () => {
 
       message.success(`Xin chào, ${result.user.name}!`);
       navigate("/", { replace: true });
-    } catch {
-      message.error("Email hoặc mật khẩu không đúng");
+    } catch (error) {
+      console.error("Login error:", error);
+      if (error instanceof AxiosError && error.response) {
+        switch (error.response.status) {
+          case 401:
+            message.error("Email hoặc mật khẩu không đúng");
+            break;
+          case 403:
+            message.error("Tài khoản của bạn đã bị khóa");
+            break;
+          case 500:
+            message.error("Lỗi server, vui lòng thử lại sau");
+            break;
+          default:
+            message.error("Đã có lỗi xảy ra, vui lòng thử lại");
+        }
+      } else if (error instanceof AxiosError && error.request) {
+        message.error(
+          "Không thể kết nối đến server, vui lòng kiểm tra kết nối mạng"
+        );
+      } else {
+        message.error("Đã có lỗi xảy ra, vui lòng thử lại");
+      }
     } finally {
       setLoading(false);
     }

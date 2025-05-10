@@ -1,6 +1,7 @@
 import { get, put } from "@/lib/base-api";
 import type { User } from "./auth";
 import { API_CONFIG } from "./config";
+import { store } from "@/store";
 
 export interface ProfileUpdateRequest {
   fullName?: string;
@@ -16,12 +17,12 @@ export interface ProfileUpdateRequest {
  */
 
 // Get user profile
-export const getUserProfile = () => get<User>(`${API_CONFIG.BASE_URL}/profile`);
+export const getUserProfile = () => get<User>(API_CONFIG.ENDPOINTS.PROFILE.GET);
 
 // Update user profile
 export const updateUserProfile = (data: ProfileUpdateRequest) =>
   put<User>(
-    `${API_CONFIG.BASE_URL}/profile`,
+    API_CONFIG.ENDPOINTS.PROFILE.UPDATE,
     data as unknown as Record<string, unknown>
   );
 
@@ -32,18 +33,19 @@ export const changePassword = (data: {
   confirmPassword: string;
 }) =>
   put<{ success: boolean }>(
-    `${API_CONFIG.BASE_URL}/profile/password`,
+    API_CONFIG.ENDPOINTS.PROFILE.CHANGE_PASSWORD,
     data as unknown as Record<string, unknown>
   );
 
 // Upload profile picture
 export const uploadProfilePicture = (formData: FormData) => {
   // Using fetch API directly for file uploads
-  return fetch(`${API_CONFIG.BASE_URL}/profile/avatar`, {
+  const token = store.getState().auth.token;
+  return fetch(API_CONFIG.ENDPOINTS.PROFILE.UPLOAD_AVATAR, {
     method: "POST",
     body: formData,
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${token}`,
     },
   }).then((response) => response.json());
 };

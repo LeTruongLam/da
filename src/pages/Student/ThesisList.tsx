@@ -21,9 +21,6 @@ import {
   SearchOutlined,
   UserOutlined,
   FileTextOutlined,
-  CalendarOutlined,
-  QuestionCircleOutlined,
-  ExperimentOutlined,
   InfoCircleOutlined,
   BookOutlined,
 } from "@ant-design/icons";
@@ -32,60 +29,65 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { api } from "../../services/api";
 import { useNavigate } from "react-router-dom";
+import { getAllTheses } from "@/services/api/thesis";
+import type { ThesisResponse } from "@/services/api/thesis";
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
-
-interface Thesis {
-  id: string;
-  title: string;
-  description: string;
-  supervisor: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    department: string;
-    expertise: string;
-  };
-  status: string;
-  deadline: string;
-  objectives: string;
-  requirements: string;
-  progress?: number;
-  createdAt: string;
-}
 
 const ThesisList = () => {
   // States
   const [searchAllTheses, setSearchAllTheses] = useState("");
   const [searchMyTheses, setSearchMyTheses] = useState("");
-  const [selectedThesis, setSelectedThesis] = useState<Thesis | null>(null);
+  const [selectedThesis, setSelectedThesis] = useState<ThesisResponse | null>(
+    null
+  );
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const user = useSelector((state: RootState) => state.auth.user);
   const navigate = useNavigate();
 
   // Fetch theses data
-  const { data: allTheses = [], isLoading: isLoadingAll } = useQuery({
+  const { data: allTheses = [], isLoading: isLoadingAll } = useQuery<
+    ThesisResponse[]
+  >({
     queryKey: ["theses"],
-    queryFn: () => api.getTheses(),
+    queryFn: () => getAllTheses(),
   });
 
   // Fetch my theses data
-  const { data: myTheses = [], isLoading: isLoadingMy } = useQuery({
-    queryKey: ["myTheses", user?.id],
-    queryFn: () => api.getMyTheses(user?.id || ""),
-    enabled: !!user?.id,
+  const { data: myTheses = [], isLoading: isLoadingMy } = useQuery<
+    ThesisResponse[]
+  >({
+    queryKey: ["myTheses", user?.userId],
+    queryFn: async () => {
+      const response = await api.getMyTheses(user?.userId || "");
+      return response.map((thesis) => ({
+        thesisId: parseInt(thesis.id),
+        title: thesis.title,
+        description: thesis.description,
+        status: thesis.status as ThesisResponse["status"],
+        lecturer: {
+          userId: thesis.supervisor.id,
+          name: thesis.supervisor.name,
+          email: thesis.supervisor.email,
+        },
+        major: {
+          majorId: "1", // These would come from the API in a real implementation
+          majorName: thesis.supervisor.department,
+          facultyId: "1",
+          facultyName: thesis.supervisor.department,
+        },
+        createdAt: thesis.createdAt,
+      }));
+    },
+    enabled: !!user?.userId,
   });
 
   // Filter theses based on search text
   const filteredAllTheses = allTheses.filter(
     (thesis) =>
       thesis.title.toLowerCase().includes(searchAllTheses.toLowerCase()) ||
-      thesis.supervisor.name
-        .toLowerCase()
-        .includes(searchAllTheses.toLowerCase()) ||
       thesis.description.toLowerCase().includes(searchAllTheses.toLowerCase())
   );
 
@@ -93,7 +95,7 @@ const ThesisList = () => {
   const filteredMyTheses = myTheses.filter(
     (thesis) =>
       thesis.title.toLowerCase().includes(searchMyTheses.toLowerCase()) ||
-      thesis.supervisor.name
+      thesis.lecturer.name
         .toLowerCase()
         .includes(searchMyTheses.toLowerCase()) ||
       thesis.description.toLowerCase().includes(searchMyTheses.toLowerCase())
@@ -104,43 +106,39 @@ const ThesisList = () => {
     if (!selectedThesis || !user) return;
 
     try {
-      await api.registerThesis(selectedThesis.id, user.id);
+      await api.registerThesis(selectedThesis.thesisId.toString(), user.userId);
       setIsModalVisible(false);
+      message.success("Đăng ký đề tài thành công!");
     } catch {
       message.error("Đã xảy ra lỗi khi đăng ký đề tài!");
     }
   };
 
   // View thesis detail
-  const viewThesisDetail = (thesis: Thesis) => {
-    navigate(`/my-thesis/${thesis.id}`);
+  const viewThesisDetail = (thesis: ThesisResponse) => {
+    navigate(`/my-thesis/${thesis.thesisId}`);
   };
 
   // Show thesis details modal
-  const showThesisDetails = (thesis: Thesis) => {
+  const showThesisDetails = (thesis: ThesisResponse) => {
     setSelectedThesis(thesis);
     setIsModalVisible(true);
   };
 
-  const getMonthsUntilDeadline = (deadline: string) => {
-    const deadlineDate = new Date(deadline);
-    const today = new Date();
-    const diffTime = deadlineDate.getTime() - today.getTime();
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30));
-  };
+  const getStatusTag = (status: ThesisResponse["status"]) => {
+    const statusConfig = {
+      available: { color: "processing", text: "Đang mở" },
+      in_progress: { color: "processing", text: "Đang thực hiện" },
+      completed: { color: "success", text: "Hoàn thành" },
+      "not available": { color: "default", text: "Không khả dụng" },
+      "on hold": { color: "warning", text: "Tạm hoãn" },
+    };
 
-  const getDeadlineTag = (deadline: string) => {
-    const months = getMonthsUntilDeadline(deadline);
-
-    if (months < 0) {
-      return <Tag color="red">Đã hết hạn</Tag>;
-    } else if (months < 2) {
-      return <Tag color="volcano">Còn {months} tháng</Tag>;
-    } else if (months < 6) {
-      return <Tag color="orange">Còn {months} tháng</Tag>;
-    } else {
-      return <Tag color="green">Còn {months} tháng</Tag>;
-    }
+    const config = statusConfig[status] || {
+      color: "default",
+      text: "Không xác định",
+    };
+    return <Tag color={config.color}>{config.text}</Tag>;
   };
 
   // Get columns for all theses
@@ -157,32 +155,43 @@ const ThesisList = () => {
       ellipsis: true,
     },
     {
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      render: (text: string) => <Text>{text}</Text>,
+    },
+    {
       title: "Giảng viên hướng dẫn",
-      dataIndex: "supervisor",
-      key: "supervisor",
-      render: (supervisor: Thesis["supervisor"]) => (
+      dataIndex: "lecturer",
+      key: "lecturer",
+      render: (lecturer: ThesisResponse["lecturer"]) => (
         <Space>
           <Avatar icon={<UserOutlined />} />
-          {supervisor.name}
+          {lecturer.name}
         </Space>
       ),
     },
     {
-      title: "Deadline",
-      dataIndex: "deadline",
-      key: "deadline",
-      render: (deadline: string) => (
+      title: "Ngành",
+      dataIndex: "major",
+      key: "major",
+      render: (major: ThesisResponse["major"]) => (
         <Space>
-          <CalendarOutlined />
-          {deadline}
-          {getDeadlineTag(deadline)}
+          <BookOutlined />
+          {major.majorName}
         </Space>
       ),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status: ThesisResponse["status"]) => getStatusTag(status),
     },
     {
       title: "Thao tác",
       key: "action",
-      render: (_: unknown, record: Thesis) => (
+      render: (_: unknown, record: ThesisResponse) => (
         <Space>
           <Button type="primary" onClick={() => showThesisDetails(record)}>
             Chi tiết
@@ -207,51 +216,36 @@ const ThesisList = () => {
     },
     {
       title: "Giảng viên hướng dẫn",
-      dataIndex: "supervisor",
-      key: "supervisor",
-      render: (supervisor: Thesis["supervisor"]) => (
+      dataIndex: "lecturer",
+      key: "lecturer",
+      render: (lecturer: ThesisResponse["lecturer"]) => (
         <Space>
           <Avatar icon={<UserOutlined />} />
-          {supervisor.name}
+          {lecturer.name}
         </Space>
       ),
     },
     {
-      title: "Deadline",
-      dataIndex: "deadline",
-      key: "deadline",
-      render: (deadline: string) => (
+      title: "Ngành",
+      dataIndex: "major",
+      key: "major",
+      render: (major: ThesisResponse["major"]) => (
         <Space>
-          <CalendarOutlined />
-          {deadline}
-          {getDeadlineTag(deadline)}
+          <BookOutlined />
+          {major.majorName}
         </Space>
       ),
     },
     {
-      title: "Tiến độ",
-      dataIndex: "progress",
-      key: "progress",
-      render: (progress: number = 0) => (
-        <Space>
-          <Tag
-            color={
-              progress > 70
-                ? "success"
-                : progress > 30
-                ? "processing"
-                : "warning"
-            }
-          >
-            {progress}%
-          </Tag>
-        </Space>
-      ),
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status: ThesisResponse["status"]) => getStatusTag(status),
     },
     {
       title: "Thao tác",
       key: "action",
-      render: (_: unknown, record: Thesis) => (
+      render: (_: unknown, record: ThesisResponse) => (
         <Button type="primary" onClick={() => viewThesisDetail(record)}>
           Xem chi tiết
         </Button>
@@ -294,7 +288,7 @@ const ThesisList = () => {
             ) : (
               <Table
                 dataSource={filteredAllTheses}
-                rowKey="id"
+                rowKey="thesisId"
                 loading={isLoadingAll}
                 columns={getAllThesesColumns()}
                 pagination={{ pageSize: 10 }}
@@ -326,7 +320,7 @@ const ThesisList = () => {
             ) : (
               <Table
                 dataSource={filteredMyTheses}
-                rowKey="id"
+                rowKey="thesisId"
                 loading={isLoadingMy}
                 columns={getMyThesesColumns()}
                 pagination={{ pageSize: 10 }}
@@ -373,26 +367,18 @@ const ThesisList = () => {
                     <div style={{ textAlign: "center", margin: "10px 0" }}>
                       <Avatar size={64} icon={<UserOutlined />} />
                       <div style={{ marginTop: 8 }}>
-                        <Text strong>{selectedThesis.supervisor.name}</Text>
+                        <Text strong>{selectedThesis.lecturer.name}</Text>
                         <br />
                         <Text type="secondary">
-                          {selectedThesis.supervisor.department}
+                          {selectedThesis.major.majorName}
                         </Text>
                       </div>
                     </div>
                     <Divider style={{ margin: "10px 0" }} />
                     <Paragraph>
                       <Text strong>Email: </Text>
-                      {selectedThesis.supervisor.email}
+                      {selectedThesis.lecturer.email}
                     </Paragraph>
-                    <Paragraph>
-                      <Text strong>SĐT: </Text>
-                      {selectedThesis.supervisor.phone}
-                    </Paragraph>
-                    {/* <Paragraph>
-                      <Text strong>Chuyên môn: </Text>
-                      {selectedThesis.supervisor.expertise}
-                    </Paragraph> */}
                   </Space>
                 </Card>
               </Col>
@@ -415,27 +401,24 @@ const ThesisList = () => {
                     <Row gutter={16}>
                       <Col span={12}>
                         <Paragraph>
-                          <Text strong>
-                            <QuestionCircleOutlined /> Yêu cầu:{" "}
-                          </Text>
-                          {selectedThesis.requirements}
+                          <Text strong>Ngành: </Text>
+                          {selectedThesis.major.majorName}
                         </Paragraph>
                       </Col>
                       <Col span={12}>
                         <Paragraph>
-                          <Text strong>
-                            <ExperimentOutlined /> Mục tiêu:{" "}
-                          </Text>
-                          {selectedThesis.objectives}
+                          <Text strong>Khoa: </Text>
+                          {selectedThesis.major.facultyName}
                         </Paragraph>
                       </Col>
                     </Row>
                     <Paragraph>
-                      <Text strong>
-                        <CalendarOutlined /> Deadline:{" "}
-                      </Text>
-                      {selectedThesis.deadline}
-                      {getDeadlineTag(selectedThesis.deadline)}
+                      <Text strong>Trạng thái: </Text>
+                      {getStatusTag(selectedThesis.status)}
+                    </Paragraph>
+                    <Paragraph>
+                      <Text strong>Ngày tạo: </Text>
+                      {new Date(selectedThesis.createdAt).toLocaleDateString()}
                     </Paragraph>
                   </Space>
                 </Card>

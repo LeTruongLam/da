@@ -7,10 +7,17 @@ interface User {
   id: string;
   name: string;
   email: string;
-  role: "student" | "teacher" | "admin";
+  role: "student" | "lecturer" | "admin";
   department?: string;
   studentId?: string;
-  teacherId?: string;
+  lecturerId?: string;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  email: string;
+  studentId: string;
 }
 
 interface Thesis {
@@ -25,12 +32,7 @@ interface Thesis {
     department: string;
     expertise: string;
   };
-  students?: Array<{
-    id: string;
-    name: string;
-    email: string;
-    studentId: string;
-  }>;
+  students?: Student[];
   status: string;
   deadline: string;
   objectives: string;
@@ -55,6 +57,15 @@ interface Meeting {
   createdAt: string;
 }
 
+interface Lecturer {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  department: string;
+  expertise: string;
+}
+
 // Mock data
 const mockUsers: User[] = [
   {
@@ -67,10 +78,10 @@ const mockUsers: User[] = [
   {
     id: "2",
     name: "Giảng viên",
-    email: "teacher@example.edu.vn",
-    role: "teacher",
+    email: "lecturer@example.edu.vn",
+    role: "lecturer",
     department: "Công nghệ thông tin",
-    teacherId: "GV001",
+    lecturerId: "GV001",
   },
   {
     id: "3",
@@ -149,12 +160,12 @@ const mockMeetings: Meeting[] = [
   },
 ];
 
-const mockTeachers = Array.from({ length: 10 }).map((_, i) => ({
-  id: `teacher${i + 1}`,
+const mockLecturers = Array.from({ length: 10 }).map((_, i) => ({
+  id: `lecturer${i + 1}`,
   name: `TS. ${i % 2 === 0 ? "Nguyễn" : "Trần"} ${
     i % 3 === 0 ? "Văn" : i % 3 === 1 ? "Thị" : "Minh"
   } ${String.fromCharCode(65 + i)}`,
-  email: `teacher${i + 1}@example.edu.vn`,
+  email: `lecturer${i + 1}@example.edu.vn`,
   phone: `098765432${i}`,
   department:
     i % 3 === 0
@@ -230,15 +241,28 @@ export const api = {
   ): Promise<void> => {
     await delay(800);
     // In a real app, you would update the thesis object
+    const thesis = mockTheses.find((t) => t.id === thesisId);
+    const student = mockUsers.find((u) => u.id === studentId);
+    if (thesis && student) {
+      thesis.students = [
+        ...(thesis.students || []),
+        {
+          id: student.id,
+          name: student.name,
+          email: student.email,
+          studentId: student.studentId || "",
+        },
+      ];
+    }
     message.success(
       "Đăng ký đề tài thành công! Vui lòng chờ giảng viên xác nhận."
     );
   },
 
-  // Teachers
-  getTeachers: async (): Promise<any[]> => {
+  // Lecturers
+  getLecturers: async (): Promise<Lecturer[]> => {
     await delay(800);
-    return mockTeachers;
+    return mockLecturers;
   },
 
   // Meetings

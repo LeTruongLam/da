@@ -1,8 +1,11 @@
 import axios from "axios";
+import { API_CONFIG } from "@/services/api/config";
+import { message } from "antd";
+import { store } from "@/store";
 
 // Create axios instance with default config
 const axiosClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/api",
+  baseURL: API_CONFIG.BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
@@ -12,49 +15,85 @@ const axiosClient = axios.create({
 // Request interceptor for adding auth token, etc.
 axiosClient.interceptors.request.use(
   (config) => {
-    // Get token from localStorage
-    const token = localStorage.getItem("token");
+    // Get token from Redux store
+    const token = store.getState().auth.token;
 
     // If token exists, add to headers
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // Log request in development
+    if (import.meta.env.DEV) {
+      console.log("Request:", {
+        method: config.method?.toUpperCase(),
+        url: config.url,
+        data: config.data,
+        params: config.params,
+      });
+    }
+
     return config;
   },
   (error) => {
+    console.error("Request error:", error);
     return Promise.reject(error);
   }
 );
 
 // Response interceptor for handling common errors
 axiosClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Log response in development
+    if (import.meta.env.DEV) {
+      console.log("Response:", {
+        status: response.status,
+        data: response.data,
+      });
+    }
+    return response;
+  },
   (error) => {
+    // Log error in development
+    if (import.meta.env.DEV) {
+      console.error("Response error:", {
+        status: error.response?.status,
+        data: error.response?.data,
+        message: error.message,
+      });
+    }
+
     // Handle specific error status codes
     if (error.response) {
       switch (error.response.status) {
         case 401:
           // Handle unauthorized (e.g., logout user, redirect to login)
-          localStorage.removeItem("token");
+          store.dispatch({ type: "auth/logout" });
+          message.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+          window.location.href = "/login";
           break;
         case 403:
           // Handle forbidden
-          console.error("Access forbidden");
+          message.error("Bạn không có quyền truy cập vào tài nguyên này");
+          break;
+        case 404:
+          message.error("Không tìm thấy tài nguyên yêu cầu");
           break;
         case 500:
           // Handle server error
-          console.error("Server error");
+          message.error("Lỗi server, vui lòng thử lại sau");
           break;
         default:
-          break;
+          message.error(error.response.data?.message || "Đã có lỗi xảy ra");
       }
     } else if (error.request) {
       // Request made but no response received
-      console.error("No response received from server");
+      message.error(
+        "Không thể kết nối đến server, vui lòng kiểm tra kết nối mạng"
+      );
     } else {
       // Error in setting up request
-      console.error("Error setting up request:", error.message);
+      message.error("Đã có lỗi xảy ra khi gửi yêu cầu");
     }
 
     return Promise.reject(error);

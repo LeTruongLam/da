@@ -5,19 +5,19 @@ export const TABLE_PAGE_SIZE = 10;
 // User Roles
 export const USER_ROLES = {
   STUDENT: "Student",
-  TEACHER: "Teacher",
+  LECTURER: "Lecturer",
   ADMIN: "Admin",
 };
 
 export const USER_ROLE_LABELS = {
   [USER_ROLES.STUDENT]: "Sinh viên",
-  [USER_ROLES.TEACHER]: "Giảng viên",
-  [USER_ROLES.ADMIN]: "Admin",
+  [USER_ROLES.LECTURER]: "Giảng viên",
+  [USER_ROLES.ADMIN]: "Quản trị viên",
 };
 
 export const USER_ROLE_COLORS = {
   [USER_ROLES.STUDENT]: "blue",
-  [USER_ROLES.TEACHER]: "green",
+  [USER_ROLES.LECTURER]: "green",
   [USER_ROLES.ADMIN]: "red",
 };
 

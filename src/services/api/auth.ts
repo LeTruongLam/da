@@ -38,24 +38,24 @@ interface RegisterRequest {
 // Login user
 export const login = (data: LoginRequest) =>
   post<LoginResponse>(
-    `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`,
+    API_CONFIG.ENDPOINTS.AUTH.LOGIN,
     data as unknown as Record<string, unknown>
   );
 
 // Register new user
 export const register = (userData: RegisterRequest) =>
   post<User>(
-    `${API_CONFIG.BASE_URL}/auth/register`,
+    API_CONFIG.ENDPOINTS.AUTH.REGISTER,
     userData as unknown as Record<string, unknown>
   );
 
 // Logout user
 export const logout = () =>
-  post<{ success: boolean }>(`${API_CONFIG.BASE_URL}/auth/logout`);
+  post<{ success: boolean }>(API_CONFIG.ENDPOINTS.AUTH.LOGOUT);
 
 // Get current user
-export const getCurrentUser = () => get<User>(`${API_CONFIG.BASE_URL}/auth/me`);
+export const getCurrentUser = () => get<User>(API_CONFIG.ENDPOINTS.AUTH.ME);
 
 // Refresh authentication token
 export const refreshToken = () =>
-  post<{ token: string }>(`${API_CONFIG.BASE_URL}/auth/refresh-token`);
+  post<{ token: string }>(API_CONFIG.ENDPOINTS.AUTH.REFRESH_TOKEN);

@@ -1,16 +1,29 @@
 import { get, post, put, del } from "@/lib/base-api";
 import { API_CONFIG } from "./config";
+import { store } from "@/store";
 
-export interface Thesis {
-  id: string;
+export interface ThesisResponse {
+  thesisId: number;
   title: string;
   description: string;
-  status: "draft" | "review" | "approved" | "rejected" | "completed";
-  studentId: string;
-  teacherId?: string;
+  status:
+    | "available"
+    | "in_progress"
+    | "completed"
+    | "not available"
+    | "on hold";
+  lecturer: {
+    userId: string;
+    name: string;
+    email: string;
+  };
+  major: {
+    majorId: string;
+    majorName: string;
+    facultyId: string;
+    facultyName: string;
+  };
   createdAt: string;
-  updatedAt: string;
-  documents?: ThesisDocument[];
 }
 
 export interface ThesisDocument {
@@ -33,50 +46,44 @@ export interface ThesisCreateRequest {
  */
 
 // Get all theses
-export const getAllTheses = (params?: {
-  status?: string;
-  studentId?: string;
-  teacherId?: string;
-}) =>
-  get<Thesis[]>(
-    `${API_CONFIG.BASE_URL}/theses`,
-    params as Record<string, unknown>
-  );
+export const getAllTheses = () =>
+  get<ThesisResponse[]>(API_CONFIG.ENDPOINTS.THESIS.LIST);
 
 // Get thesis by ID
 export const getThesisById = (id: string) =>
-  get<Thesis>(`${API_CONFIG.BASE_URL}/theses/${id}`);
+  get<ThesisResponse>(API_CONFIG.ENDPOINTS.THESIS.DETAIL(id));
 
 // Create new thesis
 export const createThesis = (data: ThesisCreateRequest) =>
-  post<Thesis>(
-    `${API_CONFIG.BASE_URL}/theses`,
+  post<ThesisResponse>(
+    API_CONFIG.ENDPOINTS.THESIS.CREATE,
     data as unknown as Record<string, unknown>
   );
 
 // Update thesis
-export const updateThesis = (id: string, data: Partial<Thesis>) =>
-  put<Thesis>(
-    `${API_CONFIG.BASE_URL}/theses/${id}`,
+export const updateThesis = (id: string, data: Partial<ThesisResponse>) =>
+  put<ThesisResponse>(
+    API_CONFIG.ENDPOINTS.THESIS.UPDATE(id),
     data as unknown as Record<string, unknown>
   );
 
 // Delete thesis
 export const deleteThesis = (id: string) =>
-  del<{ success: boolean }>(`${API_CONFIG.BASE_URL}/theses/${id}`);
+  del<{ success: boolean }>(API_CONFIG.ENDPOINTS.THESIS.DELETE(id));
 
 // Get thesis documents
 export const getThesisDocuments = (thesisId: string) =>
-  get<ThesisDocument[]>(`${API_CONFIG.BASE_URL}/theses/${thesisId}/documents`);
+  get<ThesisDocument[]>(API_CONFIG.ENDPOINTS.THESIS.DOCUMENTS(thesisId));
 
 // Upload thesis document
 export const uploadThesisDocument = (thesisId: string, formData: FormData) => {
   // Using fetch API directly for file uploads
-  return fetch(`${API_CONFIG.BASE_URL}/theses/${thesisId}/documents`, {
+  const token = store.getState().auth.token;
+  return fetch(API_CONFIG.ENDPOINTS.THESIS.DOCUMENTS(thesisId), {
     method: "POST",
     body: formData,
     headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
+      Authorization: `Bearer ${token}`,
     },
   }).then((response) => response.json());
 };

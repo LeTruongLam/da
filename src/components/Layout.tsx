@@ -1,9 +1,10 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import type { RootState } from "@/store";
-import { logout } from "@/store/slices/authSlice";
+import { logout } from "@/services/api/auth";
+import { logout as logoutAction } from "@/store/slices/authSlice";
 import {
-  Layout,
+  Layout as AntLayout,
   Menu,
   Avatar,
   Dropdown,
@@ -12,6 +13,7 @@ import {
   Space,
   Tag,
   type MenuProps,
+  message,
 } from "antd";
 import {
   DashboardOutlined,
@@ -27,7 +29,7 @@ import {
 import { useState } from "react";
 import { USER_ROLES } from "@/lib/constants";
 
-const { Header, Sider, Content } = Layout;
+const { Header, Sider, Content } = AntLayout;
 
 // Function to get role tag color
 const getRoleTagColor = (role: string) => {
@@ -129,15 +131,20 @@ const MainLayout = () => {
     },
   ];
 
-  const handleUserMenuClick = ({ key }: { key: string }) => {
+  const handleUserMenuClick = async ({ key }: { key: string }) => {
     if (key === "logout") {
-      dispatch(logout());
-      navigate("/login", { replace: true });
+      try {
+        await logout();
+        dispatch(logoutAction());
+        navigate("/login", { replace: true });
+      } catch {
+        message.error("Đăng xuất thất bại, vui lòng thử lại");
+      }
     }
   };
 
   return (
-    <Layout>
+    <AntLayout>
       <Sider
         trigger={null}
         collapsible
@@ -172,10 +179,10 @@ const MainLayout = () => {
           selectedKeys={[
             location.pathname.includes("create-thesis") ||
             (location.pathname.includes("thesis-detail") &&
-              user?.role === "teacher")
+              user?.role === USER_ROLES.TEACHER)
               ? "/thesis-management"
               : location.pathname.includes("my-thesis") &&
-                user?.role === "student"
+                user?.role === USER_ROLES.STUDENT
               ? "/thesis-list"
               : location.pathname,
           ]}
@@ -184,7 +191,9 @@ const MainLayout = () => {
           style={{ borderRight: 0 }}
         />
       </Sider>
-      <Layout style={{ marginLeft: collapsed ? 80 : 200, minHeight: "100vh" }}>
+      <AntLayout
+        style={{ marginLeft: collapsed ? 80 : 200, minHeight: "100vh" }}
+      >
         <Header
           style={{
             position: "fixed",
@@ -244,8 +253,8 @@ const MainLayout = () => {
         >
           <Outlet />
         </Content>
-      </Layout>
-    </Layout>
+      </AntLayout>
+    </AntLayout>
   );
 };
 
