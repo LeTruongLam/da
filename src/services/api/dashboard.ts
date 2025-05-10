@@ -1,6 +1,7 @@
 import { get } from "@/lib/base-api";
 import type { Thesis } from "./thesis";
 import type { User } from "./auth";
+import { API_CONFIG } from "./config";
 
 export interface DashboardStats {
   totalTheses: number;
@@ -30,15 +31,18 @@ export interface RecentActivity {
  */
 
 // Get dashboard statistics
-export const getDashboardStats = () => get<DashboardStats>("/dashboard/stats");
+export const getDashboardStats = () =>
+  get<DashboardStats>(`${API_CONFIG.BASE_URL}/dashboard/stats`);
 
 // Get recent theses
 export const getRecentTheses = (limit = 5) =>
-  get<Thesis[]>("/dashboard/recent-theses", { limit });
+  get<Thesis[]>(`${API_CONFIG.BASE_URL}/dashboard/recent-theses`, { limit });
 
 // Get recent activities
 export const getRecentActivities = (limit = 10) =>
-  get<RecentActivity[]>("/dashboard/activities", { limit });
+  get<RecentActivity[]>(`${API_CONFIG.BASE_URL}/dashboard/activities`, {
+    limit,
+  });
 
 // Admin only: Get user statistics
 export const getUserStats = () =>
@@ -47,11 +51,11 @@ export const getUserStats = () =>
     activeUsers: number;
     newUsersThisMonth: number;
     usersByRole: { role: string; count: number }[];
-  }>("/dashboard/user-stats");
+  }>(`${API_CONFIG.BASE_URL}/dashboard/user-stats`);
 
 // Teacher only: Get assigned students
 export const getAssignedStudents = () =>
-  get<User[]>("/dashboard/assigned-students");
+  get<User[]>(`${API_CONFIG.BASE_URL}/dashboard/assigned-students`);
 
 // Student only: Get thesis progress
 export const getThesisProgress = () =>
@@ -60,4 +64,4 @@ export const getThesisProgress = () =>
     progress: number;
     nextMilestone?: string;
     dueDates: { title: string; date: string }[];
-  }>("/dashboard/thesis-progress");
+  }>(`${API_CONFIG.BASE_URL}/dashboard/thesis-progress`);

@@ -1,5 +1,6 @@
 // Mock API service for the thesis management system
 import { message } from "antd";
+import { API_CONFIG } from "./api/config";
 
 // Types
 interface User {
@@ -179,12 +180,28 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 export const api = {
   // Auth
   login: async (email: string, password: string): Promise<User> => {
-    await delay(800);
-    const user = mockUsers.find((u) => u.email === email);
-    if (!user || password !== "password") {
-      throw new Error("Email hoặc mật khẩu không đúng");
+    try {
+      const response = await fetch(
+        `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Email hoặc mật khẩu không đúng");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
     }
-    return user;
   },
 
   // Thesis

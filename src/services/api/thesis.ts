@@ -1,4 +1,5 @@
 import { get, post, put, del } from "@/lib/base-api";
+import { API_CONFIG } from "./config";
 
 export interface Thesis {
   id: string;
@@ -36,40 +37,46 @@ export const getAllTheses = (params?: {
   status?: string;
   studentId?: string;
   teacherId?: string;
-}) => get<Thesis[]>("/theses", params as Record<string, unknown>);
+}) =>
+  get<Thesis[]>(
+    `${API_CONFIG.BASE_URL}/theses`,
+    params as Record<string, unknown>
+  );
 
 // Get thesis by ID
-export const getThesisById = (id: string) => get<Thesis>(`/theses/${id}`);
+export const getThesisById = (id: string) =>
+  get<Thesis>(`${API_CONFIG.BASE_URL}/theses/${id}`);
 
 // Create new thesis
 export const createThesis = (data: ThesisCreateRequest) =>
-  post<Thesis>("/theses", data as unknown as Record<string, unknown>);
+  post<Thesis>(
+    `${API_CONFIG.BASE_URL}/theses`,
+    data as unknown as Record<string, unknown>
+  );
 
 // Update thesis
 export const updateThesis = (id: string, data: Partial<Thesis>) =>
-  put<Thesis>(`/theses/${id}`, data as unknown as Record<string, unknown>);
+  put<Thesis>(
+    `${API_CONFIG.BASE_URL}/theses/${id}`,
+    data as unknown as Record<string, unknown>
+  );
 
 // Delete thesis
 export const deleteThesis = (id: string) =>
-  del<{ success: boolean }>(`/theses/${id}`);
+  del<{ success: boolean }>(`${API_CONFIG.BASE_URL}/theses/${id}`);
 
 // Get thesis documents
 export const getThesisDocuments = (thesisId: string) =>
-  get<ThesisDocument[]>(`/theses/${thesisId}/documents`);
+  get<ThesisDocument[]>(`${API_CONFIG.BASE_URL}/theses/${thesisId}/documents`);
 
 // Upload thesis document
 export const uploadThesisDocument = (thesisId: string, formData: FormData) => {
   // Using fetch API directly for file uploads
-  return fetch(
-    `${
-      import.meta.env.VITE_API_URL || "http://localhost:3000/api"
-    }/theses/${thesisId}/documents`,
-    {
-      method: "POST",
-      body: formData,
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`,
-      },
-    }
-  ).then((response) => response.json());
+  return fetch(`${API_CONFIG.BASE_URL}/theses/${thesisId}/documents`, {
+    method: "POST",
+    body: formData,
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  }).then((response) => response.json());
 };

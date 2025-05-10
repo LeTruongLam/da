@@ -25,17 +25,18 @@ import {
   BellOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
+import { USER_ROLES } from "@/lib/constants";
 
 const { Header, Sider, Content } = Layout;
 
 // Function to get role tag color
 const getRoleTagColor = (role: string) => {
   switch (role) {
-    case "admin":
+    case USER_ROLES.ADMIN:
       return "red";
-    case "teacher":
+    case USER_ROLES.TEACHER:
       return "blue";
-    case "student":
+    case USER_ROLES.STUDENT:
       return "green";
     default:
       return "default";
@@ -51,7 +52,7 @@ const MainLayout = () => {
   const { token } = theme.useToken();
 
   const menuItems = [
-    ...(user?.role !== "admin"
+    ...(user?.role !== USER_ROLES.ADMIN
       ? [
           {
             key: "/",
@@ -60,7 +61,7 @@ const MainLayout = () => {
           },
         ]
       : []),
-    ...(user?.role === "student"
+    ...(user?.role === USER_ROLES.STUDENT
       ? [
           {
             key: "/thesis-list",
@@ -74,7 +75,7 @@ const MainLayout = () => {
           },
         ]
       : []),
-    ...(user?.role === "teacher"
+    ...(user?.role === USER_ROLES.TEACHER
       ? [
           {
             key: "/thesis-management",
@@ -93,7 +94,7 @@ const MainLayout = () => {
           },
         ]
       : []),
-    ...(user?.role === "admin"
+    ...(user?.role === USER_ROLES.ADMIN
       ? [
           {
             key: "/user-management",
@@ -118,10 +119,6 @@ const MainLayout = () => {
     {
       key: "profile",
       label: "Hồ sơ",
-    },
-    {
-      key: "settings",
-      label: "Cài đặt",
     },
     {
       type: "divider",

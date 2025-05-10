@@ -1,14 +1,12 @@
-import type { UserRole } from "../store/slices/authSlice";
-
 // Pagination
 export const DEFAULT_PAGE_SIZE = 5;
 export const TABLE_PAGE_SIZE = 10;
 
 // User Roles
 export const USER_ROLES = {
-  STUDENT: "student" as UserRole,
-  TEACHER: "teacher" as UserRole,
-  ADMIN: "admin" as UserRole,
+  STUDENT: "Student",
+  TEACHER: "Teacher",
+  ADMIN: "Admin",
 };
 
 export const USER_ROLE_LABELS = {

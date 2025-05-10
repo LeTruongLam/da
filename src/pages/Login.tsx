@@ -16,27 +16,29 @@ import {
   InfoCircleOutlined,
 } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import { api } from "../services/api";
+// import { api } from "../services/api"
 import { setCredentials } from "../store/slices/authSlice";
 import { useState } from "react";
+import { login } from "../services/api/auth";
+import { USER_ROLES } from "../lib/constants";
 
 const { Title, Text } = Typography;
 
 const demoAccounts = [
   {
-    role: "Sinh viên",
-    email: "student@example.edu.vn",
-    password: "password",
+    role: USER_ROLES.STUDENT,
+    email: "PhucNVHE171648@fpt.edu.vn",
+    password: "PhucNVHE171648",
   },
   {
-    role: "Giảng viên",
-    email: "teacher@example.edu.vn",
-    password: "password",
+    role: USER_ROLES.TEACHER,
+    email: "teacher@fpt.edu.vn",
+    password: "Teacher@123",
   },
   {
-    role: "Admin",
-    email: "admin@example.edu.vn",
-    password: "password",
+    role: USER_ROLES.ADMIN,
+    email: "admin@fpt.edu.vn",
+    password: "Admin@123",
   },
 ];
 
@@ -49,9 +51,18 @@ const Login = () => {
   const handleLogin = async (values: { email: string; password: string }) => {
     try {
       setLoading(true);
-      const user = await api.login(values.email, values.password);
-      dispatch(setCredentials({ user, token: "mock-token" }));
-      message.success(`Xin chào, ${user.name}!`);
+      const result = await login(values);
+
+      // Dispatch credentials to Redux store
+      dispatch(
+        setCredentials({
+          user: result.user,
+          token: result.token,
+          expiresIn: result.expiresIn,
+        })
+      );
+
+      message.success(`Xin chào, ${result.user.name}!`);
       navigate("/", { replace: true });
     } catch {
       message.error("Email hoặc mật khẩu không đúng");

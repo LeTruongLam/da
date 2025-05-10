@@ -1,22 +1,26 @@
 import { get, post } from "@/lib/base-api";
+import { API_CONFIG } from "./config";
+import type { UserRole } from "@/store/slices/authSlice";
 
 // Define User type since it's not exported from types.ts
 export interface User {
-  id: string;
-  username: string;
+  userId: string;
+  name: string;
   email: string;
-  fullName: string;
-  role: "student" | "teacher" | "admin";
+  faculty: string;
+  major: string;
+  role: UserRole;
 }
 
 interface LoginRequest {
-  username: string;
+  email: string;
   password: string;
 }
 
 interface LoginResponse {
   user: User;
   token: string;
+  expiresIn: number;
 }
 
 interface RegisterRequest {
@@ -24,7 +28,7 @@ interface RegisterRequest {
   password: string;
   email: string;
   fullName: string;
-  role: "student" | "teacher" | "admin";
+  role: UserRole;
 }
 
 /**
@@ -32,22 +36,26 @@ interface RegisterRequest {
  */
 
 // Login user
-export const login = (credentials: LoginRequest) =>
+export const login = (data: LoginRequest) =>
   post<LoginResponse>(
-    "/auth/login",
-    credentials as unknown as Record<string, unknown>
+    `${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AUTH.LOGIN}`,
+    data as unknown as Record<string, unknown>
   );
 
 // Register new user
 export const register = (userData: RegisterRequest) =>
-  post<User>("/auth/register", userData as unknown as Record<string, unknown>);
+  post<User>(
+    `${API_CONFIG.BASE_URL}/auth/register`,
+    userData as unknown as Record<string, unknown>
+  );
 
 // Logout user
-export const logout = () => post<{ success: boolean }>("/auth/logout");
+export const logout = () =>
+  post<{ success: boolean }>(`${API_CONFIG.BASE_URL}/auth/logout`);
 
 // Get current user
-export const getCurrentUser = () => get<User>("/auth/me");
+export const getCurrentUser = () => get<User>(`${API_CONFIG.BASE_URL}/auth/me`);
 
 // Refresh authentication token
 export const refreshToken = () =>
-  post<{ token: string }>("/auth/refresh-token");
+  post<{ token: string }>(`${API_CONFIG.BASE_URL}/auth/refresh-token`);
