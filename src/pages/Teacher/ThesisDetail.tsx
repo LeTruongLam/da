@@ -42,6 +42,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import type { UploadChangeParam, UploadFile } from "antd/es/upload/interface";
 import dayjs from "dayjs";
+import { useQuery } from "@tanstack/react-query";
+import { getThesisById } from "@/services/api/thesis";
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
@@ -548,12 +550,10 @@ const ThesisDetail = () => {
     setThesis(thesis.id === "1" ? thesisDataNoStudent : thesisData);
   };
 
-  // This would be a real API call in production
-  useEffect(() => {
-    console.log(`Fetching thesis data for ID: ${thesisId}`);
-    // In a real app, this would be an API call like:
-    // fetchThesisById(thesisId).then(data => setThesis(data));
-  }, [thesisId]);
+  const { data: thesisDataResponse } = useQuery({
+    queryKey: ["thesis", thesisId],
+    queryFn: () => getThesisById(thesisId as unknown as number),
+  });
 
   const handleUpload = (info: UploadChangeParam<UploadFile>) => {
     if (info.file.status === "done") {
@@ -771,7 +771,7 @@ const ThesisDetail = () => {
         <Col span={24}>
           <Card
             type="inner"
-            title={<Title level={4}>{thesis.title}</Title>}
+            title={<Title level={4}>{thesisDataResponse?.title || "--"}</Title>}
             extra={
               <Space>
                 <Button icon={<EditOutlined />} onClick={openEditModal}>
@@ -794,21 +794,13 @@ const ThesisDetail = () => {
               <Col span={16}>
                 <Paragraph>
                   <Text strong>Mô tả: </Text>
-                  {thesis.description}
-                </Paragraph>
-                <Paragraph>
-                  <Text strong>Yêu cầu: </Text>
-                  {thesis.requirements}
-                </Paragraph>
-                <Paragraph>
-                  <Text strong>Mục tiêu: </Text>
-                  {thesis.objectives}
+                  {thesisDataResponse?.description || "--"}
                 </Paragraph>
               </Col>
               <Col span={8}>
                 <Paragraph>
                   <Text strong>Chuyên ngành: </Text>
-                  {thesis.major}
+                  {thesisDataResponse?.major.majorName || "--"}
                 </Paragraph>
                 <Paragraph>
                   <Text strong>Trạng thái: </Text>
@@ -817,16 +809,12 @@ const ThesisDetail = () => {
                       statusColors[thesis.status as keyof typeof statusColors]
                     }
                   >
-                    {thesis.status}
+                    {thesisDataResponse?.status || "--"}
                   </Tag>
                 </Paragraph>
                 <Paragraph>
                   <Text strong>Deadline: </Text>
                   {thesis.deadline}
-                </Paragraph>
-                <Paragraph>
-                  <Text strong>Số sinh viên: </Text>
-                  {thesis.student ? 1 : 0}
                 </Paragraph>
               </Col>
             </Row>

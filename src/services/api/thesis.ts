@@ -26,6 +26,27 @@ export interface ThesisResponse {
   createAt: string;
 }
 
+export interface ThesisDetailResponse {
+  thesisId: number;
+  title: string;
+  description: string;
+  createAt: string;
+  status: string;
+  lecturer: {
+    userId: string;
+    name: string;
+    email: string;
+  };
+  major: {
+    majorId: string;
+    majorName: string;
+    facultyId: string;
+    facultyName: string;
+  };
+  tasks: any[];
+  materials: any[];
+}
+
 export interface ThesisDocument {
   id: string;
   thesisId: string;
@@ -54,8 +75,8 @@ export const getMyTheses = () =>
   get<ThesisResponse[]>(API_CONFIG.ENDPOINTS.THESIS.MY_THESES);
 
 // Get thesis by ID
-export const getThesisById = (id: string) =>
-  get<ThesisResponse>(API_CONFIG.ENDPOINTS.THESIS.DETAIL(id));
+export const getThesisById = (id: number) =>
+  get<ThesisDetailResponse>(API_CONFIG.ENDPOINTS.THESIS.DETAIL(id));
 
 // Create new thesis
 export const createThesis = (data: ThesisCreateRequest) =>

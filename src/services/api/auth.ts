@@ -1,7 +1,6 @@
 import { get, post } from "@/lib/base-api";
 import { API_CONFIG } from "./config";
 import type { UserRole } from "@/store/slices/authSlice";
-import axios from "axios";
 
 // Define User type since it's not exported from types.ts
 export interface User {
@@ -24,14 +23,6 @@ interface LoginResponse {
   expiresIn: number;
 }
 
-interface RegisterRequest {
-  username: string;
-  password: string;
-  email: string;
-  fullName: string;
-  role: UserRole;
-}
-
 interface RegisterData {
   name: string;
   email: string;
@@ -51,10 +42,11 @@ export const login = (data: LoginRequest) =>
   );
 
 // Register new user
-export const register = async (data: RegisterData) => {
-  const response = await axios.post("/api/auth/register", data);
-  return response.data;
-};
+export const register = (data: RegisterData) =>
+  post<LoginResponse>(
+    API_CONFIG.ENDPOINTS.AUTH.REGISTER,
+    data as unknown as Record<string, unknown>
+  );
 
 // Logout user
 export const logout = () =>

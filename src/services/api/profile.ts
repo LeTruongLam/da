@@ -17,6 +17,12 @@ export interface UserProfileResponse {
   name: string;
   email: string;
   role: string;
+  major: {
+    majorId: number;
+    majorName: string;
+    facultyId: number;
+    facultyName: string;
+  };
 }
 
 /**

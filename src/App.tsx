@@ -58,7 +58,7 @@ const App = () => {
               )}
 
               {/* Routes cho Giảng viên */}
-              {user.role === USER_ROLES.TEACHER && (
+              {user.role === USER_ROLES.LECTURER && (
                 <>
                   <Route
                     path="thesis-management"

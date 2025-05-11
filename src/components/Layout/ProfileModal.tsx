@@ -101,6 +101,10 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
           <Descriptions.Item label="Email">
             {userProfile?.email}
           </Descriptions.Item>
+
+          <Descriptions.Item label="Chuyên ngành">
+            {userProfile?.major.majorName}
+          </Descriptions.Item>
         </Descriptions>
       </Modal>
 
