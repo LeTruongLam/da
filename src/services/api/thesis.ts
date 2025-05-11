@@ -23,7 +23,7 @@ export interface ThesisResponse {
     facultyId: string;
     facultyName: string;
   };
-  createdAt: string;
+  createAt: string;
 }
 
 export interface ThesisDocument {
@@ -48,6 +48,10 @@ export interface ThesisCreateRequest {
 // Get all theses
 export const getAllTheses = () =>
   get<ThesisResponse[]>(API_CONFIG.ENDPOINTS.THESIS.LIST);
+
+// Get my theses
+export const getMyTheses = () =>
+  get<ThesisResponse[]>(API_CONFIG.ENDPOINTS.THESIS.MY_THESES);
 
 // Get thesis by ID
 export const getThesisById = (id: string) =>

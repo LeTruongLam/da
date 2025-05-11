@@ -12,8 +12,7 @@ import {
   Col,
   Badge,
   Avatar,
-  Divider,
-  message,
+  notification,
   Empty,
   Tabs,
 } from "antd";
@@ -29,11 +28,43 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { api } from "../../services/api";
 import { useNavigate } from "react-router-dom";
-import { getAllTheses } from "@/services/api/thesis";
+import { getAllTheses, getMyTheses } from "@/services/api/thesis";
 import type { ThesisResponse } from "@/services/api/thesis";
+import { formatDate } from "@/lib/ultils";
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
+
+const getStatusTag = (status: ThesisResponse["status"]) => {
+  const statusConfig = {
+    available: { color: "processing", text: "Đang mở" },
+    in_progress: { color: "processing", text: "Đang thực hiện" },
+    completed: { color: "success", text: "Hoàn thành" },
+    "not available": { color: "default", text: "Không khả dụng" },
+    "on hold": { color: "warning", text: "Tạm hoãn" },
+  };
+
+  const config = statusConfig[status] || {
+    color: "default",
+    text: "Không xác định",
+  };
+  return <Tag color={config.color}>{config.text}</Tag>;
+};
+
+const _renderContent = ({
+  title,
+  content,
+}: {
+  title: string;
+  content: string;
+}) => {
+  return (
+    <Paragraph>
+      <Text strong>{title}: </Text>
+      {content || "--"}
+    </Paragraph>
+  );
+};
 
 const ThesisList = () => {
   // States
@@ -43,6 +74,7 @@ const ThesisList = () => {
     null
   );
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isConfirmModalVisible, setIsConfirmModalVisible] = useState(false);
   const [activeTab, setActiveTab] = useState("all");
   const user = useSelector((state: RootState) => state.auth.user);
   const navigate = useNavigate();
@@ -61,44 +93,49 @@ const ThesisList = () => {
   >({
     queryKey: ["myTheses", user?.userId],
     queryFn: async () => {
-      const response = await api.getMyTheses(user?.userId || "");
-      return response.map((thesis) => ({
-        thesisId: parseInt(thesis.id),
-        title: thesis.title,
-        description: thesis.description,
-        status: thesis.status as ThesisResponse["status"],
-        lecturer: {
-          userId: thesis.supervisor.id,
-          name: thesis.supervisor.name,
-          email: thesis.supervisor.email,
-        },
-        major: {
-          majorId: "1", // These would come from the API in a real implementation
-          majorName: thesis.supervisor.department,
-          facultyId: "1",
-          facultyName: thesis.supervisor.department,
-        },
-        createdAt: thesis.createdAt,
-      }));
+      if (!user?.userId) return [];
+      try {
+        const response = await getMyTheses();
+        return response;
+      } catch {
+        notification.error({
+          message: "Lỗi",
+          description: "Không thể tải danh sách đồ án. Vui lòng thử lại sau!",
+        });
+        return [];
+      }
     },
     enabled: !!user?.userId,
   });
+
+  console.log("myTheses", myTheses);
 
   // Filter theses based on search text
   const filteredAllTheses = allTheses.filter(
     (thesis) =>
       thesis.title.toLowerCase().includes(searchAllTheses.toLowerCase()) ||
-      thesis.description.toLowerCase().includes(searchAllTheses.toLowerCase())
+      thesis.description
+        .toLowerCase()
+        .includes(searchAllTheses.toLowerCase()) ||
+      thesis.lecturer.name
+        .toLowerCase()
+        .includes(searchAllTheses.toLowerCase()) ||
+      thesis.major.majorName
+        .toLowerCase()
+        .includes(searchAllTheses.toLowerCase())
   );
 
   // Filter my theses based on search text
   const filteredMyTheses = myTheses.filter(
     (thesis) =>
       thesis.title.toLowerCase().includes(searchMyTheses.toLowerCase()) ||
+      thesis.description.toLowerCase().includes(searchMyTheses.toLowerCase()) ||
       thesis.lecturer.name
         .toLowerCase()
         .includes(searchMyTheses.toLowerCase()) ||
-      thesis.description.toLowerCase().includes(searchMyTheses.toLowerCase())
+      thesis.major.majorName
+        .toLowerCase()
+        .includes(searchMyTheses.toLowerCase())
   );
 
   // Handle registering for a thesis
@@ -108,10 +145,21 @@ const ThesisList = () => {
     try {
       await api.registerThesis(selectedThesis.thesisId.toString(), user.userId);
       setIsModalVisible(false);
-      message.success("Đăng ký đề tài thành công!");
+      setIsConfirmModalVisible(false);
+      notification.success({
+        message: "Thành công",
+        description: "Đăng ký đề tài thành công!",
+      });
     } catch {
-      message.error("Đã xảy ra lỗi khi đăng ký đề tài!");
+      notification.error({
+        message: "Lỗi",
+        description: "Đã xảy ra lỗi khi đăng ký đề tài!",
+      });
     }
+  };
+
+  const showConfirmModal = () => {
+    setIsConfirmModalVisible(true);
   };
 
   // View thesis detail
@@ -123,22 +171,6 @@ const ThesisList = () => {
   const showThesisDetails = (thesis: ThesisResponse) => {
     setSelectedThesis(thesis);
     setIsModalVisible(true);
-  };
-
-  const getStatusTag = (status: ThesisResponse["status"]) => {
-    const statusConfig = {
-      available: { color: "processing", text: "Đang mở" },
-      in_progress: { color: "processing", text: "Đang thực hiện" },
-      completed: { color: "success", text: "Hoàn thành" },
-      "not available": { color: "default", text: "Không khả dụng" },
-      "on hold": { color: "warning", text: "Tạm hoãn" },
-    };
-
-    const config = statusConfig[status] || {
-      color: "default",
-      text: "Không xác định",
-    };
-    return <Tag color={config.color}>{config.text}</Tag>;
   };
 
   // Get columns for all theses
@@ -158,17 +190,14 @@ const ThesisList = () => {
       title: "Mô tả",
       dataIndex: "description",
       key: "description",
-      render: (text: string) => <Text>{text}</Text>,
+      render: (text: string) => <Text>{text || "--"}</Text>,
     },
     {
       title: "Giảng viên hướng dẫn",
       dataIndex: "lecturer",
       key: "lecturer",
       render: (lecturer: ThesisResponse["lecturer"]) => (
-        <Space>
-          <Avatar icon={<UserOutlined />} />
-          {lecturer.name}
-        </Space>
+        <Space>{lecturer.name || "--"}</Space>
       ),
     },
     {
@@ -178,7 +207,7 @@ const ThesisList = () => {
       render: (major: ThesisResponse["major"]) => (
         <Space>
           <BookOutlined />
-          {major.majorName}
+          {major.majorName || "--"}
         </Space>
       ),
     },
@@ -272,9 +301,9 @@ const ThesisList = () => {
               }}
             >
               <Input
-                placeholder="Tìm kiếm đề tài..."
+                placeholder="Tìm kiếm theo tên đề tài, mô tả, giảng viên hoặc chuyên ngành..."
                 prefix={<SearchOutlined />}
-                style={{ width: 300 }}
+                style={{ width: 400 }}
                 value={searchAllTheses}
                 onChange={(e) => setSearchAllTheses(e.target.value)}
                 allowClear
@@ -304,9 +333,9 @@ const ThesisList = () => {
               }}
             >
               <Input
-                placeholder="Tìm kiếm đồ án của tôi..."
+                placeholder="Tìm kiếm theo tên đề tài, mô tả, giảng viên hoặc chuyên ngành..."
                 prefix={<SearchOutlined />}
-                style={{ width: 300 }}
+                style={{ width: 400 }}
                 value={searchMyTheses}
                 onChange={(e) => setSearchMyTheses(e.target.value)}
                 allowClear
@@ -344,7 +373,7 @@ const ThesisList = () => {
           <Button key="back" onClick={() => setIsModalVisible(false)}>
             Đóng
           </Button>,
-          <Button key="register" type="primary" onClick={handleRegister}>
+          <Button key="register" type="primary" onClick={showConfirmModal}>
             Đăng ký
           </Button>,
         ]}
@@ -352,7 +381,7 @@ const ThesisList = () => {
       >
         {selectedThesis && (
           <div>
-            <Row gutter={[16, 24]}>
+            <Row style={{ marginBottom: 16 }} gutter={[16, 24]}>
               {/* Thông tin giảng viên */}
               <Col xs={24} md={8}>
                 <Card
@@ -369,16 +398,12 @@ const ThesisList = () => {
                       <div style={{ marginTop: 8 }}>
                         <Text strong>{selectedThesis.lecturer.name}</Text>
                         <br />
-                        <Text type="secondary">
-                          {selectedThesis.major.majorName}
-                        </Text>
+                        <Paragraph>
+                          <Text strong>Email: </Text>
+                          {selectedThesis.lecturer.email}
+                        </Paragraph>
                       </div>
                     </div>
-                    <Divider style={{ margin: "10px 0" }} />
-                    <Paragraph>
-                      <Text strong>Email: </Text>
-                      {selectedThesis.lecturer.email}
-                    </Paragraph>
                   </Space>
                 </Card>
               </Col>
@@ -394,22 +419,16 @@ const ThesisList = () => {
                   size="small"
                 >
                   <Space direction="vertical" style={{ width: "100%" }}>
-                    <Paragraph>
-                      <Text strong>Mô tả: </Text>
-                      {selectedThesis.description}
-                    </Paragraph>
+                    {_renderContent({
+                      title: "Mô tả",
+                      content: selectedThesis.description,
+                    })}
                     <Row gutter={16}>
                       <Col span={12}>
-                        <Paragraph>
-                          <Text strong>Ngành: </Text>
-                          {selectedThesis.major.majorName}
-                        </Paragraph>
-                      </Col>
-                      <Col span={12}>
-                        <Paragraph>
-                          <Text strong>Khoa: </Text>
-                          {selectedThesis.major.facultyName}
-                        </Paragraph>
+                        {_renderContent({
+                          title: "Ngành",
+                          content: selectedThesis.major.majorName,
+                        })}
                       </Col>
                     </Row>
                     <Paragraph>
@@ -417,37 +436,54 @@ const ThesisList = () => {
                       {getStatusTag(selectedThesis.status)}
                     </Paragraph>
                     <Paragraph>
-                      <Text strong>Ngày tạo: </Text>
-                      {new Date(selectedThesis.createdAt).toLocaleDateString()}
+                      {_renderContent({
+                        title: "Ngày tạo",
+                        content: formatDate(selectedThesis.createAt),
+                      })}
                     </Paragraph>
                   </Space>
                 </Card>
               </Col>
             </Row>
 
-            <div style={{ marginTop: 16 }}>
+            <div>
               <Badge.Ribbon
                 text="Thông tin quan trọng"
                 color="blue"
                 placement="start"
               >
                 <Card>
-                  <Paragraph>
+                  <Paragraph style={{ marginTop: 16 }}>
                     Sinh viên vui lòng đọc kỹ thông tin đề tài trước khi đăng
                     ký. Sau khi đăng ký, giảng viên sẽ xem xét và phản hồi trong
                     vòng 48 giờ.
-                  </Paragraph>
-                  <Paragraph>
-                    <Text strong>Lưu ý: </Text>
-                    Mỗi sinh viên chỉ được đăng ký một đề tài. Việc thay đổi đề
-                    tài sau khi đã được duyệt sẽ cần được xem xét và có thể ảnh
-                    hưởng đến tiến độ của bạn.
                   </Paragraph>
                 </Card>
               </Badge.Ribbon>
             </div>
           </div>
         )}
+      </Modal>
+
+      {/* Modal xác nhận đăng ký */}
+      <Modal
+        title="Xác nhận đăng ký"
+        open={isConfirmModalVisible}
+        onCancel={() => setIsConfirmModalVisible(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setIsConfirmModalVisible(false)}>
+            Hủy
+          </Button>,
+          <Button key="confirm" type="primary" onClick={handleRegister}>
+            Xác nhận
+          </Button>,
+        ]}
+      >
+        <p>Bạn có chắc chắn muốn đăng ký đề tài "{selectedThesis?.title}"?</p>
+        <p>
+          Lưu ý: Sau khi đăng ký, giảng viên sẽ xem xét và phản hồi trong vòng
+          48 giờ.
+        </p>
       </Modal>
     </div>
   );

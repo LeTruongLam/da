@@ -23,34 +23,28 @@ export const USER_ROLE_COLORS = {
 
 // Thesis Status
 export const THESIS_STATUS = {
-  PENDING: "pending",
+  AVAILABLE: "available",
   IN_PROGRESS: "in_progress",
-  DELAYED: "delayed",
   COMPLETED: "completed",
-  OPEN: "Đang mở",
-  CLOSED: "Đã đóng",
-  FINISHED: "Đã hoàn thành",
-};
+  NOT_AVAILABLE: "not available",
+  ON_HOLD: "on hold",
+} as const;
 
 export const THESIS_STATUS_LABELS = {
-  [THESIS_STATUS.PENDING]: "Chờ duyệt",
+  [THESIS_STATUS.AVAILABLE]: "Đang mở",
   [THESIS_STATUS.IN_PROGRESS]: "Đang thực hiện",
-  [THESIS_STATUS.DELAYED]: "Trễ hạn",
   [THESIS_STATUS.COMPLETED]: "Hoàn thành",
-  [THESIS_STATUS.OPEN]: "Đang mở",
-  [THESIS_STATUS.CLOSED]: "Đã đóng",
-  [THESIS_STATUS.FINISHED]: "Đã hoàn thành",
-};
+  [THESIS_STATUS.NOT_AVAILABLE]: "Không khả dụng",
+  [THESIS_STATUS.ON_HOLD]: "Tạm hoãn",
+} as const;
 
 export const THESIS_STATUS_COLORS = {
-  [THESIS_STATUS.PENDING]: "default",
+  [THESIS_STATUS.AVAILABLE]: "processing",
   [THESIS_STATUS.IN_PROGRESS]: "processing",
-  [THESIS_STATUS.DELAYED]: "error",
   [THESIS_STATUS.COMPLETED]: "success",
-  [THESIS_STATUS.OPEN]: "green",
-  [THESIS_STATUS.CLOSED]: "red",
-  [THESIS_STATUS.FINISHED]: "purple",
-};
+  [THESIS_STATUS.NOT_AVAILABLE]: "default",
+  [THESIS_STATUS.ON_HOLD]: "warning",
+} as const;
 
 // Task Status
 export const TASK_STATUS = {
@@ -96,6 +90,7 @@ export const DISPLAY_DATETIME_FORMAT = "DD/MM/YYYY HH:mm";
 // Routes
 export const ROUTES = {
   LOGIN: "/login",
+  REGISTER: "/register",
   DASHBOARD: "/",
   USER_MANAGEMENT: "/user-management",
   SYSTEM_NOTIFICATIONS: "/system-notifications",

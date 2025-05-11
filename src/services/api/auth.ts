@@ -1,6 +1,7 @@
 import { get, post } from "@/lib/base-api";
 import { API_CONFIG } from "./config";
 import type { UserRole } from "@/store/slices/authSlice";
+import axios from "axios";
 
 // Define User type since it's not exported from types.ts
 export interface User {
@@ -31,6 +32,13 @@ interface RegisterRequest {
   role: UserRole;
 }
 
+interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+  majorId: number;
+}
+
 /**
  * Authentication API services
  */
@@ -43,11 +51,10 @@ export const login = (data: LoginRequest) =>
   );
 
 // Register new user
-export const register = (userData: RegisterRequest) =>
-  post<User>(
-    API_CONFIG.ENDPOINTS.AUTH.REGISTER,
-    userData as unknown as Record<string, unknown>
-  );
+export const register = async (data: RegisterData) => {
+  const response = await axios.post("/api/auth/register", data);
+  return response.data;
+};
 
 // Logout user
 export const logout = () =>
@@ -59,3 +66,16 @@ export const getCurrentUser = () => get<User>(API_CONFIG.ENDPOINTS.AUTH.ME);
 // Refresh authentication token
 export const refreshToken = () =>
   post<{ token: string }>(API_CONFIG.ENDPOINTS.AUTH.REFRESH_TOKEN);
+
+// Forgot password
+export const forgotPassword = (email: string) =>
+  post<{ message: string }>(API_CONFIG.ENDPOINTS.AUTH.FORGOT_PASSWORD, {
+    email,
+  });
+
+// Reset password
+export const resetPassword = (token: string, newPassword: string) =>
+  post<{ message: string }>(API_CONFIG.ENDPOINTS.AUTH.RESET_PASSWORD, {
+    token,
+    newPassword,
+  });

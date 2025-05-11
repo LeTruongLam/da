@@ -12,12 +12,20 @@ export interface ProfileUpdateRequest {
   bio?: string;
 }
 
+export interface UserProfileResponse {
+  userId: number;
+  name: string;
+  email: string;
+  role: string;
+}
+
 /**
  * User Profile API services
  */
 
 // Get user profile
-export const getUserProfile = () => get<User>(API_CONFIG.ENDPOINTS.PROFILE.GET);
+export const getUserProfile = (id: number) =>
+  get<UserProfileResponse>(API_CONFIG.ENDPOINTS.USER.DETAIL(id));
 
 // Update user profile
 export const updateUserProfile = (data: ProfileUpdateRequest) =>

@@ -163,6 +163,21 @@ const Login = () => {
                 Đăng nhập
               </Button>
             </Form.Item>
+
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginTop: 16,
+              }}
+            >
+              <Button type="link" onClick={() => navigate("/forgot-password")}>
+                Quên mật khẩu?
+              </Button>
+              <Button type="link" onClick={() => navigate("/register")}>
+                Chưa có tài khoản? Đăng ký
+              </Button>
+            </div>
           </Form>
 
           <Divider>

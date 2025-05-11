@@ -7,6 +7,8 @@ export const API_CONFIG = {
       LOGOUT: "/auth/logout",
       ME: "/auth/me",
       REFRESH_TOKEN: "/auth/refresh-token",
+      FORGOT_PASSWORD: "/auth/forgot-password",
+      RESET_PASSWORD: "/auth/reset-password",
     },
     PROFILE: {
       GET: "/profile",
@@ -14,13 +16,23 @@ export const API_CONFIG = {
       CHANGE_PASSWORD: "/profile/password",
       UPLOAD_AVATAR: "/profile/avatar",
     },
+    USER: {
+      LIST: "/users",
+      DETAIL: (id: number) => `/users/${id}`,
+      UPDATE: (id: string) => `/users/${id}`,
+    },
     THESIS: {
       LIST: "/theses",
+      MY_THESES: "/users/my-thesis",
       DETAIL: (id: string) => `/theses/${id}`,
       CREATE: "/theses",
       UPDATE: (id: string) => `/theses/${id}`,
       DELETE: (id: string) => `/theses/${id}`,
-      DOCUMENTS: (id: string) => `/theses/${id}/documents`,
+      DOCUMENTS: (thesisId: string) => `/theses/${thesisId}/documents`,
+    },
+    TEACHER: {
+      LIST: "/users/lectures",
+      DETAIL: (id: string) => `/teachers/${id}`,
     },
     DASHBOARD: {
       STATS: "/dashboard/stats",
@@ -29,6 +41,13 @@ export const API_CONFIG = {
       USER_STATS: "/dashboard/user-stats",
       ASSIGNED_STUDENTS: "/dashboard/assigned-students",
       THESIS_PROGRESS: "/dashboard/thesis-progress",
+    },
+    MAJOR: {
+      LIST: "/majors",
+      DETAIL: (id: number) => `/majors/${id}`,
+      CREATE: "/majors",
+      UPDATE: (id: number) => `/majors/${id}`,
+      DELETE: (id: number) => `/majors/${id}`,
     },
   },
 } as const;

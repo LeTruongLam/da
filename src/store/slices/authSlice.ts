@@ -4,7 +4,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 export type UserRole = "Student" | "Teacher" | "Admin";
 
 export interface User {
-  userId: string;
+  userId: number;
   email: string;
   name: string;
   faculty: string;
