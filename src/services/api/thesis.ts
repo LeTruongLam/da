@@ -60,8 +60,6 @@ export interface ThesisCreateRequest {
   title: string;
   description: string;
   majorId: number;
-  lecturerId: string;
-  status: string;
 }
 
 /**
