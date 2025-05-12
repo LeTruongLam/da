@@ -21,7 +21,7 @@ export const API_CONFIG = {
       DETAIL: (id: number) => `/theses/${id}`,
       CREATE: "/theses",
       UPDATE: (id: string) => `/theses/${id}`,
-      DELETE: (id: string) => `/theses/${id}`,
+      DELETE: (id: number) => `/theses/${id}`,
       DOCUMENTS: (thesisId: string) => `/theses/${thesisId}/documents`,
     },
     TEACHER: {

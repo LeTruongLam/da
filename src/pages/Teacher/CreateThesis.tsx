@@ -4,6 +4,7 @@ import { createThesis } from "@/services/api/thesis";
 import type { ThesisCreateRequest } from "@/services/api/thesis";
 import { getMajors } from "@/services/api/major";
 import type { Major } from "@/services/api/major";
+import { useNavigate } from "react-router-dom";
 
 interface FormValues {
   title: string;
@@ -14,6 +15,7 @@ interface FormValues {
 const CreateThesis = () => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   // Fetch majors using React Query
   const { data: majors = [], isLoading: isLoadingMajors } = useQuery({
@@ -28,6 +30,8 @@ const CreateThesis = () => {
       message.success("Tạo đề tài thành công!");
       form.resetFields();
       queryClient.invalidateQueries({ queryKey: ["theses"] });
+      queryClient.invalidateQueries({ queryKey: ["myTheses"] });
+      navigate("/thesis-management");
     },
     onError: (error: Error) => {
       message.error(`Tạo đề tài thất bại: ${error.message}`);

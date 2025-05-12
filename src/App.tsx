@@ -41,7 +41,7 @@ const App = () => {
               {user.role === USER_ROLES.STUDENT && (
                 <Route index element={<StudentDashboard />} />
               )}
-              {user.role === USER_ROLES.TEACHER && (
+              {user.role === USER_ROLES.LECTURER && (
                 <Route index element={<TeacherDashboard />} />
               )}
               {user.role === USER_ROLES.ADMIN && (

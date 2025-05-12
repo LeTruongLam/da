@@ -37,25 +37,9 @@ const thesisSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
-    updateThesisProgress: (
-      state,
-      action: PayloadAction<{ thesisId: string; progress: number }>
-    ) => {
-      const thesis = state.theses.find(
-        (t: Thesis) => t.id === action.payload.thesisId
-      );
-      if (thesis) {
-        thesis.progress = action.payload.progress;
-      }
-    },
   },
 });
 
-export const {
-  setTheses,
-  setSelectedThesis,
-  setLoading,
-  setError,
-  updateThesisProgress,
-} = thesisSlice.actions;
+export const { setTheses, setSelectedThesis, setLoading, setError } =
+  thesisSlice.actions;
 export default thesisSlice.reducer;

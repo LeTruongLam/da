@@ -43,7 +43,7 @@ import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import type { UploadChangeParam, UploadFile } from "antd/es/upload/interface";
 import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
-import { getThesisById } from "@/services/api/thesis";
+import { getThesisById, deleteThesis } from "@/services/api/thesis";
 import EditThesisModal from "@/components/Modals/EditThesisModal";
 import { THESIS_STATUS_LABELS } from "@/lib/constants";
 
@@ -537,6 +537,7 @@ const ThesisDetail = () => {
   );
   const [isDeleteThesisModalVisible, setIsDeleteThesisModalVisible] =
     useState(false);
+  const [isDeletingThesis, setIsDeletingThesis] = useState(false);
 
   const paged = <T,>(data: T[], page: number) =>
     data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -750,11 +751,24 @@ const ThesisDetail = () => {
     setIsDeleteThesisModalVisible(true);
   };
 
-  const handleDeleteThesis = () => {
-    message.success(`Đã xóa đề tài "${thesis.title}"`);
-    setIsDeleteThesisModalVisible(false);
-    navigate("/thesis-management");
-    // In a real app, you would update the database here
+  const handleDeleteThesis = async () => {
+    setIsDeletingThesis(true);
+    try {
+      if (!thesisId) {
+        message.error("Không tìm thấy ID của đề tài");
+        return;
+      }
+
+      await deleteThesis(Number(thesisId));
+      message.success(`Đã xóa đề tài "${thesis.title}" thành công`);
+      navigate("/thesis-management");
+    } catch (error) {
+      console.error("Error deleting thesis:", error);
+      message.error("Đã xảy ra lỗi khi xóa đề tài. Vui lòng thử lại sau.");
+    } finally {
+      setIsDeletingThesis(false);
+      setIsDeleteThesisModalVisible(false);
+    }
   };
 
   return (
@@ -1773,7 +1787,8 @@ const ThesisDetail = () => {
         onOk={handleDeleteThesis}
         okText="Xóa"
         cancelText="Hủy"
-        okButtonProps={{ danger: true }}
+        okButtonProps={{ danger: true, loading: isDeletingThesis }}
+        confirmLoading={isDeletingThesis}
       >
         <p>Bạn có chắc chắn muốn xóa đề tài "{thesis.title}"?</p>
         <p>Tất cả thông tin liên quan đến đề tài này sẽ bị xóa vĩnh viễn.</p>

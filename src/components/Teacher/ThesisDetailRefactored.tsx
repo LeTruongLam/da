@@ -1,13 +1,15 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import { Card, Tabs, Form, Row, Col } from "antd";
+import { Card, Tabs, Form, Row, Col, message } from "antd";
+import { useNavigate } from "react-router-dom";
 import {
   ThesisHeader,
   StudentSection,
   SubtaskSection,
   DocumentSection,
   MeetingSection,
-  StudentEvaluation,
   ActivityHistory,
+  StudentEvaluation,
   EvaluationModal,
   TaskFeedbackModal,
   MeetingModal,
@@ -16,19 +18,27 @@ import {
   ConfirmationModal,
 } from "./";
 import { styles } from "./styles";
+import { deleteThesis } from "@/services/api/thesis";
 
 const { TabPane } = Tabs;
 const PAGE_SIZE = 5;
 
-// You would normally import these from your data/API layer
-import {
-  thesisData,
-  mockDocuments,
-  mockMeetings,
-  mockActivities,
-} from "../../mocks";
+// Example mock data for demo purposes - define here to avoid the import error
+const mockDocuments = [
+  // Add some mock documents here
+];
+
+const mockMeetings = [
+  // Add some mock meetings here
+];
+
+const mockActivities = [
+  // Add some mock activities here
+];
 
 const ThesisDetailRefactored: React.FC = () => {
+  const navigate = useNavigate();
+
   // Tab state
   const [activeTab, setActiveTab] = useState("1");
 
@@ -61,7 +71,7 @@ const ThesisDetailRefactored: React.FC = () => {
     useState(false);
   const [isDeleteThesisModalVisible, setIsDeleteThesisModalVisible] =
     useState(false);
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [setIsEditModalVisible] = useState(false);
 
   // Form instances
   const [evaluationForm] = Form.useForm();
@@ -187,9 +197,24 @@ const ThesisDetailRefactored: React.FC = () => {
     setIsDeleteThesisModalVisible(true);
   };
 
-  const handleDeleteThesis = () => {
-    console.log("Deleted thesis:", thesis);
-    setIsDeleteThesisModalVisible(false);
+  const handleDeleteThesis = async () => {
+    try {
+      // Call the deleteThesis API service
+      const response: { success: boolean } = await deleteThesis(
+        thesis.thesisId
+      );
+      if (response.success) {
+        message.success(`Đã xóa đề tài "${thesis.title}"`);
+        navigate("/thesis-management");
+      } else {
+        message.error("Không thể xóa đề tài. Vui lòng thử lại sau.");
+      }
+    } catch (error) {
+      console.error("Error deleting thesis:", error);
+      message.error("Đã xảy ra lỗi khi xóa đề tài. Vui lòng thử lại sau.");
+    } finally {
+      setIsDeleteThesisModalVisible(false);
+    }
   };
 
   const openEditModal = () => {

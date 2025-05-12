@@ -93,7 +93,7 @@ export const updateThesis = (id: string, data: Partial<ThesisResponse>) =>
   );
 
 // Delete thesis
-export const deleteThesis = (id: string) =>
+export const deleteThesis = (id: number) =>
   del<{ success: boolean }>(API_CONFIG.ENDPOINTS.THESIS.DELETE(id));
 
 // Get thesis documents
