@@ -19,6 +19,8 @@ import {
   Avatar,
   Space,
   Alert,
+  Empty,
+  Spin,
 } from "antd";
 import {
   FileTextOutlined,
@@ -31,13 +33,84 @@ import {
   DeleteOutlined,
   InboxOutlined,
 } from "@ant-design/icons";
-import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import { api } from "../../services/api";
 import type { UploadProps } from "antd/es/upload/interface";
+
+// Custom interface definitions to replace those from api.ts
+interface Document {
+  id: string;
+  name: string;
+  fileUrl: string;
+  uploadedBy: string;
+  uploadedAt: string;
+}
+
+interface Task {
+  key: string;
+  name: string;
+  startDate: string;
+  deadline: string;
+  description: string;
+  status: string;
+  score?: number;
+  feedback?: string;
+}
+
+interface FeedbackItem {
+  id: string;
+  time: string;
+  by: string;
+  desc: string;
+  content: string;
+}
+
+interface Thesis {
+  id: string;
+  title: string;
+  description: string;
+  supervisor: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    department: string;
+    expertise: string;
+  };
+  students?: Student[];
+  status: string;
+  deadline: string;
+  objectives: string;
+  requirements: string;
+  progress?: number;
+  createdAt: string;
+}
+
+interface Student {
+  id: string;
+  name: string;
+  email: string;
+  studentId: string;
+}
+
+interface Meeting {
+  id: string;
+  title: string;
+  purpose: string;
+  date: string;
+  time: string;
+  thesisId: string;
+  teacherId: string;
+  teacherName: string;
+  studentId: string;
+  studentName: string;
+  status: string;
+  link?: string;
+  createdAt: string;
+}
 
 const { TabPane } = Tabs;
 const { TextArea } = Input;
@@ -45,115 +118,6 @@ const { Title, Text, Paragraph } = Typography;
 const { Dragger } = Upload;
 
 const PAGE_SIZE = 5;
-
-// Mock dữ liệu đồ án
-const mockThesis = {
-  id: "1",
-  title: "Ứng dụng AI trong giáo dục",
-  supervisor: {
-    id: "2",
-    name: "TS. Nguyễn Văn A",
-    email: "nguyenvana@example.edu.vn",
-    phone: "0987654321",
-    department: "Công nghệ thông tin",
-    expertise: "Trí tuệ nhân tạo, Học máy",
-  },
-  description: "Nghiên cứu và phát triển ứng dụng AI hỗ trợ học tập.",
-  status: "in_progress",
-  deadline: "2024-09-30",
-  requirements: "Yêu cầu sinh viên có kiến thức về AI và học máy.",
-  objectives: "Xây dựng ứng dụng demo AI hỗ trợ học tập cá nhân hóa.",
-};
-
-const progressHistory = [
-  { key: 1, time: "2024-06-01", desc: "Bắt đầu đề tài", by: "Sinh viên" },
-  { key: 2, time: "2024-06-10", desc: "Nộp đề cương", by: "Sinh viên" },
-  { key: 3, time: "2024-06-12", desc: "Nhận xét đề cương", by: "Giảng viên" },
-  { key: 4, time: "2024-06-20", desc: "Nộp chương 1", by: "Sinh viên" },
-  { key: 5, time: "2024-06-22", desc: "Nhận xét chương 1", by: "Giảng viên" },
-];
-
-const mockDocuments = Array.from({ length: 8 }).map((_, i) => ({
-  key: String(i + 1),
-  name: `Tài liệu ${i + 1}.${
-    i % 3 === 0 ? "pdf" : i % 3 === 1 ? "docx" : "zip"
-  }`,
-  type: i % 3 === 0 ? "pdf" : i % 3 === 1 ? "docx" : "zip",
-  uploadedAt: `2024-06-${10 + (i % 10)}`,
-  status: i % 4 === 0 ? "approved" : "pending",
-  url: "#",
-}));
-
-const mockFeedbacks = [
-  {
-    key: 1,
-    time: "2024-06-12",
-    by: "Giảng viên",
-    content: "Đề cương cần bổ sung mục tiêu rõ ràng hơn.",
-  },
-  {
-    key: 2,
-    time: "2024-06-22",
-    by: "Giảng viên",
-    content: "Chương 1 trình bày tốt, cần bổ sung ví dụ thực tế.",
-  },
-];
-
-interface StatusMapType {
-  [key: string]: { color: string; text: string };
-}
-
-const statusMap: StatusMapType = {
-  approved: { color: "green", text: "Đã duyệt" },
-  pending: { color: "orange", text: "Chờ duyệt" },
-};
-
-const mockSubTasks = [
-  {
-    key: "1",
-    name: "Nộp đề cương",
-    startDate: "2024-06-01",
-    deadline: "2024-06-15",
-    description: "Nộp đề cương chi tiết của đồ án",
-    status: "completed",
-    score: 8,
-    feedback: "Đề cương tốt, cần bổ sung thêm mục tiêu cụ thể hơn",
-  },
-  {
-    key: "2",
-    name: "Nộp chương 1",
-    startDate: "2024-06-16",
-    deadline: "2024-06-30",
-    description: "Nộp chương 1: Tổng quan",
-    status: "completed",
-    score: 7.5,
-    feedback: "Chương 1 trình bày khá tốt, cần thêm ví dụ minh họa",
-  },
-  {
-    key: "3",
-    name: "Nộp chương 2",
-    startDate: "2024-07-01",
-    deadline: "2024-07-15",
-    description: "Nộp chương 2: Phương pháp nghiên cứu",
-    status: "in_progress",
-  },
-  {
-    key: "4",
-    name: "Nộp chương 3",
-    startDate: "2024-07-16",
-    deadline: "2024-08-15",
-    description: "Nộp chương 3: Kết quả và thảo luận",
-    status: "not_started",
-  },
-  {
-    key: "5",
-    name: "Nộp báo cáo tổng kết",
-    startDate: "2024-08-16",
-    deadline: "2024-09-15",
-    description: "Nộp báo cáo tổng kết đầy đủ",
-    status: "not_started",
-  },
-];
 
 interface MeetingFormValues {
   title: string;
@@ -170,7 +134,6 @@ interface SubmissionFormValues {
 
 const ThesisDetail = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const user = useSelector((state: RootState) => state.auth.user);
 
@@ -180,18 +143,187 @@ const ThesisDetail = () => {
   const [isMeetingModalVisible, setIsMeetingModalVisible] = useState(false);
   const [isSubmissionModalVisible, setIsSubmissionModalVisible] =
     useState(false);
-  const [selectedTask, setSelectedTask] = useState<any>(null);
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [activeTab, setActiveTab] = useState("overview");
 
   // Forms
   const [meetingForm] = Form.useForm();
   const [submissionForm] = Form.useForm();
 
-  // Fetch meetings from API
+  // Fetch thesis details with mock data
+  const { data: thesis, isLoading: thesisLoading } = useQuery({
+    queryKey: ["thesis", id],
+    queryFn: () => {
+      if (!id) return null;
+
+      // Replace API call with mock data
+      return Promise.resolve<Thesis>({
+        id: id,
+        title: "Ứng dụng AI trong giáo dục",
+        description:
+          "Nghiên cứu và phát triển ứng dụng AI hỗ trợ học tập trong giáo dục.",
+        supervisor: {
+          id: "2",
+          name: "TS. Nguyễn Văn A",
+          email: "nguyenvana@example.edu.vn",
+          phone: "0987654321",
+          department: "Công nghệ thông tin",
+          expertise: "Trí tuệ nhân tạo, Học máy",
+        },
+        status: "in_progress",
+        deadline: "2024-08-30",
+        objectives:
+          "Xây dựng ứng dụng demo minh họa việc ứng dụng AI trong giáo dục.",
+        requirements:
+          "Yêu cầu sinh viên có kiến thức về Machine Learning, Python và các thư viện AI.",
+        progress: 60,
+        createdAt: "2024-05-15",
+      });
+    },
+    enabled: !!id,
+  });
+
+  // Fetch thesis documents with mock data
+  const { data: documents = [], isLoading: documentsLoading } = useQuery({
+    queryKey: ["documents", id],
+    queryFn: () => {
+      if (!id) return [];
+
+      // Replace API call with mock data
+      return Promise.resolve<Document[]>([
+        {
+          id: "1",
+          name: "Đề cương đồ án.pdf",
+          fileUrl: "#",
+          uploadedBy: "Nguyễn Văn A",
+          uploadedAt: "2024-06-12",
+        },
+        {
+          id: "2",
+          name: "Báo cáo chương 1.docx",
+          fileUrl: "#",
+          uploadedBy: "Nguyễn Văn A",
+          uploadedAt: "2024-06-29",
+        },
+      ]);
+    },
+    enabled: !!id,
+  });
+
+  // Fetch thesis tasks with mock data
+  const { data: tasks = [], isLoading: tasksLoading } = useQuery({
+    queryKey: ["tasks", id],
+    queryFn: () => {
+      if (!id) return [];
+
+      // Replace API call with mock data
+      return Promise.resolve<Task[]>([
+        {
+          key: "1",
+          name: "Nộp đề cương",
+          description:
+            "Đề cương nghiên cứu, bao gồm mục tiêu, phạm vi, và phương pháp",
+          startDate: "2024-06-01",
+          deadline: "2024-06-15",
+          status: "completed",
+          feedback:
+            "Tốt, cần bổ sung phần phương pháp nghiên cứu chi tiết hơn.",
+          score: 8,
+        },
+        {
+          key: "2",
+          name: "Nộp chương 1",
+          description:
+            "Giới thiệu tổng quan về đề tài, tầm quan trọng và mục tiêu nghiên cứu",
+          startDate: "2024-06-16",
+          deadline: "2024-07-01",
+          status: "completed",
+          feedback:
+            "Đã đáp ứng yêu cầu, tuy nhiên cần bổ sung thêm tài liệu tham khảo.",
+          score: 7,
+        },
+        {
+          key: "3",
+          name: "Nộp chương 2",
+          description: "Phương pháp nghiên cứu và thiết kế hệ thống",
+          startDate: "2024-07-02",
+          deadline: "2024-07-20",
+          status: "in_progress",
+        },
+      ]);
+    },
+    enabled: !!id,
+  });
+
+  // Fetch thesis feedback with mock data
+  const { data: feedback = [], isLoading: feedbackLoading } = useQuery({
+    queryKey: ["feedback", id],
+    queryFn: () => {
+      if (!id) return [];
+
+      // Replace API call with mock data
+      return Promise.resolve<FeedbackItem[]>([
+        {
+          id: "1",
+          time: "2024-06-14",
+          by: "Giảng viên",
+          desc: "Đánh giá đề cương",
+          content:
+            "Đề cương tốt, cần bổ sung phần phương pháp nghiên cứu chi tiết hơn.",
+        },
+        {
+          id: "2",
+          time: "2024-07-01",
+          by: "Giảng viên",
+          desc: "Đánh giá chương 1",
+          content:
+            "Chương 1 đã đáp ứng yêu cầu, tuy nhiên cần bổ sung thêm tài liệu tham khảo.",
+        },
+      ]);
+    },
+    enabled: !!id,
+  });
+
+  // Fetch meetings with mock data
   const { data: meetings = [], isLoading: meetingsLoading } = useQuery({
-    queryKey: ["meetings", user?.id],
-    queryFn: () => api.getMeetings(user?.id || ""),
-    enabled: !!user?.id,
+    queryKey: ["meetings", user?.userId],
+    queryFn: () => {
+      if (!user?.userId) return [];
+
+      // Replace API call with mock data
+      return Promise.resolve<Meeting[]>([
+        {
+          id: "meeting1",
+          title: "Thảo luận về đề cương",
+          purpose: "Thảo luận các nội dung sẽ thực hiện trong đề tài",
+          date: "2024-07-15",
+          time: "14:30",
+          thesisId: id || "",
+          teacherId: "2",
+          teacherName: "TS. Nguyễn Văn A",
+          studentId: user.userId.toString(),
+          studentName: user.name,
+          status: "approved",
+          link: "https://meet.google.com/abc-defg-hij",
+          createdAt: "2024-07-10",
+        },
+        {
+          id: "meeting2",
+          title: "Báo cáo tiến độ chương 1",
+          purpose: "Trình bày kết quả chương 1 và kế hoạch tiếp theo",
+          date: "2024-07-25",
+          time: "10:00",
+          thesisId: id || "",
+          teacherId: "2",
+          teacherName: "TS. Nguyễn Văn A",
+          studentId: user.userId.toString(),
+          studentName: user.name,
+          status: "pending",
+          createdAt: "2024-07-12",
+        },
+      ]);
+    },
+    enabled: !!user?.userId && !!id,
   });
 
   // Pagination helper
@@ -199,20 +331,12 @@ const ThesisDetail = () => {
     data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   // Calculate progress based on completed tasks
-  const progress = Math.round(
-    (mockSubTasks.filter((t) => t.status === "completed").length /
-      mockSubTasks.length) *
-      100
-  );
-
-  // Mock thesis data (in a real app, this would come from an API)
-  const [thesis] = useState(mockThesis);
-
-  // Use React Query to fetch thesis data
-  useEffect(() => {
-    // In a real app, you would fetch the thesis data based on the ID
-    console.log("Fetching thesis with ID:", id);
-  }, [id]);
+  const progress = tasks.length
+    ? Math.round(
+        (tasks.filter((t) => t.status === "completed").length / tasks.length) *
+          100
+      )
+    : 0;
 
   // Upload props for document submission
   const uploadProps: UploadProps = {
@@ -229,7 +353,7 @@ const ThesisDetail = () => {
     },
   };
 
-  // Meeting scheduling
+  // Meeting scheduling with mock implementation
   const handleScheduleMeeting = (values: MeetingFormValues) => {
     if (!user || !thesis) return;
 
@@ -241,34 +365,22 @@ const ThesisDetail = () => {
       thesisId: thesis.id,
       teacherId: thesis.supervisor.id,
       teacherName: thesis.supervisor.name,
-      studentId: user.id,
+      studentId: user.userId.toString(),
       studentName: user.name,
     };
 
-    // Call the API
-    api
-      .scheduleMeeting(
-        meetingRequest.title,
-        meetingRequest.purpose,
-        meetingRequest.date,
-        meetingRequest.time,
-        meetingRequest.thesisId,
-        meetingRequest.teacherId,
-        meetingRequest.teacherName,
-        meetingRequest.studentId,
-        meetingRequest.studentName
-      )
-      .then(() => {
-        message.success(
-          "Gửi yêu cầu lịch hẹn thành công! Vui lòng chờ giảng viên xác nhận."
-        );
-        queryClient.invalidateQueries({ queryKey: ["meetings", user.id] });
-        setIsMeetingModalVisible(false);
-        meetingForm.resetFields();
-      })
-      .catch((error) => {
-        message.error(`Lỗi: ${error.message}`);
-      });
+    // Replace API call with mock implementation
+    console.log("Scheduling meeting:", meetingRequest);
+
+    // Mock successful API response
+    setTimeout(() => {
+      message.success(
+        "Gửi yêu cầu lịch hẹn thành công! Vui lòng chờ giảng viên xác nhận."
+      );
+      queryClient.invalidateQueries({ queryKey: ["meetings", user.userId] });
+      setIsMeetingModalVisible(false);
+      meetingForm.resetFields();
+    }, 500);
   };
 
   // Document submission
@@ -280,7 +392,7 @@ const ThesisDetail = () => {
   };
 
   // Show submission modal for a specific task
-  const showSubmissionModal = (task: any) => {
+  const showSubmissionModal = (task: Task) => {
     setSelectedTask(task);
     submissionForm.setFieldsValue({
       taskId: task.key,
@@ -322,6 +434,23 @@ const ThesisDetail = () => {
 
     return <Tag color={statusColors[status]}>{statusText[status]}</Tag>;
   };
+
+  if (thesisLoading) {
+    return (
+      <div style={{ textAlign: "center", padding: "50px" }}>
+        <Spin size="large" tip="Đang tải thông tin đồ án..." />
+      </div>
+    );
+  }
+
+  if (!thesis) {
+    return (
+      <Empty
+        description="Không tìm thấy thông tin đồ án"
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+      />
+    );
+  }
 
   return (
     <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 16px" }}>
@@ -415,23 +544,27 @@ const ThesisDetail = () => {
                   title="Lịch sử tiến độ"
                   extra={<Tag color="blue">Thời gian gần nhất</Tag>}
                 >
-                  <Timeline
-                    style={{
-                      maxHeight: 300,
-                      overflowY: "auto",
-                      padding: "16px 8px",
-                    }}
-                  >
-                    {progressHistory.map((item) => (
-                      <Timeline.Item
-                        key={item.key}
-                        color={item.by === "Giảng viên" ? "blue" : "green"}
-                      >
-                        <Text strong>{item.time}</Text> - {item.desc}{" "}
-                        <Tag>{item.by}</Tag>
-                      </Timeline.Item>
-                    ))}
-                  </Timeline>
+                  {feedback.length > 0 ? (
+                    <Timeline
+                      style={{
+                        maxHeight: 300,
+                        overflowY: "auto",
+                        padding: "16px 8px",
+                      }}
+                    >
+                      {feedback.map((item, index) => (
+                        <Timeline.Item
+                          key={index}
+                          color={item.by === "Giảng viên" ? "blue" : "green"}
+                        >
+                          <Text strong>{item.time}</Text> - {item.desc}{" "}
+                          <Tag>{item.by}</Tag>
+                        </Timeline.Item>
+                      ))}
+                    </Timeline>
+                  ) : (
+                    <Empty description="Chưa có dữ liệu tiến độ" />
+                  )}
                 </Card>
               </Col>
             </Row>
@@ -441,77 +574,84 @@ const ThesisDetail = () => {
             <Row gutter={[24, 24]}>
               <Col span={24}>
                 <Card title="Danh sách công việc">
-                  <Table
-                    dataSource={mockSubTasks}
-                    rowKey="key"
-                    columns={[
-                      {
-                        title: "Tên công việc",
-                        dataIndex: "name",
-                        key: "name",
-                        render: (text) => (
-                          <Space>
-                            <FileTextOutlined />
-                            <Text strong>{text}</Text>
-                          </Space>
-                        ),
-                      },
-                      {
-                        title: "Bắt đầu",
-                        dataIndex: "startDate",
-                        key: "startDate",
-                      },
-                      {
-                        title: "Deadline",
-                        dataIndex: "deadline",
-                        key: "deadline",
-                      },
-                      {
-                        title: "Mô tả",
-                        dataIndex: "description",
-                        key: "description",
-                        ellipsis: true,
-                      },
-                      {
-                        title: "Trạng thái",
-                        dataIndex: "status",
-                        key: "status",
-                        render: (status) => getTaskStatusTag(status),
-                      },
-                      {
-                        title: "Điểm",
-                        dataIndex: "score",
-                        key: "score",
-                        render: (score) => (score !== undefined ? score : "--"),
-                      },
-                      {
-                        title: "Thao tác",
-                        key: "action",
-                        render: (_, record) => (
-                          <Space>
-                            {record.status !== "completed" && (
-                              <Button
-                                type="primary"
-                                icon={<UploadOutlined />}
-                                onClick={() => showSubmissionModal(record)}
-                              >
-                                Nộp bài
-                              </Button>
-                            )}
-                            {record.feedback && (
-                              <Button
-                                type="link"
-                                icon={<CommentOutlined />}
-                                onClick={() => message.info(record.feedback)}
-                              >
-                                Nhận xét
-                              </Button>
-                            )}
-                          </Space>
-                        ),
-                      },
-                    ]}
-                  />
+                  {tasksLoading ? (
+                    <Spin tip="Đang tải dữ liệu..." />
+                  ) : tasks.length > 0 ? (
+                    <Table
+                      dataSource={tasks}
+                      rowKey="key"
+                      columns={[
+                        {
+                          title: "Tên công việc",
+                          dataIndex: "name",
+                          key: "name",
+                          render: (text) => (
+                            <Space>
+                              <FileTextOutlined />
+                              <Text strong>{text}</Text>
+                            </Space>
+                          ),
+                        },
+                        {
+                          title: "Bắt đầu",
+                          dataIndex: "startDate",
+                          key: "startDate",
+                        },
+                        {
+                          title: "Deadline",
+                          dataIndex: "deadline",
+                          key: "deadline",
+                        },
+                        {
+                          title: "Mô tả",
+                          dataIndex: "description",
+                          key: "description",
+                          ellipsis: true,
+                        },
+                        {
+                          title: "Trạng thái",
+                          dataIndex: "status",
+                          key: "status",
+                          render: (status) => getTaskStatusTag(status),
+                        },
+                        {
+                          title: "Điểm",
+                          dataIndex: "score",
+                          key: "score",
+                          render: (score) =>
+                            score !== undefined ? score : "--",
+                        },
+                        {
+                          title: "Thao tác",
+                          key: "action",
+                          render: (_, record: Task) => (
+                            <Space>
+                              {record.status !== "completed" && (
+                                <Button
+                                  type="primary"
+                                  icon={<UploadOutlined />}
+                                  onClick={() => showSubmissionModal(record)}
+                                >
+                                  Nộp bài
+                                </Button>
+                              )}
+                              {record.feedback && (
+                                <Button
+                                  type="link"
+                                  icon={<CommentOutlined />}
+                                  onClick={() => message.info(record.feedback)}
+                                >
+                                  Nhận xét
+                                </Button>
+                              )}
+                            </Space>
+                          ),
+                        },
+                      ]}
+                    />
+                  ) : (
+                    <Empty description="Chưa có nhiệm vụ nào được giao" />
+                  )}
                 </Card>
               </Col>
             </Row>
@@ -532,65 +672,69 @@ const ThesisDetail = () => {
                     </Button>
                   }
                 >
-                  <Table
-                    columns={[
-                      {
-                        title: "Tên file",
-                        dataIndex: "name",
-                        key: "name",
-                        render: (name, record) => (
-                          <a
-                            href={record.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <FileTextOutlined /> {name}
-                          </a>
-                        ),
-                      },
-                      { title: "Loại", dataIndex: "type", key: "type" },
-                      {
-                        title: "Ngày nộp",
-                        dataIndex: "uploadedAt",
-                        key: "uploadedAt",
-                      },
-                      {
-                        title: "Trạng thái",
-                        dataIndex: "status",
-                        key: "status",
-                        render: (status) => (
-                          <Tag color={statusMap[status].color}>
-                            {statusMap[status].text}
-                          </Tag>
-                        ),
-                      },
-                      {
-                        title: "Thao tác",
-                        key: "action",
-                        render: (_, record) => (
-                          <Button
-                            type="link"
-                            danger
-                            icon={<DeleteOutlined />}
-                            onClick={() =>
-                              message.info("Chức năng xóa đang cập nhật")
-                            }
-                          >
-                            Xóa
-                          </Button>
-                        ),
-                      },
-                    ]}
-                    dataSource={paged(mockDocuments, documentPage)}
-                    pagination={false}
-                  />
-                  <Pagination
-                    current={documentPage}
-                    pageSize={PAGE_SIZE}
-                    total={mockDocuments.length}
-                    onChange={setDocumentPage}
-                    style={{ marginTop: 16, textAlign: "right" }}
-                  />
+                  {documentsLoading ? (
+                    <Spin tip="Đang tải dữ liệu..." />
+                  ) : documents.length > 0 ? (
+                    <>
+                      <Table
+                        columns={[
+                          {
+                            title: "Tên file",
+                            dataIndex: "name",
+                            key: "name",
+                            render: (name, record: Document) => (
+                              <a
+                                href={record.fileUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <FileTextOutlined /> {name}
+                              </a>
+                            ),
+                          },
+                          {
+                            title: "Người tải lên",
+                            dataIndex: "uploadedBy",
+                            key: "uploadedBy",
+                          },
+                          {
+                            title: "Ngày nộp",
+                            dataIndex: "uploadedAt",
+                            key: "uploadedAt",
+                          },
+                          {
+                            title: "Thao tác",
+                            key: "action",
+                            render: () => (
+                              <Button
+                                type="link"
+                                danger
+                                icon={<DeleteOutlined />}
+                                onClick={() =>
+                                  message.info("Chức năng xóa đang cập nhật")
+                                }
+                              >
+                                Xóa
+                              </Button>
+                            ),
+                          },
+                        ]}
+                        dataSource={paged(documents, documentPage)}
+                        pagination={false}
+                      />
+                      {documents.length > PAGE_SIZE && (
+                        <Pagination
+                          current={documentPage}
+                          pageSize={PAGE_SIZE}
+                          total={documents.length}
+                          onChange={setDocumentPage}
+                          style={{ marginTop: 16, textAlign: "right" }}
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <Empty description="Chưa có tài liệu nào được tải lên" />
+                  )}
                 </Card>
               </Col>
             </Row>
@@ -611,71 +755,84 @@ const ThesisDetail = () => {
                     </Button>
                   }
                 >
-                  <Table
-                    loading={meetingsLoading}
-                    columns={[
-                      {
-                        title: "Tiêu đề",
-                        dataIndex: "title",
-                        key: "title",
-                      },
-                      {
-                        title: "Ngày",
-                        dataIndex: "date",
-                        key: "date",
-                      },
-                      {
-                        title: "Giờ",
-                        dataIndex: "time",
-                        key: "time",
-                      },
-                      {
-                        title: "Trạng thái",
-                        dataIndex: "status",
-                        key: "status",
-                        render: (status) => getTaskStatusTag(status),
-                      },
-                      {
-                        title: "Thao tác",
-                        key: "action",
-                        render: (_, record) => (
-                          <Space>
-                            {record.link && record.status === "approved" && (
-                              <Button
-                                type="primary"
-                                href={record.link}
-                                target="_blank"
-                              >
-                                Tham gia
-                              </Button>
-                            )}
-                            {record.status === "pending" && (
-                              <Button
-                                type="link"
-                                danger
-                                icon={<DeleteOutlined />}
-                                onClick={() =>
-                                  message.info("Chức năng hủy đang cập nhật")
-                                }
-                              >
-                                Hủy
-                              </Button>
-                            )}
-                          </Space>
-                        ),
-                      },
-                    ]}
-                    dataSource={paged(meetings, meetingPage)}
-                    pagination={false}
-                  />
-                  <Pagination
-                    current={meetingPage}
-                    pageSize={PAGE_SIZE}
-                    total={meetings.length}
-                    onChange={setMeetingPage}
-                    style={{ marginTop: 16, textAlign: "right" }}
-                    hideOnSinglePage
-                  />
+                  {meetingsLoading ? (
+                    <Spin tip="Đang tải dữ liệu..." />
+                  ) : meetings.length > 0 ? (
+                    <>
+                      <Table
+                        loading={meetingsLoading}
+                        columns={[
+                          {
+                            title: "Tiêu đề",
+                            dataIndex: "title",
+                            key: "title",
+                          },
+                          {
+                            title: "Ngày",
+                            dataIndex: "date",
+                            key: "date",
+                          },
+                          {
+                            title: "Giờ",
+                            dataIndex: "time",
+                            key: "time",
+                          },
+                          {
+                            title: "Trạng thái",
+                            dataIndex: "status",
+                            key: "status",
+                            render: (status) => getTaskStatusTag(status),
+                          },
+                          {
+                            title: "Thao tác",
+                            key: "action",
+                            render: (_, record) => (
+                              <Space>
+                                {record.link &&
+                                  record.status === "approved" && (
+                                    <Button
+                                      type="primary"
+                                      href={record.link}
+                                      target="_blank"
+                                    >
+                                      Tham gia
+                                    </Button>
+                                  )}
+                                {record.status === "pending" && (
+                                  <Button
+                                    type="link"
+                                    danger
+                                    icon={<DeleteOutlined />}
+                                    onClick={() =>
+                                      message.info(
+                                        "Chức năng hủy đang cập nhật"
+                                      )
+                                    }
+                                  >
+                                    Hủy
+                                  </Button>
+                                )}
+                              </Space>
+                            ),
+                          },
+                        ]}
+                        dataSource={paged(meetings, meetingPage)}
+                        pagination={false}
+                      />
+                      {meetings.length > PAGE_SIZE && (
+                        <Pagination
+                          current={meetingPage}
+                          pageSize={PAGE_SIZE}
+                          total={meetings.length}
+                          onChange={setMeetingPage}
+                          style={{ marginTop: 16, textAlign: "right" }}
+                          hideOnSinglePage
+                        />
+                      )}
+                    </>
+                  ) : (
+                    <Empty description="Chưa có lịch họp nào" />
+                  )}
                 </Card>
               </Col>
             </Row>
@@ -685,16 +842,22 @@ const ThesisDetail = () => {
             <Row gutter={[24, 24]}>
               <Col span={24}>
                 <Card title="Nhận xét từ giảng viên">
-                  <Timeline style={{ padding: "16px 8px" }}>
-                    {mockFeedbacks.map((fb) => (
-                      <Timeline.Item key={fb.key} color="blue">
-                        <Text strong>{fb.time}</Text>
-                        <Paragraph style={{ marginTop: 8, marginBottom: 8 }}>
-                          {fb.content}
-                        </Paragraph>
-                      </Timeline.Item>
-                    ))}
-                  </Timeline>
+                  {feedbackLoading ? (
+                    <Spin tip="Đang tải dữ liệu..." />
+                  ) : feedback.length > 0 ? (
+                    <Timeline style={{ padding: "16px 8px" }}>
+                      {feedback.map((fb, index) => (
+                        <Timeline.Item key={index} color="blue">
+                          <Text strong>{fb.time}</Text>
+                          <Paragraph style={{ marginTop: 8, marginBottom: 8 }}>
+                            {fb.content}
+                          </Paragraph>
+                        </Timeline.Item>
+                      ))}
+                    </Timeline>
+                  ) : (
+                    <Empty description="Chưa có nhận xét nào từ giảng viên" />
+                  )}
                 </Card>
               </Col>
             </Row>

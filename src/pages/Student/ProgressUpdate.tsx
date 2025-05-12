@@ -15,8 +15,22 @@ import { useState } from "react";
 
 const PAGE_SIZE = 5;
 
+// Define types
+interface FileData {
+  key: string;
+  name: string;
+  type: string;
+  uploadedAt: string;
+  status: "approved" | "pending";
+}
+
+interface ProgressFormValues {
+  progress: number;
+  desc?: string;
+}
+
 // Mock tài liệu đã upload
-const mockFiles = Array.from({ length: 12 }).map((_, i) => ({
+const mockFiles: FileData[] = Array.from({ length: 12 }).map((_, i) => ({
   key: String(i + 1),
   name: `Tài liệu ${i + 1}.${
     i % 3 === 0 ? "pdf" : i % 3 === 1 ? "docx" : "zip"
@@ -26,22 +40,22 @@ const mockFiles = Array.from({ length: 12 }).map((_, i) => ({
   status: i % 4 === 0 ? "approved" : "pending",
 }));
 
-const statusMap = {
+const statusMap: Record<FileData["status"], { color: string; text: string }> = {
   approved: { color: "green", text: "Đã duyệt" },
   pending: { color: "orange", text: "Chờ duyệt" },
 };
 
 const ProgressUpdate = () => {
-  const [form] = Form.useForm();
+  const [form] = Form.useForm<ProgressFormValues>();
   const [progress, setProgress] = useState(60);
-  const [files, setFiles] = useState(mockFiles);
+  const [files, setFiles] = useState<FileData[]>(mockFiles);
   const [filePage, setFilePage] = useState(1);
   const [uploading, setUploading] = useState(false);
 
   const paged = <T,>(data: T[], page: number) =>
     data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const handleProgressUpdate = (values: any) => {
+  const handleProgressUpdate = (values: ProgressFormValues) => {
     setProgress(values.progress);
     message.success("Cập nhật tiến độ thành công!");
   };
@@ -130,7 +144,7 @@ const ProgressUpdate = () => {
               title: "Trạng thái",
               dataIndex: "status",
               key: "status",
-              render: (status) => (
+              render: (status: "approved" | "pending") => (
                 <Tag color={statusMap[status].color}>
                   {statusMap[status].text}
                 </Tag>

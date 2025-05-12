@@ -36,7 +36,6 @@ import {
   FileAddOutlined,
   DownloadOutlined,
   PlusOutlined,
-  EyeOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
@@ -656,18 +655,21 @@ const ThesisDetail = () => {
   const handleEditSubmit = (values: {
     title: string;
     description: string;
-    requirements: string;
-    objectives: string;
     major: string;
     status: string;
     deadline: dayjs.Dayjs;
   }) => {
-    message.success("Đã cập nhật thông tin đề tài thành công");
+    // Update thesis with the new values
+    setThesis({
+      ...thesis,
+      title: values.title,
+      description: values.description,
+      major: values.major,
+      status: values.status,
+      deadline: values.deadline.format("YYYY-MM-DD"),
+    });
+    message.success("Cập nhật thông tin đề tài thành công!");
     setIsEditModalVisible(false);
-
-    // Here we would typically update the state with new thesis data
-    // For demo purposes, we'll just show a success message
-    console.log("Updated thesis data:", values);
   };
 
   // Function to handle opening the add/edit subtask modal

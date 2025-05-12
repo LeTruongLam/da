@@ -1,6 +1,5 @@
 import { Card, Form, Input, Button, Select, Space, message } from "antd";
-import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query";
 
 interface SettingsForm {
   semester: string;
@@ -12,12 +11,28 @@ interface SettingsForm {
 const SystemSettings = () => {
   const [form] = Form.useForm();
 
+  // Fetch current settings
+  const { data: currentSettings } = useQuery({
+    queryKey: ["systemSettings"],
+    queryFn: () => {
+      // Replace with actual API call when available
+      return Promise.resolve({
+        semester: "2024.1",
+        academicYear: "2023-2024",
+        department: "cntt",
+        backupFrequency: "daily",
+      });
+    },
+  });
+
   const updateSettingsMutation = useMutation({
-    mutationFn: (values: SettingsForm) =>
-      Promise.resolve({
+    mutationFn: (values: SettingsForm) => {
+      // Replace with actual API call when available
+      return Promise.resolve({
         success: true,
         data: values,
-      }),
+      });
+    },
     onSuccess: () => {
       message.success("Cập nhật cài đặt thành công!");
     },
@@ -32,12 +47,14 @@ const SystemSettings = () => {
         form={form}
         layout="vertical"
         onFinish={updateSettingsMutation.mutate}
-        initialValues={{
-          semester: "2024.1",
-          academicYear: "2023-2024",
-          department: "cntt",
-          backupFrequency: "daily",
-        }}
+        initialValues={
+          currentSettings || {
+            semester: "2024.1",
+            academicYear: "2023-2024",
+            department: "cntt",
+            backupFrequency: "daily",
+          }
+        }
       >
         <Form.Item
           name="semester"

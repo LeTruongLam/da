@@ -14,8 +14,37 @@ import { useState } from "react";
 
 const PAGE_SIZE = 5;
 
+// Define types for our data
+interface Evaluation {
+  key: string;
+  teacher: string;
+  rating: number;
+  comment: string;
+  date: string;
+}
+
+interface Meeting {
+  key: string;
+  teacher: string;
+  time: string;
+  reason: string;
+  status: "pending" | "accepted" | "rejected";
+}
+
+interface EvalFormValues {
+  teacher: string;
+  rating: number;
+  comment: string;
+}
+
+interface MeetingFormValues {
+  teacher: string;
+  time: import("dayjs").Dayjs;
+  reason: string;
+}
+
 // Mock lịch sử đánh giá
-const mockEvaluations = Array.from({ length: 7 }).map((_, i) => ({
+const mockEvaluations: Evaluation[] = Array.from({ length: 7 }).map((_, i) => ({
   key: String(i + 1),
   teacher: `TS. Giảng viên ${String.fromCharCode(65 + (i % 5))}`,
   rating: 3 + (i % 3),
@@ -24,7 +53,7 @@ const mockEvaluations = Array.from({ length: 7 }).map((_, i) => ({
 }));
 
 // Mock lịch sử lịch họp
-const mockMeetings = Array.from({ length: 8 }).map((_, i) => ({
+const mockMeetings: Meeting[] = Array.from({ length: 8 }).map((_, i) => ({
   key: String(i + 1),
   teacher: `TS. Giảng viên ${String.fromCharCode(65 + (i % 5))}`,
   time: `2024-06-${12 + i} ${9 + (i % 3)}:00`,
@@ -32,17 +61,17 @@ const mockMeetings = Array.from({ length: 8 }).map((_, i) => ({
   status: i % 3 === 0 ? "pending" : "accepted",
 }));
 
-const statusMap = {
+const statusMap: Record<Meeting["status"], { color: string; text: string }> = {
   pending: { color: "orange", text: "Chờ duyệt" },
   accepted: { color: "green", text: "Đã duyệt" },
   rejected: { color: "red", text: "Từ chối" },
 };
 
 const EvaluateAndMeeting = () => {
-  const [evalForm] = Form.useForm();
-  const [meetingForm] = Form.useForm();
-  const [evaluations, setEvaluations] = useState(mockEvaluations);
-  const [meetings, setMeetings] = useState(mockMeetings);
+  const [evalForm] = Form.useForm<EvalFormValues>();
+  const [meetingForm] = Form.useForm<MeetingFormValues>();
+  const [evaluations, setEvaluations] = useState<Evaluation[]>(mockEvaluations);
+  const [meetings, setMeetings] = useState<Meeting[]>(mockMeetings);
   const [evalPage, setEvalPage] = useState(1);
   const [meetingPage, setMeetingPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -50,7 +79,7 @@ const EvaluateAndMeeting = () => {
   const paged = <T,>(data: T[], page: number) =>
     data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  const handleEvalFinish = (values: any) => {
+  const handleEvalFinish = (values: EvalFormValues) => {
     setLoading(true);
     setTimeout(() => {
       setEvaluations([
@@ -69,7 +98,7 @@ const EvaluateAndMeeting = () => {
     }, 1000);
   };
 
-  const handleMeetingFinish = (values: any) => {
+  const handleMeetingFinish = (values: MeetingFormValues) => {
     setLoading(true);
     setTimeout(() => {
       setMeetings([
@@ -184,7 +213,7 @@ const EvaluateAndMeeting = () => {
                 title: "Trạng thái",
                 dataIndex: "status",
                 key: "status",
-                render: (status) => (
+                render: (status: "pending" | "accepted" | "rejected") => (
                   <Tag color={statusMap[status].color}>
                     {statusMap[status].text}
                   </Tag>

@@ -15,6 +15,10 @@ export const API_CONFIG = {
       DETAIL: (id: number) => `/users/${id}`,
       UPDATE: "/users/update",
     },
+    PROFILE: {
+      CHANGE_PASSWORD: "/users/change-password",
+      UPLOAD_AVATAR: "/users/upload-avatar",
+    },
     THESIS: {
       LIST: "/theses",
       MY_THESES: "/users/my-thesis",

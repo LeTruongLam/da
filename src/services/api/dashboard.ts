@@ -1,5 +1,5 @@
 import { get } from "@/lib/base-api";
-import type { Thesis } from "./thesis";
+import type { ThesisResponse } from "./thesis";
 import type { User } from "./auth";
 import { API_CONFIG } from "./config";
 
@@ -36,7 +36,9 @@ export const getDashboardStats = () =>
 
 // Get recent theses
 export const getRecentTheses = (limit = 5) =>
-  get<Thesis[]>(API_CONFIG.ENDPOINTS.DASHBOARD.RECENT_THESES, { limit });
+  get<ThesisResponse[]>(API_CONFIG.ENDPOINTS.DASHBOARD.RECENT_THESES, {
+    limit,
+  });
 
 // Get recent activities
 export const getRecentActivities = (limit = 10) =>
@@ -58,7 +60,7 @@ export const getAssignedStudents = () =>
 // Student only: Get thesis progress
 export const getThesisProgress = () =>
   get<{
-    currentThesis?: Thesis;
+    currentThesis?: ThesisResponse;
     progress: number;
     nextMilestone?: string;
     dueDates: { title: string; date: string }[];

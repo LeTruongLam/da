@@ -1,32 +1,46 @@
-import { Card, Form, Input, Button, Select, message, Table, Tag } from "antd";
+import {
+  Card,
+  Form,
+  Input,
+  Button,
+  Select,
+  message,
+  Table,
+  Tag,
+  Spin,
+  Empty,
+} from "antd";
 import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
-// Mock data giảng viên và đề tài
-const teachers = Array.from({ length: 8 }).map((_, i) => ({
-  id: String(i + 1),
-  name: `TS. Giảng viên ${String.fromCharCode(65 + i)}`,
-  major: i % 2 === 0 ? "CNTT" : "Kỹ thuật phần mềm",
-}));
-const topics = Array.from({ length: 10 }).map((_, i) => ({
-  id: String(i + 1),
-  title: `Đề tài số ${i + 1}: Ứng dụng công nghệ mới trong giáo dục`,
-}));
+// Updated Teacher interface without references to Lecturer
+interface Teacher {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  department: string;
+  expertise: string;
+  major: string;
+}
 
-// Mock danh sách yêu cầu đã gửi
-const mockRequests = [
-  {
-    key: "1",
-    topic: "Đề tài số 1: Ứng dụng công nghệ mới trong giáo dục",
-    teacher: "TS. Giảng viên A",
-    status: "pending",
-  },
-  {
-    key: "2",
-    topic: "Đề tài số 2: Ứng dụng công nghệ mới trong giáo dục",
-    teacher: "TS. Giảng viên B",
-    status: "accepted",
-  },
-];
+interface Topic {
+  id: string;
+  title: string;
+}
+
+interface Request {
+  key: string;
+  topic: string;
+  teacher: string;
+  status: "pending" | "accepted" | "rejected";
+}
+
+interface RequestFormValues {
+  topic: string;
+  teacher: string;
+  note?: string;
+}
 
 const statusMap = {
   pending: { color: "orange", text: "Chờ duyệt" },
@@ -37,25 +51,111 @@ const statusMap = {
 const RequestMentor = () => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [requests, setRequests] = useState(mockRequests);
+  const queryClient = useQueryClient();
 
-  const onFinish = (values: any) => {
-    setLoading(true);
-    setTimeout(() => {
-      setRequests([
-        ...requests,
+  // Fetch teachers with mock data
+  const { data: teachers = [], isLoading: teachersLoading } = useQuery<
+    Teacher[]
+  >({
+    queryKey: ["teachers"],
+    queryFn: async () => {
+      // Replaced with mock data instead of API call
+      return Promise.resolve<Teacher[]>([
         {
-          key: String(requests.length + 1),
-          topic: topics.find((t) => t.id === values.topic)?.title,
-          teacher: teachers.find((t) => t.id === values.teacher)?.name,
+          id: "1",
+          name: "TS. Nguyễn Văn A",
+          email: "nguyenvana@example.edu.vn",
+          phone: "0987654321",
+          department: "Công nghệ thông tin",
+          expertise: "Trí tuệ nhân tạo, Học máy",
+          major: "Công nghệ thông tin",
+        },
+        {
+          id: "2",
+          name: "TS. Trần Thị B",
+          email: "tranthib@example.edu.vn",
+          phone: "0987654322",
+          department: "Khoa học máy tính",
+          expertise: "IoT, Edge Computing",
+          major: "Khoa học máy tính",
+        },
+        {
+          id: "3",
+          name: "TS. Lê Minh C",
+          email: "leminhc@example.edu.vn",
+          phone: "0987654323",
+          department: "Kỹ thuật phần mềm",
+          expertise: "An toàn thông tin, Blockchain",
+          major: "Kỹ thuật phần mềm",
+        },
+      ]);
+    },
+  });
+
+  // Fetch topics
+  const { data: topics = [], isLoading: topicsLoading } = useQuery<Topic[]>({
+    queryKey: ["topics"],
+    queryFn: () => {
+      // Replace with mock data
+      return Promise.resolve<Topic[]>([
+        { id: "1", title: "Đề tài 1: Ứng dụng công nghệ mới trong giáo dục" },
+        { id: "2", title: "Đề tài 2: Phát triển ứng dụng web hiện đại" },
+        { id: "3", title: "Đề tài 3: Xây dựng hệ thống quản lý học tập" },
+      ]);
+    },
+  });
+
+  // Fetch user requests
+  const { data: requests = [], isLoading: requestsLoading } = useQuery<
+    Request[]
+  >({
+    queryKey: ["mentor-requests"],
+    queryFn: () => {
+      // Replace with mock data
+      return Promise.resolve<Request[]>([
+        {
+          key: "1",
+          topic: "Đề tài 1: Ứng dụng công nghệ mới trong giáo dục",
+          teacher: "TS. Nguyễn Văn A",
           status: "pending",
         },
       ]);
-      setLoading(false);
-      form.resetFields();
+    },
+  });
+
+  // Submit request mutation
+  const submitRequestMutation = useMutation({
+    mutationFn: (formData: RequestFormValues) => {
+      // Replace with mock API call
+      return new Promise<void>((resolve) => {
+        console.log("Sending form data:", formData);
+        setTimeout(() => {
+          resolve();
+        }, 1000);
+      });
+    },
+    onSuccess: () => {
       message.success("Gửi yêu cầu thành công! Vui lòng chờ giảng viên duyệt.");
-    }, 1000);
+      form.resetFields();
+      queryClient.invalidateQueries({ queryKey: ["mentor-requests"] });
+    },
+    onError: (error: Error) => {
+      message.error(`Lỗi: ${error.message}`);
+    },
+  });
+
+  const onFinish = (values: RequestFormValues) => {
+    setLoading(true);
+    submitRequestMutation.mutate(values);
   };
+
+  if (teachersLoading || topicsLoading) {
+    return (
+      <div style={{ textAlign: "center", padding: "50px" }}>
+        <Spin size="large" tip="Đang tải dữ liệu..." />
+      </div>
+    );
+  }
 
   return (
     <Card
@@ -69,9 +169,9 @@ const RequestMentor = () => {
           rules={[{ required: true, message: "Vui lòng chọn đề tài!" }]}
         >
           <Select placeholder="Chọn đề tài">
-            {topics.map((t) => (
-              <Select.Option key={t.id} value={t.id}>
-                {t.title}
+            {topics.map((topic: Topic) => (
+              <Select.Option key={topic.id} value={topic.id}>
+                {topic.title}
               </Select.Option>
             ))}
           </Select>
@@ -82,9 +182,10 @@ const RequestMentor = () => {
           rules={[{ required: true, message: "Vui lòng chọn giảng viên!" }]}
         >
           <Select placeholder="Chọn giảng viên">
-            {teachers.map((t) => (
-              <Select.Option key={t.id} value={t.id}>
-                {t.name} ({t.major})
+            {teachers.map((teacher: Teacher) => (
+              <Select.Option key={teacher.id} value={teacher.id}>
+                {teacher.name} (
+                {teacher.major || teacher.department || "Không có thông tin"})
               </Select.Option>
             ))}
           </Select>
@@ -96,32 +197,43 @@ const RequestMentor = () => {
           />
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" loading={loading} block>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={loading || submitRequestMutation.isPending}
+            block
+          >
             Gửi yêu cầu
           </Button>
         </Form.Item>
       </Form>
 
       <Card title="Yêu cầu đã gửi" style={{ marginTop: 32 }}>
-        <Table
-          columns={[
-            { title: "Đề tài", dataIndex: "topic", key: "topic" },
-            { title: "Giảng viên", dataIndex: "teacher", key: "teacher" },
-            {
-              title: "Trạng thái",
-              dataIndex: "status",
-              key: "status",
-              render: (status) => (
-                <Tag color={statusMap[status].color}>
-                  {statusMap[status].text}
-                </Tag>
-              ),
-            },
-          ]}
-          dataSource={requests}
-          pagination={false}
-          scroll={{ y: 200 }}
-        />
+        {requestsLoading ? (
+          <Spin tip="Đang tải dữ liệu..." />
+        ) : requests.length > 0 ? (
+          <Table
+            columns={[
+              { title: "Đề tài", dataIndex: "topic", key: "topic" },
+              { title: "Giảng viên", dataIndex: "teacher", key: "teacher" },
+              {
+                title: "Trạng thái",
+                dataIndex: "status",
+                key: "status",
+                render: (status: "pending" | "accepted" | "rejected") => (
+                  <Tag color={statusMap[status].color}>
+                    {statusMap[status].text}
+                  </Tag>
+                ),
+              },
+            ]}
+            dataSource={requests}
+            pagination={false}
+            scroll={{ y: 200 }}
+          />
+        ) : (
+          <Empty description="Bạn chưa gửi yêu cầu nào" />
+        )}
       </Card>
     </Card>
   );

@@ -14,7 +14,6 @@ import {
 import { UploadOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import type { UploadProps } from "antd";
-import { styles, props } from "./styles";
 
 const { TextArea } = Input;
 
@@ -38,24 +37,6 @@ interface SubTask {
   submittedAt?: string;
   feedback?: string;
   score?: number;
-}
-
-interface Document {
-  key: string;
-  name: string;
-  type: string;
-  uploadedBy: string;
-  uploadedAt: string;
-  size: string;
-  url?: string;
-}
-
-interface Meeting {
-  key?: string;
-  title: string;
-  time: string;
-  student: string;
-  link: string;
 }
 
 interface EvaluationModalProps {
@@ -94,11 +75,7 @@ export const EvaluationModal: React.FC<EvaluationModalProps> = ({
         label="Nhận xét"
         rules={[{ required: true, message: "Vui lòng nhập nhận xét" }]}
       >
-        <TextArea
-          rows={4}
-          placeholder="Nhập nhận xét của bạn"
-          size={props.input.size}
-        />
+        <TextArea rows={4} placeholder="Nhập nhận xét của bạn" size="middle" />
       </Form.Item>
     </Form>
   </Modal>
@@ -133,7 +110,7 @@ export const TaskFeedbackModal: React.FC<TaskFeedbackModalProps> = ({
         label="Điểm (0-10)"
         rules={[{ required: true, message: "Vui lòng cho điểm" }]}
       >
-        <Select size={props.select.size}>
+        <Select size="middle">
           {Array.from({ length: 11 }).map((_, i) => (
             <Select.Option key={i} value={i}>
               {i}
@@ -146,11 +123,7 @@ export const TaskFeedbackModal: React.FC<TaskFeedbackModalProps> = ({
         label="Nhận xét"
         rules={[{ required: true, message: "Vui lòng nhập nhận xét" }]}
       >
-        <TextArea
-          rows={4}
-          placeholder="Nhập nhận xét của bạn"
-          size={props.input.size}
-        />
+        <TextArea rows={4} placeholder="Nhập nhận xét của bạn" size="middle" />
       </Form.Item>
     </Form>
   </Modal>
@@ -190,7 +163,7 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
         label="Tiêu đề cuộc họp"
         rules={[{ required: true, message: "Vui lòng nhập tiêu đề cuộc họp" }]}
       >
-        <Input placeholder="Nhập tiêu đề cuộc họp" size={props.input.size} />
+        <Input placeholder="Nhập tiêu đề cuộc họp" size="middle" />
       </Form.Item>
       <Form.Item
         name="meetingDate"
@@ -200,7 +173,7 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
         <DatePicker
           style={{ width: "100%" }}
           format="YYYY-MM-DD"
-          size={props.datePicker.size}
+          size="middle"
         />
       </Form.Item>
       <Form.Item
@@ -213,7 +186,7 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
           style={{ width: "100%" }}
           format="HH:mm"
           showNow={false}
-          size={props.datePicker.size}
+          size="middle"
         />
       </Form.Item>
       <Form.Item
@@ -221,10 +194,7 @@ export const MeetingModal: React.FC<MeetingModalProps> = ({
         label="Link cuộc họp (Google Meet, Zoom,...)"
         rules={[{ required: true, message: "Vui lòng nhập link cuộc họp" }]}
       >
-        <Input
-          placeholder="https://meet.google.com/..."
-          size={props.input.size}
-        />
+        <Input placeholder="https://meet.google.com/..." size="middle" />
       </Form.Item>
     </Form>
   </Modal>
@@ -259,14 +229,14 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
         label="Tên tài liệu"
         rules={[{ required: true, message: "Vui lòng nhập tên tài liệu" }]}
       >
-        <Input placeholder="Nhập tên tài liệu" size={props.input.size} />
+        <Input placeholder="Nhập tên tài liệu" size="middle" />
       </Form.Item>
       <Form.Item
         name="documentType"
         label="Loại tài liệu"
         rules={[{ required: true, message: "Vui lòng chọn loại tài liệu" }]}
       >
-        <Select placeholder="Chọn loại tài liệu" size={props.select.size}>
+        <Select placeholder="Chọn loại tài liệu" size="middle">
           <Select.Option value="lesson">Bài giảng</Select.Option>
           <Select.Option value="assignment">Đề bài</Select.Option>
           <Select.Option value="reference">Tài liệu tham khảo</Select.Option>
@@ -279,7 +249,7 @@ export const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
         rules={[{ required: true, message: "Vui lòng tải lên file tài liệu" }]}
       >
         <Upload onChange={handleUpload}>
-          <Button icon={<UploadOutlined />} size={props.button.size}>
+          <Button icon={<UploadOutlined />} size="middle">
             Chọn file
           </Button>
         </Upload>
@@ -325,7 +295,7 @@ export const SubtaskModal: React.FC<SubtaskModalProps> = ({
         label="Tên công việc"
         rules={[{ required: true, message: "Vui lòng nhập tên công việc" }]}
       >
-        <Input placeholder="Nhập tên công việc" size={props.input.size} />
+        <Input placeholder="Nhập tên công việc" size="middle" />
       </Form.Item>
 
       <Form.Item
@@ -336,7 +306,7 @@ export const SubtaskModal: React.FC<SubtaskModalProps> = ({
         <TextArea
           rows={3}
           placeholder="Nhập mô tả chi tiết về công việc"
-          size={props.input.size}
+          size="middle"
         />
       </Form.Item>
 
@@ -347,10 +317,7 @@ export const SubtaskModal: React.FC<SubtaskModalProps> = ({
             label="Ngày bắt đầu"
             rules={[{ required: true, message: "Vui lòng chọn ngày bắt đầu" }]}
           >
-            <DatePicker
-              style={{ width: "100%" }}
-              size={props.datePicker.size}
-            />
+            <DatePicker style={{ width: "100%" }} size="middle" />
           </Form.Item>
         </Col>
         <Col span={12}>
@@ -359,10 +326,7 @@ export const SubtaskModal: React.FC<SubtaskModalProps> = ({
             label="Deadline"
             rules={[{ required: true, message: "Vui lòng chọn deadline" }]}
           >
-            <DatePicker
-              style={{ width: "100%" }}
-              size={props.datePicker.size}
-            />
+            <DatePicker style={{ width: "100%" }} size="middle" />
           </Form.Item>
         </Col>
       </Row>

@@ -26,7 +26,6 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
-import { api } from "../../services/api";
 import { useNavigate } from "react-router-dom";
 import { getAllTheses, getMyTheses } from "@/services/api/thesis";
 import type { ThesisResponse } from "@/services/api/thesis";
@@ -143,13 +142,16 @@ const ThesisList = () => {
     if (!selectedThesis || !user) return;
 
     try {
-      await api.registerThesis(selectedThesis.thesisId.toString(), user.userId);
-      setIsModalVisible(false);
-      setIsConfirmModalVisible(false);
-      notification.success({
-        message: "Thành công",
-        description: "Đăng ký đề tài thành công!",
-      });
+      // Replace API call with mock implementation
+      // Mock successful registration
+      setTimeout(() => {
+        setIsModalVisible(false);
+        setIsConfirmModalVisible(false);
+        notification.success({
+          message: "Thành công",
+          description: "Đăng ký đề tài thành công!",
+        });
+      }, 500);
     } catch {
       notification.error({
         message: "Lỗi",

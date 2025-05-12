@@ -1,5 +1,4 @@
 import { get, put } from "@/lib/base-api";
-import type { User } from "./auth";
 import { API_CONFIG } from "./config";
 import { store } from "@/store";
 

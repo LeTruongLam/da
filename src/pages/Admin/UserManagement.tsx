@@ -160,8 +160,8 @@ const UserManagement = () => {
               <Select.Option value={USER_ROLES.STUDENT}>
                 {USER_ROLE_LABELS[USER_ROLES.STUDENT]}
               </Select.Option>
-              <Select.Option value={USER_ROLES.TEACHER}>
-                {USER_ROLE_LABELS[USER_ROLES.TEACHER]}
+              <Select.Option value={USER_ROLES.LECTURER}>
+                {USER_ROLE_LABELS[USER_ROLES.LECTURER]}
               </Select.Option>
               <Select.Option value={USER_ROLES.ADMIN}>
                 {USER_ROLE_LABELS[USER_ROLES.ADMIN]}

@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from "react";
-import { Card, Tabs, Form, Row, Col, message } from "antd";
-import { useNavigate } from "react-router-dom";
-import { useQueryClient } from "@tanstack/react-query";
+import { Card, Tabs, Form, Row, Col, message, Spin, Empty } from "antd";
+import { useNavigate, useParams } from "react-router-dom";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import {
   ThesisHeader,
   StudentSection,
@@ -18,28 +18,76 @@ import {
   SubtaskModal,
   ConfirmationModal,
 } from "./";
-import { styles } from "./styles";
 import { deleteThesis } from "@/services/api/thesis";
 
 const { TabPane } = Tabs;
 const PAGE_SIZE = 5;
 
-// Example mock data for demo purposes - define here to avoid the import error
-const mockDocuments = [
-  // Add some mock documents here
-];
+interface SubTask {
+  key: string;
+  name: string;
+  description?: string;
+  startDate: string;
+  deadline: string;
+  status?: "not_started" | "in_progress" | "completed" | "late";
+  submittedAt?: string;
+  feedback?: string;
+  score?: number;
+}
 
-const mockMeetings = [
-  // Add some mock meetings here
-];
+// Define interfaces used in child components
+interface DocumentType {
+  key: string;
+  name: string;
+  type: string;
+  uploadedBy: string;
+  uploadedAt: string;
+  size: string;
+  url?: string;
+}
 
-const mockActivities = [
-  // Add some mock activities here
-];
+interface MeetingType {
+  key: string;
+  id: string;
+  title: string;
+  time: string;
+  student: string;
+  link: string;
+}
+
+interface ActivityType {
+  key: string;
+  time: string;
+  action: string;
+  user: string;
+  details: string;
+}
+
+interface ThesisData {
+  thesisId: number;
+  id: string;
+  title: string;
+  description: string;
+  student: {
+    id: string;
+    name: string;
+    email: string;
+    studentId: string;
+    progress: number;
+    rating: number;
+    submittedTasks: SubTask[];
+  } | null;
+  status: string;
+  deadline: string;
+  major: string;
+  requirements: string;
+  objectives: string;
+}
 
 const ThesisDetailRefactored: React.FC = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { id } = useParams<{ id: string }>();
 
   // Tab state
   const [activeTab, setActiveTab] = useState("1");
@@ -50,7 +98,7 @@ const ThesisDetailRefactored: React.FC = () => {
   const [activityPage, setActivityPage] = useState(1);
 
   // Current item states
-  const [currentStudent, setCurrentStudent] = useState(thesisData.student);
+  const [currentStudent, setCurrentStudent] = useState<any>(null);
   const [currentTask, setCurrentTask] = useState<any>(null);
   const [currentSubtask, setCurrentSubtask] = useState<any>(null);
   const [documentToDelete, setDocumentToDelete] = useState<any>(null);
@@ -73,7 +121,6 @@ const ThesisDetailRefactored: React.FC = () => {
     useState(false);
   const [isDeleteThesisModalVisible, setIsDeleteThesisModalVisible] =
     useState(false);
-  const [setIsEditModalVisible] = useState(false);
 
   // Form instances
   const [evaluationForm] = Form.useForm();
@@ -81,19 +128,148 @@ const ThesisDetailRefactored: React.FC = () => {
   const [meetingForm] = Form.useForm();
   const [documentForm] = Form.useForm();
   const [subtaskForm] = Form.useForm();
-  const [editForm] = Form.useForm();
 
-  // Thesis data state
-  const [thesis, setThesis] = useState(thesisData);
+  // Fetch thesis data
+  const { data: thesis, isLoading: thesisLoading } = useQuery({
+    queryKey: ["thesis", id],
+    queryFn: () => {
+      if (!id) return null;
+      // Replace with mock data
+      return Promise.resolve<ThesisData>({
+        thesisId: 1,
+        id: id,
+        title: "Phát triển ứng dụng web",
+        description: "Mô tả đề tài...",
+        student: {
+          id: "S001",
+          name: "Nguyễn Văn A",
+          email: "student@example.com",
+          studentId: "SV001",
+          progress: 60,
+          rating: 4,
+          submittedTasks: [],
+        },
+        status: "in_progress",
+        deadline: "2024-09-30",
+        major: "Công nghệ thông tin",
+        requirements: "Yêu cầu...",
+        objectives: "Mục tiêu...",
+      });
+    },
+    enabled: !!id,
+  });
 
-  // Demo toggle
-  const toggleThesisDemo = () => {
-    setThesis({
-      ...thesis,
-      student: thesis.student ? null : thesisData.student,
-    });
-    setCurrentStudent(thesis.student ? null : thesisData.student);
-  };
+  // Fetch documents with mock data
+  const { data: documents = [], isLoading: documentsLoading } = useQuery<
+    DocumentType[]
+  >({
+    queryKey: ["documents", id],
+    queryFn: () => {
+      if (!id) return [];
+      // Mock data for documents
+      return Promise.resolve<DocumentType[]>([
+        {
+          key: "1",
+          name: "Đề cương đồ án.pdf",
+          type: "PDF",
+          uploadedBy: "Nguyễn Văn A",
+          uploadedAt: "2024-06-12",
+          size: "2.1MB",
+          url: "#",
+        },
+        {
+          key: "2",
+          name: "Báo cáo chương 1.docx",
+          type: "DOCX",
+          uploadedBy: "Nguyễn Văn A",
+          uploadedAt: "2024-06-29",
+          size: "3.5MB",
+          url: "#",
+        },
+      ]);
+    },
+    enabled: !!id,
+  });
+
+  // Fetch meetings with mock data
+  const { data: meetings = [], isLoading: meetingsLoading } = useQuery<
+    MeetingType[]
+  >({
+    queryKey: ["meetings", id],
+    queryFn: () => {
+      if (!id) return [];
+      // Mock data for meetings
+      return Promise.resolve<MeetingType[]>([
+        {
+          key: "1",
+          id: "1",
+          title: "Họp khởi động đề tài",
+          time: "2024-06-05 10:00",
+          student: "Nguyễn Văn A",
+          link: "https://meet.google.com/abc-defg-hij",
+        },
+        {
+          key: "2",
+          id: "2",
+          title: "Họp đánh giá tiến độ",
+          time: "2024-07-15 14:30",
+          student: "Nguyễn Văn A",
+          link: "https://meet.google.com/xyz-mnop-qrs",
+        },
+      ]);
+    },
+    enabled: !!id,
+  });
+
+  // Fetch activities with mock data
+  const { data: activities = [], isLoading: activitiesLoading } = useQuery<
+    ActivityType[]
+  >({
+    queryKey: ["activities", id],
+    queryFn: () => {
+      if (!id) return [];
+      // Mock data for activities
+      return Promise.resolve<ActivityType[]>([
+        {
+          key: "1",
+          time: "2024-05-15",
+          action: "Tạo đề tài",
+          user: "Giảng viên",
+          details: "Giảng viên tạo đề tài mới",
+        },
+        {
+          key: "2",
+          time: "2024-05-25",
+          action: "Sinh viên đăng ký",
+          user: "Sinh viên",
+          details: "Sinh viên Nguyễn Văn A đăng ký đề tài",
+        },
+        {
+          key: "3",
+          time: "2024-05-28",
+          action: "Phê duyệt đăng ký",
+          user: "Giảng viên",
+          details:
+            "Giảng viên chấp nhận yêu cầu đăng ký của sinh viên Nguyễn Văn A",
+        },
+        {
+          key: "4",
+          time: "2024-06-12",
+          action: "Nộp đề cương",
+          user: "Sinh viên",
+          details: "Sinh viên Nguyễn Văn A nộp đề cương",
+        },
+        {
+          key: "5",
+          time: "2024-06-14",
+          action: "Đánh giá đề cương",
+          user: "Giảng viên",
+          details: "Giảng viên đánh giá đề cương với điểm 8/10",
+        },
+      ]);
+    },
+    enabled: !!id,
+  });
 
   // Handler functions
   const openEvaluationModal = (student: any) => {
@@ -201,6 +377,7 @@ const ThesisDetailRefactored: React.FC = () => {
 
   const handleDeleteThesis = async () => {
     try {
+      if (!thesis) return;
       // Call the deleteThesis API service
       const response: { success: boolean } = await deleteThesis(
         thesis.thesisId
@@ -222,82 +399,116 @@ const ThesisDetailRefactored: React.FC = () => {
   };
 
   const openEditModal = () => {
-    setIsEditModalVisible(true);
-  };
-
-  const handleEditSubmit = (values: any) => {
-    console.log("Edited thesis:", values);
-    setIsEditModalVisible(false);
+    // This function is likely supposed to be defined elsewhere
+    console.log("Edit modal should be opened");
   };
 
   const handleUpload = (info: any) => {
     console.log("Upload info:", info);
   };
 
+  if (thesisLoading) {
+    return (
+      <div style={{ textAlign: "center", padding: "50px" }}>
+        <Spin size="large" tip="Đang tải thông tin đồ án..." />
+      </div>
+    );
+  }
+
+  if (!thesis) {
+    return (
+      <Empty
+        description="Không tìm thấy thông tin đồ án"
+        image={Empty.PRESENTED_IMAGE_SIMPLE}
+      />
+    );
+  }
+
   return (
     <Card title="Chi tiết đề tài" style={{ maxWidth: 1200, margin: "0 auto" }}>
-      <Row gutter={styles.rowGutter}>
+      <Row gutter={[16, 16]}>
         <Col span={24}>
           <ThesisHeader
             thesis={thesis}
             openEditModal={openEditModal}
             openDeleteThesisModal={openDeleteThesisModal}
-            toggleThesisDemo={toggleThesisDemo}
           />
         </Col>
 
         <Col span={24}>
           <Tabs activeKey={activeTab} onChange={setActiveTab}>
             <TabPane tab="Tổng quan" key="1">
-              <Row gutter={styles.rowGutter}>
+              <Row gutter={[16, 16]}>
                 <Col span={24}>
-                  <StudentSection
-                    student={thesis.student}
-                    onViewDetails={() => setActiveTab("2")}
-                    onEvaluate={openEvaluationModal}
-                    onScheduleMeeting={openMeetingModal}
-                    onAddStudent={() => console.log("Add student")}
-                  />
+                  {thesis.student ? (
+                    <StudentSection
+                      student={thesis.student}
+                      onViewDetails={() => setActiveTab("2")}
+                      onEvaluate={openEvaluationModal}
+                      onScheduleMeeting={openMeetingModal}
+                      onAddStudent={() => console.log("Add student")}
+                    />
+                  ) : (
+                    <Empty description="Chưa có sinh viên đăng ký đề tài này" />
+                  )}
                 </Col>
 
                 <Col span={24}>
-                  <SubtaskSection
-                    subTasks={thesis.subTasks}
-                    onAddSubtask={() => openSubtaskModal()}
-                    onEditSubtask={openSubtaskModal}
-                    onDeleteSubtask={openDeleteSubtaskModal}
-                  />
+                  {documentsLoading ? (
+                    <Spin tip="Đang tải tài liệu..." />
+                  ) : (
+                    <SubtaskSection
+                      subTasks={[]}
+                      onAddSubtask={() => openSubtaskModal()}
+                      onEditSubtask={openSubtaskModal}
+                      onDeleteSubtask={openDeleteSubtaskModal}
+                    />
+                  )}
                 </Col>
 
                 <Col span={12}>
-                  <DocumentSection
-                    documents={mockDocuments}
-                    page={documentPage}
-                    pageSize={PAGE_SIZE}
-                    onPageChange={setDocumentPage}
-                    onUpload={openDocumentUploadModal}
-                    onDelete={openDeleteDocumentModal}
-                  />
+                  {documentsLoading ? (
+                    <Spin tip="Đang tải tài liệu..." />
+                  ) : (
+                    <DocumentSection
+                      documents={documents}
+                      page={documentPage}
+                      pageSize={PAGE_SIZE}
+                      onPageChange={setDocumentPage}
+                      onUpload={openDocumentUploadModal}
+                      onDelete={openDeleteDocumentModal}
+                    />
+                  )}
                 </Col>
 
                 <Col span={12}>
-                  <MeetingSection
-                    meetings={mockMeetings}
-                    page={meetingPage}
-                    pageSize={PAGE_SIZE}
-                    onPageChange={setMeetingPage}
-                    onAddMeeting={() => openMeetingModal(thesis.student)}
-                    onDeleteMeeting={openDeleteMeetingModal}
-                  />
+                  {meetingsLoading ? (
+                    <Spin tip="Đang tải lịch họp..." />
+                  ) : (
+                    <MeetingSection
+                      meetings={meetings}
+                      page={meetingPage}
+                      pageSize={PAGE_SIZE}
+                      onPageChange={setMeetingPage}
+                      onAddMeeting={() =>
+                        thesis.student && openMeetingModal(thesis.student)
+                      }
+                      onDeleteMeeting={openDeleteMeetingModal}
+                    />
+                  )}
                 </Col>
 
                 <Col span={24}>
-                  <ActivityHistory
-                    activities={mockActivities}
-                    currentPage={activityPage}
-                    pageSize={PAGE_SIZE}
-                    onPageChange={setActivityPage}
-                  />
+                  {activitiesLoading ? (
+                    <Spin tip="Đang tải hoạt động..." />
+                  ) : (
+                    <ActivityHistory
+                      activities={activities}
+                      currentPage={activityPage}
+                      pageSize={PAGE_SIZE}
+                      onPageChange={setActivityPage}
+                    />
+                  )}
                 </Col>
               </Row>
             </TabPane>
