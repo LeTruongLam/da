@@ -1,9 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-import type { Thesis as BaseThesis } from "@/services/api/thesis";
+import type { ThesisResponse } from "@/services/api/thesis";
 
 // Extended Thesis interface with progress
-interface Thesis extends BaseThesis {
+interface Thesis extends ThesisResponse {
   progress?: number;
 }
 
