@@ -32,7 +32,7 @@ const demoAccounts = [
   {
     role: USER_ROLES.LECTURER,
     email: "LamLT@fe.edu.vn",
-    password: "lamltsota",
+    password: "123123",
   },
   {
     role: USER_ROLES.ADMIN,

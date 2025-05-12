@@ -59,7 +59,9 @@ export interface ThesisDocument {
 export interface ThesisCreateRequest {
   title: string;
   description: string;
-  studentId?: string;
+  majorId: number;
+  lecturerId: string;
+  status: string;
 }
 
 /**

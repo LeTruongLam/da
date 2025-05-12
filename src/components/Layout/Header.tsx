@@ -14,7 +14,13 @@ import {
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
-import { USER_ROLES } from "@/lib/constants";
+import {
+  USER_ROLES,
+  USER_ROLE_LABELS,
+  USER_ROLE_COLORS,
+} from "@/lib/constants";
+import { useQuery } from "@tanstack/react-query";
+import { getUserProfile } from "@/services/api/profile";
 
 interface HeaderProps {
   collapsed: boolean;
@@ -23,17 +29,14 @@ interface HeaderProps {
   onLogout: () => void;
 }
 
-const getRoleTagColor = (role: string) => {
-  switch (role) {
-    case USER_ROLES.ADMIN:
-      return "red";
-    case USER_ROLES.LECTURER:
-      return "blue";
-    case USER_ROLES.STUDENT:
-      return "green";
-    default:
-      return "default";
-  }
+const getRoleTagColor = (role?: string) => {
+  if (!role) return "default";
+  return USER_ROLE_COLORS[role as keyof typeof USER_ROLE_COLORS] || "default";
+};
+
+const getRoleLabel = (role?: string) => {
+  if (!role) return "";
+  return USER_ROLE_LABELS[role as keyof typeof USER_ROLE_LABELS] || role;
 };
 
 const Header = ({
@@ -42,16 +45,30 @@ const Header = ({
   onProfileClick,
   onLogout,
 }: HeaderProps) => {
-  const { user } = useSelector((state: RootState) => state.auth);
-  const { token } = theme.useToken();
+  const { user, token } = useSelector((state: RootState) => state.auth);
+  const { token: themeToken } = theme.useToken();
+
+  const { data: userProfile } = useQuery({
+    queryKey: ["userProfile", user?.userId],
+    queryFn: async () => {
+      if (!user) {
+        return null;
+      }
+      try {
+        const response = await getUserProfile(user.userId);
+        return response;
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+        return null;
+      }
+    },
+    enabled: !!token && !!user,
+  });
 
   const userMenuItems: MenuProps["items"] = [
     {
       key: "profile",
       label: "Hồ sơ",
-    },
-    {
-      type: "divider",
     },
     {
       key: "logout",
@@ -77,8 +94,8 @@ const Header = ({
         zIndex: 101,
         width: `calc(100% - ${collapsed ? 80 : 200}px)`,
         padding: "0 16px",
-        background: token.colorBgContainer,
-        borderBottom: `1px solid ${token.colorBorderSecondary}`,
+        background: themeToken.colorBgContainer,
+        borderBottom: `1px solid ${themeToken.colorBorderSecondary}`,
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
@@ -101,16 +118,16 @@ const Header = ({
           placement="bottomRight"
         >
           <Space style={{ cursor: "pointer" }}>
-            {user?.role && (
+            {(userProfile?.role || user?.role) && (
               <Tag
-                color={getRoleTagColor(user.role)}
+                color={getRoleTagColor(userProfile?.role || user?.role)}
                 style={{ textTransform: "capitalize" }}
               >
-                {user.role}
+                {getRoleLabel(userProfile?.role || user?.role)}
               </Tag>
             )}
             <Avatar icon={<UserOutlined />} />
-            <span>{user?.name}</span>
+            <span>{userProfile?.name || user?.name}</span>
           </Space>
         </Dropdown>
       </Space>

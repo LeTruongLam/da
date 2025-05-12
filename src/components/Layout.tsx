@@ -6,7 +6,7 @@ import { logout } from "@/services/api/auth";
 import { logout as logoutAction } from "@/store/slices/authSlice";
 import Header from "./Layout/Header";
 import Sidebar from "./Layout/Sidebar";
-import ProfileModal from "./modals/ProfileModal";
+import ProfileModal from "./Modals/ProfileModal";
 
 const { Content } = AntLayout;
 

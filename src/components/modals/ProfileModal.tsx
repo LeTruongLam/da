@@ -6,14 +6,20 @@ import {
   Form,
   Input,
   notification,
+  Select,
+  Switch,
+  Tag,
 } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
 import { useState } from "react";
 import { resetPassword } from "@/services/api/auth";
-import { useQuery } from "@tanstack/react-query";
-import { getUserProfile } from "@/services/api/profile";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getUserProfile, updateUserProfile } from "@/services/api/profile";
+import { getMajors } from "@/services/api/major";
+import type { Major } from "@/services/api/major";
+
 interface ProfileModalProps {
   open: boolean;
   onClose: () => void;
@@ -21,12 +27,16 @@ interface ProfileModalProps {
 
 const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
   const { token, user } = useSelector((state: RootState) => state.auth);
-
+  const queryClient = useQueryClient();
   const [isResetPasswordModalOpen, setIsResetPasswordModalOpen] =
     useState(false);
+  const [isEditProfileModalOpen, setIsEditProfileModalOpen] = useState(false);
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
 
-  const { data: userProfile, isLoading } = useQuery({
+  const { data: userProfile } = useQuery({
     queryKey: ["userProfile"],
     queryFn: async () => {
       if (!user) {
@@ -47,8 +57,14 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
     enabled: !!token,
   });
 
+  const { data: majors } = useQuery({
+    queryKey: ["majors"],
+    queryFn: getMajors,
+  });
+
   const handleResetPassword = async (values: { newPassword: string }) => {
     try {
+      setIsResettingPassword(true);
       if (!token) {
         notification.error({
           message: "Lỗi",
@@ -68,6 +84,38 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
         message: "Lỗi",
         description: "Đổi mật khẩu thất bại, vui lòng thử lại!",
       });
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
+  const handleEditProfile = async (values: {
+    name: string;
+    majorId: number;
+    isNotificationsEnabled: boolean;
+  }) => {
+    try {
+      setIsEditingProfile(true);
+      await updateUserProfile({
+        name: values.name,
+        majorId: values.majorId,
+        isNotificationsEnabled: values.isNotificationsEnabled,
+      });
+      // Refresh userProfile data
+      await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      notification.success({
+        message: "Thành công",
+        description: "Cập nhật thông tin thành công!",
+      });
+      setIsEditProfileModalOpen(false);
+      editForm.resetFields();
+    } catch {
+      notification.error({
+        message: "Lỗi",
+        description: "Cập nhật thông tin thất bại, vui lòng thử lại!",
+      });
+    } finally {
+      setIsEditingProfile(false);
     }
   };
 
@@ -82,10 +130,25 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
             key="reset"
             type="primary"
             onClick={() => setIsResetPasswordModalOpen(true)}
+            loading={isResettingPassword}
+            disabled={isEditingProfile}
           >
             Đổi mật khẩu
           </Button>,
-          <Button key="edit" type="primary" onClick={onClose}>
+          <Button
+            key="edit"
+            type="primary"
+            onClick={() => {
+              setIsEditProfileModalOpen(true);
+              editForm.setFieldsValue({
+                name: userProfile?.name,
+                majorId: userProfile?.major.majorId,
+                isNotificationsEnabled: userProfile?.isNotificationsEnabled,
+              });
+            }}
+            loading={isEditingProfile}
+            disabled={isResettingPassword}
+          >
             Sửa thông tin
           </Button>,
           <Button key="close" onClick={onClose}>
@@ -104,9 +167,15 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
           <Descriptions.Item label="Email">
             {userProfile?.email}
           </Descriptions.Item>
-
           <Descriptions.Item label="Chuyên ngành">
             {userProfile?.major.majorName}
+          </Descriptions.Item>
+          <Descriptions.Item label="Cài đặt thông báo">
+            {userProfile?.isNotificationsEnabled ? (
+              <Tag color="success">Đã bật</Tag>
+            ) : (
+              <Tag color="error">Đã tắt</Tag>
+            )}
           </Descriptions.Item>
         </Descriptions>
       </Modal>
@@ -115,6 +184,7 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
         title="Đổi mật khẩu"
         open={isResetPasswordModalOpen}
         onCancel={() => {
+          if (isResettingPassword) return; // Prevent closing while submitting
           setIsResetPasswordModalOpen(false);
           form.resetFields();
         }}
@@ -133,7 +203,65 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
           </Form.Item>
 
           <Form.Item>
-            <Button type="primary" htmlType="submit" block>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              loading={isResettingPassword}
+            >
+              Xác nhận
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Sửa thông tin"
+        open={isEditProfileModalOpen}
+        onCancel={() => {
+          if (isEditingProfile) return;
+          setIsEditProfileModalOpen(false);
+          editForm.resetFields();
+        }}
+        footer={null}
+      >
+        <Form form={editForm} layout="vertical" onFinish={handleEditProfile}>
+          <Form.Item
+            name="name"
+            label="Họ và tên"
+            rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="majorId"
+            label="Chuyên ngành"
+            rules={[{ required: true, message: "Vui lòng chọn chuyên ngành!" }]}
+          >
+            <Select
+              options={majors?.map((major: Major) => ({
+                label: major.majorName,
+                value: major.majorId,
+              }))}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="isNotificationsEnabled"
+            label="Cài đặt thông báo"
+            valuePropName="checked"
+          >
+            <Switch checkedChildren="Bật" unCheckedChildren="Tắt" />
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              block
+              loading={isEditingProfile}
+            >
               Xác nhận
             </Button>
           </Form.Item>

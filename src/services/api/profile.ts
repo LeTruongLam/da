@@ -4,12 +4,9 @@ import { API_CONFIG } from "./config";
 import { store } from "@/store";
 
 export interface ProfileUpdateRequest {
-  fullName?: string;
-  email?: string;
-  avatar?: string;
-  phone?: string;
-  address?: string;
-  bio?: string;
+  name: string;
+  majorId: number;
+  isNotificationsEnabled: boolean;
 }
 
 export interface UserProfileResponse {
@@ -23,6 +20,7 @@ export interface UserProfileResponse {
     facultyId: number;
     facultyName: string;
   };
+  isNotificationsEnabled: boolean;
 }
 
 /**
@@ -35,8 +33,8 @@ export const getUserProfile = (id: number) =>
 
 // Update user profile
 export const updateUserProfile = (data: ProfileUpdateRequest) =>
-  put<User>(
-    API_CONFIG.ENDPOINTS.PROFILE.UPDATE,
+  put<unknown>(
+    API_CONFIG.ENDPOINTS.USER.UPDATE,
     data as unknown as Record<string, unknown>
   );
 

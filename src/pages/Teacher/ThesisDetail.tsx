@@ -38,12 +38,14 @@ import {
   PlusOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import type { UploadChangeParam, UploadFile } from "antd/es/upload/interface";
 import dayjs from "dayjs";
 import { useQuery } from "@tanstack/react-query";
 import { getThesisById } from "@/services/api/thesis";
+import EditThesisModal from "@/components/Modals/EditThesisModal";
+import { THESIS_STATUS_LABELS } from "@/lib/constants";
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
@@ -519,7 +521,6 @@ const ThesisDetail = () => {
   const [taskFeedbackForm] = Form.useForm();
   const [meetingForm] = Form.useForm();
   const [documentForm] = Form.useForm();
-  const [editForm] = Form.useForm();
   const [subtaskForm] = Form.useForm();
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
@@ -647,15 +648,6 @@ const ThesisDetail = () => {
   //   dataLength > 5 ? { pageSize: 5 } : false;
 
   const openEditModal = () => {
-    editForm.setFieldsValue({
-      title: thesis.title,
-      description: thesis.description,
-      requirements: thesis.requirements,
-      objectives: thesis.objectives,
-      major: thesis.major,
-      status: thesis.status,
-      deadline: thesis.deadline ? dayjs(thesis.deadline) : undefined,
-    });
     setIsEditModalVisible(true);
   };
 
@@ -809,12 +801,12 @@ const ThesisDetail = () => {
                       statusColors[thesis.status as keyof typeof statusColors]
                     }
                   >
-                    {thesisDataResponse?.status || "--"}
+                    {thesisDataResponse?.status
+                      ? THESIS_STATUS_LABELS[
+                          thesisDataResponse?.status as keyof typeof THESIS_STATUS_LABELS
+                        ]
+                      : "--"}
                   </Tag>
-                </Paragraph>
-                <Paragraph>
-                  <Text strong>Deadline: </Text>
-                  {thesis.deadline}
                 </Paragraph>
               </Col>
             </Row>
@@ -882,16 +874,6 @@ const ThesisDetail = () => {
                           </div>
                           <Space style={{ marginTop: 24 }}>
                             <Button
-                              type="primary"
-                              icon={<EyeOutlined />}
-                              onClick={() => {
-                                setCurrentStudent(thesis.student);
-                                setActiveTab("2");
-                              }}
-                            >
-                              Chi tiết
-                            </Button>
-                            <Button
                               icon={<StarOutlined />}
                               onClick={() =>
                                 thesis.student &&
@@ -931,7 +913,7 @@ const ThesisDetail = () => {
 
                 <Col span={24}>
                   <Card
-                    title="Các công việc (Subtasks)"
+                    title="Các công việc"
                     extra={
                       <Button
                         type="primary"
@@ -1673,117 +1655,13 @@ const ThesisDetail = () => {
         </Form>
       </Modal>
 
-      {/* Modal chỉnh sửa đề tài */}
-      <Modal
-        title="Chỉnh sửa thông tin đề tài"
-        open={isEditModalVisible}
-        onCancel={() => {
-          setIsEditModalVisible(false);
-          editForm.resetFields();
-        }}
-        onOk={() => editForm.submit()}
-        okText="Lưu thay đổi"
-        cancelText="Hủy"
-        width={700}
-      >
-        <Form form={editForm} layout="vertical" onFinish={handleEditSubmit}>
-          <Form.Item
-            name="title"
-            label="Tiêu đề đề tài"
-            rules={[
-              { required: true, message: "Vui lòng nhập tiêu đề đề tài" },
-            ]}
-          >
-            <Input placeholder="Nhập tiêu đề đề tài" />
-          </Form.Item>
-
-          <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item
-                name="major"
-                label="Chuyên ngành"
-                rules={[
-                  { required: true, message: "Vui lòng chọn chuyên ngành" },
-                ]}
-              >
-                <Select placeholder="Chọn chuyên ngành">
-                  <Select.Option value="Công nghệ thông tin">
-                    Công nghệ thông tin
-                  </Select.Option>
-                  <Select.Option value="Khoa học máy tính">
-                    Khoa học máy tính
-                  </Select.Option>
-                  <Select.Option value="Hệ thống thông tin">
-                    Hệ thống thông tin
-                  </Select.Option>
-                  <Select.Option value="Kỹ thuật phần mềm">
-                    Kỹ thuật phần mềm
-                  </Select.Option>
-                </Select>
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item
-                name="status"
-                label="Trạng thái"
-                rules={[
-                  { required: true, message: "Vui lòng chọn trạng thái" },
-                ]}
-              >
-                <Select placeholder="Chọn trạng thái">
-                  <Select.Option value="Đang mở">Đang mở</Select.Option>
-                  <Select.Option value="Đã đóng">Đã đóng</Select.Option>
-                  <Select.Option value="Đã hoàn thành">
-                    Đã hoàn thành
-                  </Select.Option>
-                </Select>
-              </Form.Item>
-            </Col>
-          </Row>
-
-          <Form.Item
-            name="deadline"
-            label="Deadline"
-            rules={[{ required: true, message: "Vui lòng chọn deadline" }]}
-          >
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
-
-          <Form.Item
-            name="description"
-            label="Mô tả"
-            rules={[{ required: true, message: "Vui lòng nhập mô tả đề tài" }]}
-          >
-            <TextArea rows={4} placeholder="Nhập mô tả chi tiết về đề tài" />
-          </Form.Item>
-
-          <Form.Item
-            name="requirements"
-            label="Yêu cầu"
-            rules={[
-              { required: true, message: "Vui lòng nhập yêu cầu đề tài" },
-            ]}
-          >
-            <TextArea
-              rows={3}
-              placeholder="Nhập yêu cầu đối với sinh viên thực hiện đề tài"
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="objectives"
-            label="Mục tiêu"
-            rules={[
-              { required: true, message: "Vui lòng nhập mục tiêu đề tài" },
-            ]}
-          >
-            <TextArea
-              rows={3}
-              placeholder="Nhập mục tiêu cần đạt được của đề tài"
-            />
-          </Form.Item>
-        </Form>
-      </Modal>
+      {/* Replace the Edit Thesis Modal with the new component */}
+      <EditThesisModal
+        visible={isEditModalVisible}
+        thesis={thesis}
+        onCancel={() => setIsEditModalVisible(false)}
+        onOk={handleEditSubmit}
+      />
 
       {/* Add the Modal for adding/editing subtasks */}
       <Modal

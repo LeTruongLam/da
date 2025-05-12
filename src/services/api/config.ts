@@ -10,16 +10,10 @@ export const API_CONFIG = {
       FORGOT_PASSWORD: "/auth/forgot-password",
       RESET_PASSWORD: "/auth/reset-password",
     },
-    PROFILE: {
-      GET: "/profile",
-      UPDATE: "/profile",
-      CHANGE_PASSWORD: "/profile/password",
-      UPLOAD_AVATAR: "/profile/avatar",
-    },
     USER: {
       LIST: "/users",
       DETAIL: (id: number) => `/users/${id}`,
-      UPDATE: (id: string) => `/users/${id}`,
+      UPDATE: "/users/update",
     },
     THESIS: {
       LIST: "/theses",
