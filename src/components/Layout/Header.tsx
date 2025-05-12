@@ -14,11 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
-import {
-  USER_ROLES,
-  USER_ROLE_LABELS,
-  USER_ROLE_COLORS,
-} from "@/lib/constants";
+import { USER_ROLE_LABELS, USER_ROLE_COLORS } from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
 import { getUserProfile } from "@/services/api/profile";
 
