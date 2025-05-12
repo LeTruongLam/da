@@ -42,7 +42,7 @@ import { useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import type { UploadChangeParam, UploadFile } from "antd/es/upload/interface";
 import dayjs from "dayjs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getThesisById, deleteThesis } from "@/services/api/thesis";
 import EditThesisModal from "@/components/Modals/EditThesisModal";
 import { THESIS_STATUS_LABELS } from "@/lib/constants";
@@ -497,6 +497,7 @@ const ThesisDetail = () => {
   const { id: thesisId } = useParams();
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") === "evaluate" ? "2" : "1";
+  const queryClient = useQueryClient();
 
   const [activityPage, setActivityPage] = useState(1);
   const [documentPage, setDocumentPage] = useState(1);
@@ -761,6 +762,8 @@ const ThesisDetail = () => {
 
       await deleteThesis(Number(thesisId));
       message.success(`Đã xóa đề tài "${thesis.title}" thành công`);
+      // Invalidate the myTheses query to refresh the list when navigating back
+      queryClient.invalidateQueries({ queryKey: ["myTheses"] });
       navigate("/thesis-management");
     } catch (error) {
       console.error("Error deleting thesis:", error);

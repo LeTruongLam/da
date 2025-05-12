@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Card, Tabs, Form, Row, Col, message } from "antd";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   ThesisHeader,
   StudentSection,
@@ -38,6 +39,7 @@ const mockActivities = [
 
 const ThesisDetailRefactored: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   // Tab state
   const [activeTab, setActiveTab] = useState("1");
@@ -205,6 +207,8 @@ const ThesisDetailRefactored: React.FC = () => {
       );
       if (response.success) {
         message.success(`Đã xóa đề tài "${thesis.title}"`);
+        // Invalidate the myTheses query to refresh the list when navigating back
+        queryClient.invalidateQueries({ queryKey: ["myTheses"] });
         navigate("/thesis-management");
       } else {
         message.error("Không thể xóa đề tài. Vui lòng thử lại sau.");

@@ -17,8 +17,10 @@ const ThesisManagement = () => {
   const { data: theses = [], isLoading } = useQuery<ThesisResponse[]>({
     queryKey: ["myTheses"],
     queryFn: getMyTheses,
-    refetchOnMount: true,
+    refetchOnMount: "always",
     refetchOnWindowFocus: true,
+    staleTime: 0,
+    gcTime: 1000, // 1 giây
   });
 
   const columns = [
