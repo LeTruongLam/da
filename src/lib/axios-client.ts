@@ -23,16 +23,6 @@ axiosClient.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // Log request in development
-    if (import.meta.env.DEV) {
-      console.log("Request:", {
-        method: config.method?.toUpperCase(),
-        url: config.url,
-        data: config.data,
-        params: config.params,
-      });
-    }
-
     return config;
   },
   (error) => {
@@ -44,30 +34,14 @@ axiosClient.interceptors.request.use(
 // Response interceptor for handling common errors
 axiosClient.interceptors.response.use(
   (response) => {
-    // Log response in development
-    if (import.meta.env.DEV) {
-      console.log("Response:", {
-        status: response.status,
-        data: response.data,
-      });
-    }
     return response;
   },
   (error) => {
-    // Log error in development
-    if (import.meta.env.DEV) {
-      console.error("Response error:", {
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-      });
-    }
-
     // Handle specific error status codes
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          // Handle unauthorized (e.g., logout user, redirect to login)
+          // Handle unauthorized ( logout user, redirect to login)
           store.dispatch({ type: "auth/logout" });
           message.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
           window.location.href = "/login";

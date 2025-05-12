@@ -29,8 +29,11 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
   const { data: userProfile, isLoading } = useQuery({
     queryKey: ["userProfile"],
     queryFn: async () => {
+      if (!user) {
+        return null;
+      }
       try {
-        const response = await getUserProfile(user?.userId);
+        const response = await getUserProfile(user.userId);
         return response;
       } catch {
         notification.error({

@@ -6,7 +6,7 @@ import { logout } from "@/services/api/auth";
 import { logout as logoutAction } from "@/store/slices/authSlice";
 import Header from "./Layout/Header";
 import Sidebar from "./Layout/Sidebar";
-import ProfileModal from "./Layout/ProfileModal";
+import ProfileModal from "./modals/ProfileModal";
 
 const { Content } = AntLayout;
 
@@ -21,6 +21,7 @@ const MainLayout = () => {
     try {
       await logout();
       dispatch(logoutAction());
+      message.success("Đăng xuất thành công");
       navigate("/login", { replace: true });
     } catch {
       message.error("Đăng xuất thất bại, vui lòng thử lại");

@@ -1,9 +1,5 @@
 import axiosClient from "@/lib/axios-client";
 
-/**
- * Generic API functions for making requests
- */
-
 // GET request
 export const get = async <T>(
   url: string,
