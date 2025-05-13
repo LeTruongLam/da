@@ -15,7 +15,7 @@ import CreateThesis from "@/pages/Teacher/CreateThesis";
 import UserManagement from "@/pages/Admin/UserManagement";
 import SystemSettings from "@/pages/Admin/SystemSettings";
 import ApproveRequests from "@/pages/Teacher/ApproveRequests";
-import TeacherThesisDetail from "@/pages/Teacher/ThesisDetail";
+import TeacherThesisDetail from "@/pages/Teacher/ThesisDetail/ThesisDetail";
 import TeacherList from "@/pages/Student/TeacherList";
 import MeetingApproval from "@/pages/Teacher/MeetingApproval";
 import SystemNotifications from "@/pages/Admin/SystemNotifications";

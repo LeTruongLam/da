@@ -120,15 +120,6 @@ const EditThesisModal = ({
             </Form.Item>
           </Col>
         </Row>
-
-        <Form.Item
-          name="deadline"
-          label="Deadline"
-          rules={[{ required: true, message: "Vui lòng chọn deadline" }]}
-        >
-          <DatePicker style={{ width: "100%" }} />
-        </Form.Item>
-
         <Form.Item
           name="description"
           label="Mô tả"

@@ -46,449 +46,39 @@ import { getThesisById, deleteThesis } from "@/services/api/thesis";
 import EditThesisModal from "@/components/Modals/EditThesisModal";
 import { THESIS_STATUS_LABELS } from "@/lib/constants";
 
+import {
+  ThesisHeader,
+  StudentCard,
+  TasksTable,
+  DocumentsTable,
+  MeetingsTable,
+  ActivityTimeline,
+  StudentEvaluation,
+  EvaluationModal,
+  TaskFeedbackModal,
+  MeetingModal,
+  DocumentUploadModal,
+  SubtaskModal,
+  DeleteConfirmModal,
+  type Student,
+  type SubTask,
+  type Document,
+  type Meeting,
+  type Activity,
+  type MeetingFormValues,
+  type SubtaskFormValues,
+} from "./components";
+
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
 const { TextArea } = Input;
 const PAGE_SIZE = 5;
-
-// Định nghĩa các interfaces để tránh lỗi any
-interface Student {
-  id: string;
-  name: string;
-  studentId: string;
-  progress: number;
-  rating: number;
-  email?: string;
-  phone?: string;
-  submittedTasks: SubTask[];
-}
-
-interface SubTask {
-  key: string;
-  name: string;
-  description?: string;
-  startDate: string;
-  deadline: string;
-  status?: "not_started" | "in_progress" | "completed" | "late";
-  submittedAt?: string;
-  feedback?: string;
-  score?: number;
-}
-
-interface Document {
-  key: string;
-  name: string;
-  type: string;
-  uploadedBy: string;
-  uploadedAt: string;
-  size: string;
-  url?: string;
-}
-
-interface Activity {
-  key: string;
-  time: string;
-  action: string;
-  user: string;
-  details: string;
-}
-
-interface Meeting {
-  title: string;
-  time: string;
-  student: string;
-  link: string;
-}
-
-interface MeetingFormValues {
-  meetingTitle: string;
-  meetingDate: dayjs.Dayjs;
-  meetingTime: dayjs.Dayjs;
-  meetingLink: string;
-}
-
-interface ThesisData {
-  id: string;
-  title: string;
-  description: string;
-  major: string;
-  status: string;
-  deadline: string;
-  student: Student | null;
-  requirements: string;
-  objectives: string;
-  subTasks: SubTask[];
-}
-
-// Mock dữ liệu đề tài
-const thesisData: ThesisData = {
-  id: "1",
-  title: "Ứng dụng AI trong giáo dục",
-  description:
-    "Nghiên cứu và phát triển ứng dụng AI hỗ trợ học tập trong giáo dục.",
-  major: "Công nghệ thông tin",
-  status: "Đang thực hiện",
-  deadline: "2024-08-30",
-  student: {
-    id: "1",
-    name: "Nguyễn Văn A",
-    studentId: "20020001",
-    progress: 60,
-    rating: 4,
-    email: "nguyenvana@example.com",
-    phone: "0912345678",
-    submittedTasks: [
-      {
-        key: "1",
-        name: "Nộp đề cương",
-        description:
-          "Đề cương nghiên cứu, bao gồm mục tiêu, phạm vi, và phương pháp",
-        startDate: "2024-06-01",
-        deadline: "2024-06-15",
-        status: "completed",
-        submittedAt: "2024-06-12",
-        feedback: "Tốt, cần bổ sung phần phương pháp nghiên cứu chi tiết hơn.",
-        score: 8,
-      },
-      {
-        key: "2",
-        name: "Nộp chương 1",
-        description:
-          "Giới thiệu tổng quan về đề tài, tầm quan trọng và mục tiêu nghiên cứu",
-        startDate: "2024-06-16",
-        deadline: "2024-07-01",
-        status: "completed",
-        submittedAt: "2024-06-29",
-        feedback:
-          "Đã đáp ứng yêu cầu, tuy nhiên cần bổ sung thêm tài liệu tham khảo.",
-        score: 7,
-      },
-      {
-        key: "3",
-        name: "Nộp chương 2",
-        description: "Phương pháp nghiên cứu và thiết kế hệ thống",
-        startDate: "2024-07-02",
-        deadline: "2024-07-20",
-        status: "in_progress",
-        submittedAt: "2024-07-15",
-        feedback: "Chưa hoàn thiện, cần bổ sung chi tiết về cấu trúc hệ thống.",
-        score: 5,
-      },
-      {
-        key: "4",
-        name: "Nộp source code demo",
-        description: "Source code của ứng dụng demo AI trong giáo dục",
-        startDate: "2024-07-05",
-        deadline: "2024-07-25",
-        status: "late",
-        submittedAt: "2024-07-27",
-        feedback: "Code chạy được nhưng còn nhiều bugs và thiếu documentation.",
-        score: 6,
-      },
-      {
-        key: "5",
-        name: "Hoàn thiện báo cáo",
-        description: "Chỉnh sửa, hoàn thiện báo cáo và chuẩn bị bảo vệ",
-        startDate: "2024-08-01",
-        deadline: "2024-08-30",
-        status: "not_started",
-      },
-    ],
-  },
-  requirements:
-    "Yêu cầu sinh viên có kiến thức về Machine Learning, Python và các thư viện AI.",
-  objectives:
-    "Xây dựng ứng dụng demo minh họa việc ứng dụng AI trong giáo dục.",
-  subTasks: [
-    {
-      key: "1",
-      name: "Nộp đề cương",
-      startDate: "2024-06-01",
-      deadline: "2024-06-15",
-      description:
-        "Đề cương nghiên cứu, bao gồm mục tiêu, phạm vi, và phương pháp",
-    },
-    {
-      key: "2",
-      name: "Nộp chương 1",
-      startDate: "2024-06-16",
-      deadline: "2024-07-01",
-      description:
-        "Giới thiệu tổng quan về đề tài, tầm quan trọng và mục tiêu nghiên cứu",
-    },
-    {
-      key: "3",
-      name: "Nộp chương 2",
-      startDate: "2024-07-02",
-      deadline: "2024-07-20",
-      description: "Phương pháp nghiên cứu và thiết kế hệ thống",
-    },
-    {
-      key: "4",
-      name: "Nộp source code demo",
-      startDate: "2024-07-05",
-      deadline: "2024-07-25",
-      description: "Source code của ứng dụng demo AI trong giáo dục",
-    },
-    {
-      key: "5",
-      name: "Hoàn thiện báo cáo",
-      startDate: "2024-08-01",
-      deadline: "2024-08-30",
-      description: "Chỉnh sửa, hoàn thiện báo cáo và chuẩn bị bảo vệ",
-    },
-  ],
-};
-
-// Mock lịch sử hoạt động
-const mockActivities: Activity[] = [
-  {
-    key: "1",
-    time: "2024-05-15",
-    action: "Tạo đề tài",
-    user: "Giảng viên",
-    details: "Giảng viên tạo đề tài mới",
-  },
-  {
-    key: "2",
-    time: "2024-05-25",
-    action: "Sinh viên đăng ký",
-    user: "Sinh viên",
-    details: "Sinh viên Nguyễn Văn A đăng ký đề tài",
-  },
-  {
-    key: "3",
-    time: "2024-05-28",
-    action: "Phê duyệt đăng ký",
-    user: "Giảng viên",
-    details: "Giảng viên chấp nhận yêu cầu đăng ký của sinh viên Nguyễn Văn A",
-  },
-  {
-    key: "4",
-    time: "2024-06-12",
-    action: "Nộp đề cương",
-    user: "Sinh viên",
-    details: "Sinh viên Nguyễn Văn A nộp đề cương",
-  },
-  {
-    key: "5",
-    time: "2024-06-14",
-    action: "Đánh giá đề cương",
-    user: "Giảng viên",
-    details: "Giảng viên đánh giá đề cương với điểm 8/10",
-  },
-  {
-    key: "6",
-    time: "2024-06-29",
-    action: "Nộp chương 1",
-    user: "Sinh viên",
-    details: "Sinh viên Nguyễn Văn A nộp báo cáo chương 1",
-  },
-  {
-    key: "7",
-    time: "2024-07-01",
-    action: "Đánh giá chương 1",
-    user: "Giảng viên",
-    details: "Giảng viên đánh giá chương 1 với điểm 7/10",
-  },
-  {
-    key: "8",
-    time: "2024-07-10",
-    action: "Lên lịch họp",
-    user: "Giảng viên",
-    details: "Giảng viên lên lịch họp đánh giá tiến độ ngày 15/07/2024",
-  },
-  {
-    key: "9",
-    time: "2024-07-15",
-    action: "Nộp chương 2",
-    user: "Sinh viên",
-    details: "Sinh viên Nguyễn Văn A nộp chương 2 (bản nháp)",
-  },
-  {
-    key: "10",
-    time: "2024-07-17",
-    action: "Đánh giá chương 2",
-    user: "Giảng viên",
-    details: "Giảng viên yêu cầu chỉnh sửa chương 2",
-  },
-  {
-    key: "11",
-    time: "2024-07-27",
-    action: "Nộp source code",
-    user: "Sinh viên",
-    details: "Sinh viên Nguyễn Văn A nộp source code demo (trễ hạn)",
-  },
-  {
-    key: "12",
-    time: "2024-07-28",
-    action: "Đánh giá source code",
-    user: "Giảng viên",
-    details: "Giảng viên đánh giá source code với điểm 6/10",
-  },
-];
-
-// Mock dữ liệu tài liệu liên quan
-const mockDocuments: Document[] = [
-  // Tài liệu do giảng viên tải lên
-  {
-    key: "1",
-    name: "Hướng dẫn thực hiện đồ án.pdf",
-    type: "PDF",
-    uploadedBy: "Giảng viên",
-    uploadedAt: "2024-05-15",
-    size: "1.2MB",
-    url: "#",
-  },
-  {
-    key: "2",
-    name: "Mẫu báo cáo đồ án.docx",
-    type: "Word",
-    uploadedBy: "Giảng viên",
-    uploadedAt: "2024-05-20",
-    size: "0.8MB",
-    url: "#",
-  },
-  // Tài liệu do sinh viên nộp
-  {
-    key: "3",
-    name: "Đề cương đồ án.pdf",
-    type: "PDF",
-    uploadedBy: "Nguyễn Văn A",
-    uploadedAt: "2024-06-12",
-    size: "2.1MB",
-    url: "#",
-  },
-  {
-    key: "4",
-    name: "Báo cáo chương 1.docx",
-    type: "Word",
-    uploadedBy: "Nguyễn Văn A",
-    uploadedAt: "2024-06-29",
-    size: "3.5MB",
-    url: "#",
-  },
-  {
-    key: "5",
-    name: "Báo cáo chương 2 (nháp).docx",
-    type: "Word",
-    uploadedBy: "Nguyễn Văn A",
-    uploadedAt: "2024-07-15",
-    size: "4.2MB",
-    url: "#",
-  },
-  {
-    key: "6",
-    name: "AI-Education-Demo.zip",
-    type: "Zip",
-    uploadedBy: "Nguyễn Văn A",
-    uploadedAt: "2024-07-27",
-    size: "8.7MB",
-    url: "#",
-  },
-  {
-    key: "7",
-    name: "Slide thuyết trình (nháp).pptx",
-    type: "PowerPoint",
-    uploadedBy: "Nguyễn Văn A",
-    uploadedAt: "2024-07-20",
-    size: "5.3MB",
-    url: "#",
-  },
-];
 
 const statusColors = {
   "Đang mở": "green",
   "Đang thực hiện": "blue",
   "Đã hoàn thành": "purple",
   "Đã đóng": "red",
-};
-
-// Mock lịch họp
-const mockMeetings = [
-  {
-    id: "1",
-    title: "Họp khởi động đề tài",
-    time: "2024-06-05 10:00",
-    student: "Nguyễn Văn A",
-    link: "https://meet.google.com/abc-defg-hij",
-  },
-  {
-    id: "2",
-    title: "Họp đánh giá đề cương",
-    time: "2024-06-14 14:00",
-    student: "Nguyễn Văn A",
-    link: "https://meet.google.com/klm-nopq-rst",
-  },
-  {
-    id: "3",
-    title: "Họp đánh giá tiến độ giữa kỳ",
-    time: "2024-07-15 14:30",
-    student: "Nguyễn Văn A",
-    link: "https://meet.google.com/abc-defg-hij",
-  },
-  {
-    id: "4",
-    title: "Họp chỉnh sửa chương 2",
-    time: "2024-07-20 10:00",
-    student: "Nguyễn Văn A",
-    link: "https://meet.google.com/xyz-mnop-qrs",
-  },
-];
-
-// Mẫu đề tài chưa có sinh viên đăng ký
-const thesisDataNoStudent: ThesisData = {
-  id: "2",
-  title: "Nghiên cứu Blockchain trong lĩnh vực tài chính",
-  description:
-    "Phân tích và đánh giá ứng dụng của công nghệ Blockchain trong lĩnh vực tài chính, ngân hàng.",
-  major: "Công nghệ thông tin",
-  status: "Đang mở",
-  deadline: "2024-09-30",
-  student: null,
-  requirements:
-    "Yêu cầu sinh viên có kiến thức về Blockchain, ngôn ngữ lập trình Solidity và kiến thức cơ bản về tài chính.",
-  objectives:
-    "Xây dựng một hệ thống demo minh họa ứng dụng Blockchain trong giao dịch tài chính an toàn.",
-  subTasks: [
-    {
-      key: "1",
-      name: "Nộp đề cương",
-      startDate: "2024-06-15",
-      deadline: "2024-07-01",
-      description:
-        "Đề cương nghiên cứu, bao gồm mục tiêu, phạm vi, và phương pháp",
-    },
-    {
-      key: "2",
-      name: "Nộp chương 1: Tổng quan",
-      startDate: "2024-07-02",
-      deadline: "2024-07-20",
-      description:
-        "Tổng quan về công nghệ Blockchain và ứng dụng trong lĩnh vực tài chính",
-    },
-    {
-      key: "3",
-      name: "Nộp chương 2: Phân tích",
-      startDate: "2024-07-21",
-      deadline: "2024-08-15",
-      description: "Phân tích yêu cầu và thiết kế giải pháp",
-    },
-    {
-      key: "4",
-      name: "Nộp source code demo",
-      startDate: "2024-08-16",
-      deadline: "2024-09-15",
-      description: "Phát triển và triển khai hệ thống demo",
-    },
-    {
-      key: "5",
-      name: "Hoàn thiện báo cáo",
-      startDate: "2024-09-16",
-      deadline: "2024-09-30",
-      description: "Hoàn thiện báo cáo và demo",
-    },
-  ],
 };
 
 const ThesisDetail = () => {
@@ -524,12 +114,10 @@ const ThesisDetail = () => {
   const [subtaskForm] = Form.useForm();
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  // Add a new state for meeting deletion confirmation
   const [isDeleteMeetingModalVisible, setIsDeleteMeetingModalVisible] =
     useState(false);
   const [meetingToDelete, setMeetingToDelete] = useState<Meeting | null>(null);
 
-  // Add states for document deletion and thesis deletion confirmations
   const [isDeleteDocumentModalVisible, setIsDeleteDocumentModalVisible] =
     useState(false);
   const [documentToDelete, setDocumentToDelete] = useState<Document | null>(
@@ -542,12 +130,8 @@ const ThesisDetail = () => {
   const paged = <T,>(data: T[], page: number) =>
     data.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  // Simulate fetching thesis by id based on the thesisId
-  // In a real implementation, this would fetch from API
-  // For demo, we'll toggle between the two mock datasets
-  const [thesis, setThesis] = useState<ThesisData>(thesisData);
+  const [thesis, setThesis] = useState(thesisData);
 
-  // Toggle between thesis with student and thesis without student (for demo purposes)
   const toggleThesisDemo = () => {
     setThesis(thesis.id === "1" ? thesisDataNoStudent : thesisData);
   };
@@ -644,10 +228,6 @@ const ThesisDetail = () => {
     return <Tag color={color}>{text}</Tag>;
   };
 
-  // Pagination function for thesis students
-  // const paginationConfig = (dataLength: number) =>
-  //   dataLength > 5 ? { pageSize: 5 } : false;
-
   const openEditModal = () => {
     setIsEditModalVisible(true);
   };
@@ -659,7 +239,6 @@ const ThesisDetail = () => {
     status: string;
     deadline: dayjs.Dayjs;
   }) => {
-    // Update thesis with the new values
     setThesis({
       ...thesis,
       title: values.title,
@@ -672,10 +251,8 @@ const ThesisDetail = () => {
     setIsEditModalVisible(false);
   };
 
-  // Function to handle opening the add/edit subtask modal
   const openSubtaskModal = (subtask?: SubTask) => {
     if (subtask) {
-      // Edit mode
       setCurrentSubtask(subtask);
       subtaskForm.setFieldsValue({
         name: subtask.name,
@@ -684,13 +261,14 @@ const ThesisDetail = () => {
         deadline: subtask.deadline ? dayjs(subtask.deadline) : undefined,
       });
     } else {
-      // Add mode
       setCurrentSubtask(null);
       subtaskForm.resetFields();
     }
     setIsSubtaskModalVisible(true);
   };
 
+  const handleSubtaskSubmit = (values: SubtaskFormValues) => {
+    if (currentSubtask) {
   // Function to handle submitting the subtask form
   const handleSubtaskSubmit = (values: {
     name: string;
@@ -837,37 +415,17 @@ const ThesisDetail = () => {
             <TabPane tab="Tổng quan" key="1">
               <Row gutter={[24, 24]}>
                 <Col span={24}>
-                  <Card
-                    title="Sinh viên đăng ký"
-                    extra={
-                      !thesis.student && (
-                        <Button
-                          type="primary"
-                          icon={<PlusOutlined />}
-                          onClick={() => navigate("/approve-requests")}
-                        >
-                          Thêm sinh viên
-                        </Button>
-                      )
-                    }
-                  >
+                  <Card title="Sinh viên đăng ký">
                     {thesis.student ? (
                       <Row gutter={24}>
                         <Col span={16}>
                           <Title level={5}>
-                            <UserOutlined /> {thesis.student.name} (
-                            {thesis.student.studentId})
+                            <UserOutlined /> {thesis.student.name}
                           </Title>
                           {thesis.student.email && (
                             <Paragraph>
                               <Text strong>Email: </Text>
                               {thesis.student.email}
-                            </Paragraph>
-                          )}
-                          {thesis.student.phone && (
-                            <Paragraph>
-                              <Text strong>SĐT: </Text>
-                              {thesis.student.phone}
                             </Paragraph>
                           )}
                         </Col>

@@ -192,7 +192,14 @@ const ThesisList = () => {
       title: "Mô tả",
       dataIndex: "description",
       key: "description",
-      render: (text: string) => <Text>{text || "--"}</Text>,
+      render: (text: string) => {
+        const maxLength = 100;
+        const truncated =
+          text && text.length > maxLength
+            ? `${text.slice(0, maxLength)}...`
+            : text || "--";
+        return <Text>{truncated}</Text>;
+      },
     },
     {
       title: "Giảng viên hướng dẫn",
@@ -217,11 +224,13 @@ const ThesisList = () => {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      width: 150,
       render: (status: ThesisResponse["status"]) => getStatusTag(status),
     },
     {
       title: "Thao tác",
       key: "action",
+      width: 150,
       render: (_: unknown, record: ThesisResponse) => (
         <Space>
           <Button type="primary" onClick={() => showThesisDetails(record)}>
@@ -285,7 +294,7 @@ const ThesisList = () => {
   ];
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+    <div style={{ margin: "0 auto" }}>
       <Card
         title={
           <Title level={4}>
