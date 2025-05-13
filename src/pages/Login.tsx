@@ -31,8 +31,8 @@ const demoAccounts = [
   },
   {
     role: USER_ROLES.LECTURER,
-    email: "LamLT@fe.edu.vn",
-    password: "123123",
+    email: "truonglam962002@gmail.com",
+    password: "q-uL39oQ?N",
   },
   {
     role: USER_ROLES.ADMIN,
@@ -63,6 +63,7 @@ const Login = () => {
 
       message.success(`Xin chào, ${result.user.name}!`);
       navigate("/", { replace: true });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
     } catch (error: any) {
       message.error("Đăng nhập thất bại, vui lòng thử lại");
     } finally {

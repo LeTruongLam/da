@@ -39,27 +39,27 @@ axiosClient.interceptors.response.use(
   (error) => {
     // Handle specific error status codes
     if (error.response) {
-      switch (error.response.status) {
-        case 401:
-          // Handle unauthorized ( logout user, redirect to login)
-          store.dispatch({ type: "auth/logout" });
-          message.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
-          window.location.href = "/login";
-          break;
-        case 403:
-          // Handle forbidden
-          message.error("Bạn không có quyền truy cập vào tài nguyên này");
-          break;
-        case 404:
-          message.error("Không tìm thấy tài nguyên yêu cầu");
-          break;
-        case 500:
-          // Handle server error
-          message.error("Lỗi server, vui lòng thử lại sau");
-          break;
-        default:
-          message.error(error.response.data?.message || "Đã có lỗi xảy ra");
-      }
+      // switch (error.response.status) {
+      //   case 401:
+      //     // Handle unauthorized ( logout user, redirect to login)
+      //     store.dispatch({ type: "auth/logout" });
+      //     message.error("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại");
+      //     window.location.href = "/login";
+      //     break;
+      //   case 403:
+      //     // Handle forbidden
+      //     message.error("Bạn không có quyền truy cập vào tài nguyên này");
+      //     break;
+      //   case 404:
+      //     message.error("Không tìm thấy tài nguyên yêu cầu");
+      //     break;
+      //   case 500:
+      //     // Handle server error
+      //     message.error("Lỗi server, vui lòng thử lại sau");
+      //     break;
+      //   default:
+      //     message.error(error.response.data?.message || "Đã có lỗi xảy ra");
+      // }
     } else if (error.request) {
       // Request made but no response received
       message.error(
