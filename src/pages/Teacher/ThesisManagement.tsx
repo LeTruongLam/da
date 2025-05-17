@@ -1,4 +1,4 @@
-import { Card, Table, Tag, Button, Pagination, Alert } from "antd";
+import { Card, Table, Button, Pagination, Alert } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { EyeOutlined, UserOutlined } from "@ant-design/icons";
@@ -7,6 +7,7 @@ import { getMyTheses } from "@/services/api/thesis";
 import type { ThesisResponse } from "@/services/api/thesis";
 import type { Key } from "react";
 import { formatDate } from "@/lib/ultils";
+import { StatusTag } from "@/components/ui";
 
 const ThesisManagement = () => {
   const navigate = useNavigate();
@@ -54,17 +55,9 @@ const ThesisManagement = () => {
       ],
       onFilter: (value: boolean | Key, record: ThesisResponse) =>
         record.status === value,
-      render: (status: ThesisResponse["status"]) => {
-        const statusMap = {
-          available: { color: "processing", text: "Đang mở" },
-          in_progress: { color: "processing", text: "Đang thực hiện" },
-          completed: { color: "success", text: "Hoàn thành" },
-          "not available": { color: "default", text: "Không khả dụng" },
-          "on hold": { color: "warning", text: "Tạm hoãn" },
-        };
-        const { color, text } = statusMap[status];
-        return <Tag color={color}>{text}</Tag>;
-      },
+      render: (status: ThesisResponse["status"]) => (
+        <StatusTag type="thesis" status={status} />
+      ),
     },
     {
       title: "Ngành",

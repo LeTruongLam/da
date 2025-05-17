@@ -39,6 +39,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import type { UploadProps } from "antd/es/upload/interface";
+import { StatusTag } from "@/components/ui";
 
 // Custom interface definitions to replace those from api.ts
 interface Document {
@@ -401,40 +402,6 @@ const ThesisDetail = () => {
     setIsSubmissionModalVisible(true);
   };
 
-  interface StatusColorsType {
-    [key: string]: string;
-  }
-
-  interface StatusTextType {
-    [key: string]: string;
-  }
-
-  const statusColors: StatusColorsType = {
-    not_started: "default",
-    in_progress: "processing",
-    completed: "success",
-    late: "error",
-    upcoming: "blue",
-    pending: "orange",
-    approved: "cyan",
-    rejected: "red",
-  };
-
-  const getTaskStatusTag = (status: string) => {
-    const statusText: StatusTextType = {
-      not_started: "Chưa bắt đầu",
-      in_progress: "Đang thực hiện",
-      completed: "Hoàn thành",
-      late: "Trễ hạn",
-      upcoming: "Sắp tới",
-      pending: "Chờ xác nhận",
-      approved: "Đã xác nhận",
-      rejected: "Từ chối",
-    };
-
-    return <Tag color={statusColors[status]}>{statusText[status]}</Tag>;
-  };
-
   if (thesisLoading) {
     return (
       <div style={{ textAlign: "center", padding: "50px" }}>
@@ -463,11 +430,7 @@ const ThesisDetail = () => {
               </Title>
             </Col>
             <Col>
-              <Tag color={thesis.status === "in_progress" ? "blue" : "green"}>
-                {thesis.status === "in_progress"
-                  ? "Đang thực hiện"
-                  : "Hoàn thành"}
-              </Tag>
+              <StatusTag type="thesis" status={thesis.status} />
             </Col>
           </Row>
         }
@@ -612,7 +575,9 @@ const ThesisDetail = () => {
                           title: "Trạng thái",
                           dataIndex: "status",
                           key: "status",
-                          render: (status) => getTaskStatusTag(status),
+                          render: (status) => (
+                            <StatusTag type="task" status={status} />
+                          ),
                         },
                         {
                           title: "Điểm",
@@ -781,7 +746,9 @@ const ThesisDetail = () => {
                             title: "Trạng thái",
                             dataIndex: "status",
                             key: "status",
-                            render: (status) => getTaskStatusTag(status),
+                            render: (status) => (
+                              <StatusTag type="task" status={status} />
+                            ),
                           },
                           {
                             title: "Thao tác",

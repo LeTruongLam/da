@@ -6,12 +6,16 @@ import {
   Progress,
   Upload,
   Table,
-  Tag,
   Pagination,
   message,
+  Space,
+  Modal,
+  Spin,
+  Empty,
 } from "antd";
 import { UploadOutlined, FileTextOutlined } from "@ant-design/icons";
 import { useState } from "react";
+import { StatusTag } from "@/components/ui";
 
 const PAGE_SIZE = 5;
 
@@ -21,7 +25,7 @@ interface FileData {
   name: string;
   type: string;
   uploadedAt: string;
-  status: "approved" | "pending";
+  status: "approved" | "pending" | "rejected";
 }
 
 interface ProgressFormValues {
@@ -37,13 +41,8 @@ const mockFiles: FileData[] = Array.from({ length: 12 }).map((_, i) => ({
   }`,
   type: i % 3 === 0 ? "pdf" : i % 3 === 1 ? "docx" : "zip",
   uploadedAt: `2024-06-${10 + (i % 10)}`,
-  status: i % 4 === 0 ? "approved" : "pending",
+  status: i % 4 === 0 ? "approved" : i % 4 === 1 ? "pending" : "rejected",
 }));
-
-const statusMap: Record<FileData["status"], { color: string; text: string }> = {
-  approved: { color: "green", text: "Đã duyệt" },
-  pending: { color: "orange", text: "Chờ duyệt" },
-};
 
 const ProgressUpdate = () => {
   const [form] = Form.useForm<ProgressFormValues>();
@@ -144,10 +143,8 @@ const ProgressUpdate = () => {
               title: "Trạng thái",
               dataIndex: "status",
               key: "status",
-              render: (status: "approved" | "pending") => (
-                <Tag color={statusMap[status].color}>
-                  {statusMap[status].text}
-                </Tag>
+              render: (status: "approved" | "pending" | "rejected") => (
+                <StatusTag type="task" status={status} />
               ),
             },
           ]}

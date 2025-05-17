@@ -182,11 +182,6 @@ const ApproveRequests = () => {
 
   const columns = [
     {
-      title: "MSSV",
-      dataIndex: "studentId",
-      key: "studentId",
-    },
-    {
       title: "Họ tên SV",
       dataIndex: "studentName",
       key: "studentName",
@@ -288,7 +283,6 @@ const ApproveRequests = () => {
                   {selectedRequest.studentName}
                 </Title>
                 <Text type="secondary">
-                  {selectedRequest.studentId} |{" "}
                   {selectedRequest.studentProfile.major}
                 </Text>
               </div>
@@ -299,10 +293,7 @@ const ApproveRequests = () => {
                 <Descriptions.Item label="Đề tài" span={3}>
                   {selectedRequest.thesisTitle}
                 </Descriptions.Item>
-                <Descriptions.Item label="Mã đề tài" span={1}>
-                  {selectedRequest.thesisId}
-                </Descriptions.Item>
-                <Descriptions.Item label="Ngày đăng ký" span={2}>
+                <Descriptions.Item label="Ngày đăng ký" span={3}>
                   {selectedRequest.requestDate}
                 </Descriptions.Item>
                 <Descriptions.Item label="Trạng thái" span={3}>
@@ -316,25 +307,6 @@ const ApproveRequests = () => {
               </Descriptions>
 
               <Divider />
-
-              <Descriptions title="Hồ sơ sinh viên" bordered>
-                <Descriptions.Item label="GPA" span={3}>
-                  {selectedRequest.studentProfile.gpa}
-                </Descriptions.Item>
-                <Descriptions.Item label="Thành tích" span={3}>
-                  {selectedRequest.studentProfile.achievements}
-                </Descriptions.Item>
-                <Descriptions.Item label="Kỹ năng" span={3}>
-                  {selectedRequest.studentProfile.skills.map((skill) => (
-                    <Tag key={skill} color="blue">
-                      {skill}
-                    </Tag>
-                  ))}
-                </Descriptions.Item>
-                <Descriptions.Item label="Liên hệ" span={3}>
-                  {selectedRequest.contactInfo}
-                </Descriptions.Item>
-              </Descriptions>
 
               {selectedRequest.status === "pending" && (
                 <div style={{ marginTop: 24, textAlign: "right" }}>

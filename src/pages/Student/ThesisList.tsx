@@ -5,7 +5,6 @@ import {
   Input,
   Button,
   Space,
-  Tag,
   Modal,
   Typography,
   Row,
@@ -30,25 +29,10 @@ import { useNavigate } from "react-router-dom";
 import { getAllTheses, getMyTheses } from "@/services/api/thesis";
 import type { ThesisResponse } from "@/services/api/thesis";
 import { formatDate } from "@/lib/ultils";
+import { StatusTag } from "@/components/ui";
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
-
-const getStatusTag = (status: ThesisResponse["status"]) => {
-  const statusConfig = {
-    available: { color: "processing", text: "Đang mở" },
-    in_progress: { color: "processing", text: "Đang thực hiện" },
-    completed: { color: "success", text: "Hoàn thành" },
-    "not available": { color: "default", text: "Không khả dụng" },
-    "on hold": { color: "warning", text: "Tạm hoãn" },
-  };
-
-  const config = statusConfig[status] || {
-    color: "default",
-    text: "Không xác định",
-  };
-  return <Tag color={config.color}>{config.text}</Tag>;
-};
 
 const _renderContent = ({
   title,
@@ -225,7 +209,9 @@ const ThesisList = () => {
       dataIndex: "status",
       key: "status",
       width: 150,
-      render: (status: ThesisResponse["status"]) => getStatusTag(status),
+      render: (status: ThesisResponse["status"]) => (
+        <StatusTag type="thesis" status={status} />
+      ),
     },
     {
       title: "Thao tác",
@@ -280,7 +266,9 @@ const ThesisList = () => {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status: ThesisResponse["status"]) => getStatusTag(status),
+      render: (status: ThesisResponse["status"]) => (
+        <StatusTag type="thesis" status={status} />
+      ),
     },
     {
       title: "Thao tác",
@@ -444,7 +432,7 @@ const ThesisList = () => {
                     </Row>
                     <Paragraph>
                       <Text strong>Trạng thái: </Text>
-                      {getStatusTag(selectedThesis.status)}
+                      <StatusTag type="thesis" status={selectedThesis.status} />
                     </Paragraph>
                     <Paragraph>
                       {_renderContent({

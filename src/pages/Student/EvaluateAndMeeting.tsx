@@ -6,11 +6,11 @@ import {
   Rate,
   DatePicker,
   Table,
-  Tag,
   Pagination,
   message,
 } from "antd";
 import { useState } from "react";
+import { StatusTag } from "@/components/ui";
 
 const PAGE_SIZE = 5;
 
@@ -60,12 +60,6 @@ const mockMeetings: Meeting[] = Array.from({ length: 8 }).map((_, i) => ({
   reason: `Lý do ${i + 1}`,
   status: i % 3 === 0 ? "pending" : "accepted",
 }));
-
-const statusMap: Record<Meeting["status"], { color: string; text: string }> = {
-  pending: { color: "orange", text: "Chờ duyệt" },
-  accepted: { color: "green", text: "Đã duyệt" },
-  rejected: { color: "red", text: "Từ chối" },
-};
 
 const EvaluateAndMeeting = () => {
   const [evalForm] = Form.useForm<EvalFormValues>();
@@ -214,9 +208,7 @@ const EvaluateAndMeeting = () => {
                 dataIndex: "status",
                 key: "status",
                 render: (status: "pending" | "accepted" | "rejected") => (
-                  <Tag color={statusMap[status].color}>
-                    {statusMap[status].text}
-                  </Tag>
+                  <StatusTag type="task" status={status} />
                 ),
               },
             ]}

@@ -1,10 +1,11 @@
-import { Table, Button, Space, Tag, Card } from "antd";
+import { Table, Button, Space, Card } from "antd";
 import {
   FileTextOutlined,
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
+import { StatusTag } from "@/components/ui";
 
 export interface SubTask {
   key: string;
@@ -34,22 +35,6 @@ const TasksTable: React.FC<TasksTableProps> = ({
   onEditTask,
   onDeleteTask,
 }) => {
-  const getTaskStatusTag = (status?: string) => {
-    if (!status) return <Tag>Chưa bắt đầu</Tag>;
-
-    const statusConfig = {
-      not_started: { color: "default", text: "Chưa bắt đầu" },
-      in_progress: { color: "processing", text: "Đang thực hiện" },
-      completed: { color: "success", text: "Hoàn thành" },
-      late: { color: "error", text: "Trễ hạn" },
-    };
-
-    const { color, text } =
-      statusConfig[status as keyof typeof statusConfig] ||
-      statusConfig.not_started;
-    return <Tag color={color}>{text}</Tag>;
-  };
-
   return (
     <Card
       title="Các công việc"
@@ -97,9 +82,9 @@ const TasksTable: React.FC<TasksTableProps> = ({
                 (task) => task.key === record.key
               );
               return studentTask ? (
-                getTaskStatusTag(studentTask.status)
+                <StatusTag type="task" status={studentTask.status || ""} />
               ) : (
-                <Tag>Chưa bắt đầu</Tag>
+                <StatusTag type="task" status="not_started" />
               );
             },
           },

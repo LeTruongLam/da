@@ -6,12 +6,14 @@ import {
   Select,
   message,
   Table,
-  Tag,
+  Space,
+  Typography,
   Spin,
   Empty,
 } from "antd";
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { StatusTag } from "@/components/ui";
 
 // Updated Teacher interface without references to Lecturer
 interface Teacher {
@@ -41,12 +43,6 @@ interface RequestFormValues {
   teacher: string;
   note?: string;
 }
-
-const statusMap = {
-  pending: { color: "orange", text: "Chờ duyệt" },
-  accepted: { color: "green", text: "Đã duyệt" },
-  rejected: { color: "red", text: "Từ chối" },
-};
 
 const RequestMentor = () => {
   const [form] = Form.useForm();
@@ -221,9 +217,7 @@ const RequestMentor = () => {
                 dataIndex: "status",
                 key: "status",
                 render: (status: "pending" | "accepted" | "rejected") => (
-                  <Tag color={statusMap[status].color}>
-                    {statusMap[status].text}
-                  </Tag>
+                  <StatusTag type="task" status={status} />
                 ),
               },
             ]}

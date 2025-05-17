@@ -43,8 +43,19 @@ export interface ThesisDetailResponse {
     facultyId: string;
     facultyName: string;
   };
-  tasks: any[];
-  materials: any[];
+  tasks: Array<{
+    id: string;
+    title: string;
+    description: string;
+    status: string;
+    deadline?: string;
+  }>;
+  materials: Array<{
+    id: string;
+    name: string;
+    fileUrl: string;
+    uploadedAt: string;
+  }>;
 }
 
 export interface ThesisDocument {
@@ -60,6 +71,11 @@ export interface ThesisCreateRequest {
   title: string;
   description: string;
   majorId: number;
+}
+
+export interface ThesisUpdateRequest extends ThesisCreateRequest {
+  thesisId: number;
+  status?: string;
 }
 
 /**
@@ -86,9 +102,9 @@ export const createThesis = (data: ThesisCreateRequest) =>
   );
 
 // Update thesis
-export const updateThesis = (id: string, data: Partial<ThesisResponse>) =>
+export const updateThesis = (data: ThesisUpdateRequest) =>
   put<ThesisResponse>(
-    API_CONFIG.ENDPOINTS.THESIS.UPDATE(id),
+    API_CONFIG.ENDPOINTS.THESIS.UPDATE,
     data as unknown as Record<string, unknown>
   );
 

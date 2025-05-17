@@ -26,6 +26,7 @@ import {
 import type { SubTask } from "./TasksTable";
 import type { Document } from "./DocumentsTable";
 import type { Student } from "./StudentCard";
+import { StatusTag } from "@/components/ui";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -57,22 +58,6 @@ const StudentEvaluation: React.FC<StudentEvaluationProps> = ({
       </div>
     );
   }
-
-  const getTaskStatusTag = (status?: string) => {
-    if (!status) return <Tag>Chưa bắt đầu</Tag>;
-
-    const statusConfig = {
-      not_started: { color: "default", text: "Chưa bắt đầu" },
-      in_progress: { color: "processing", text: "Đang thực hiện" },
-      completed: { color: "success", text: "Hoàn thành" },
-      late: { color: "error", text: "Trễ hạn" },
-    };
-
-    const { color, text } =
-      statusConfig[status as keyof typeof statusConfig] ||
-      statusConfig.not_started;
-    return <Tag color={color}>{text}</Tag>;
-  };
 
   const studentDocuments = documents.filter(
     (doc) => doc.uploadedBy === student.name
@@ -169,7 +154,13 @@ const StudentEvaluation: React.FC<StudentEvaluationProps> = ({
                 title: "Trạng thái",
                 dataIndex: "status",
                 key: "status",
-                render: (status) => getTaskStatusTag(status),
+                render: (status) => (
+                  <StatusTag
+                    type="task"
+                    status={status || "not_started"}
+                    email={student.email}
+                  />
+                ),
               },
               {
                 title: "Thao tác",

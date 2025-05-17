@@ -227,10 +227,11 @@ const ThesisDetail = () => {
     }
   };
 
-  const { data: thesisDataResponse, isLoading } = useQuery<
-    ThesisDetailResponse,
-    Error
-  >({
+  const {
+    data: thesisDataResponse,
+    isLoading,
+    refetch,
+  } = useQuery<ThesisDetailResponse, Error>({
     queryKey: ["thesis", thesisId],
     queryFn: () => getThesisById(thesisId as unknown as number),
   });
@@ -302,25 +303,6 @@ const ThesisDetail = () => {
     setIsEditModalVisible(true);
   };
 
-  const handleEditSubmit = (values: {
-    title: string;
-    description: string;
-    major: string;
-    status: string;
-    deadline: dayjs.Dayjs;
-  }) => {
-    setThesis({
-      ...thesis,
-      title: values.title,
-      description: values.description,
-      major: values.major,
-      status: values.status,
-      deadline: values.deadline.format("YYYY-MM-DD"),
-    });
-    message.success("Cập nhật thông tin đề tài thành công!");
-    setIsEditModalVisible(false);
-  };
-
   const openSubtaskModal = (subtask?: SubTask) => {
     if (subtask) {
       setCurrentSubtask(subtask);
@@ -342,12 +324,6 @@ const ThesisDetail = () => {
   };
 
   const handleSubtaskSubmit = (values: SubtaskFormValues) => {
-    const formattedValues = {
-      ...values,
-      startDate: values.startDate.format("YYYY-MM-DD"),
-      deadline: values.deadline.format("YYYY-MM-DD"),
-    };
-
     if (currentSubtask) {
       message.success(
         `Đã cập nhật công việc "${values.name}" với trạng thái ${values.status}`
@@ -567,9 +543,8 @@ const ThesisDetail = () => {
 
         <EditThesisModal
           visible={isEditModalVisible}
-          thesis={thesis}
           onCancel={() => setIsEditModalVisible(false)}
-          onOk={handleEditSubmit}
+          onRefetch={refetch}
         />
 
         <SubtaskModal

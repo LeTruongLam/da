@@ -1,6 +1,6 @@
-import { Card, Row, Col, Tag, Button, Space, Typography } from "antd";
+import { Card, Row, Col, Button, Space, Typography } from "antd";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import { THESIS_STATUS_LABELS } from "@/lib/constants";
+import { StatusTag } from "@/components/ui";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -15,13 +15,6 @@ interface ThesisHeaderProps {
   onToggleDemo?: () => void;
   showDemo?: boolean;
 }
-
-const statusColors = {
-  "Đang mở": "green",
-  "Đang thực hiện": "blue",
-  "Đã hoàn thành": "purple",
-  "Đã đóng": "red",
-};
 
 const ThesisHeader: React.FC<ThesisHeaderProps> = ({
   title,
@@ -69,14 +62,15 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
           </Paragraph>
           <Paragraph>
             <Text strong>Trạng thái: </Text>
-            <Tag color={statusColors[status as keyof typeof statusColors]}>
-              {(typeof status === "string" &&
-                THESIS_STATUS_LABELS[
-                  status as keyof typeof THESIS_STATUS_LABELS
-                ]) ||
-                status ||
-                "--"}
-            </Tag>
+            <StatusTag
+              type="thesis"
+              status={status}
+              faculty={
+                typeof major === "object" && major?.majorName
+                  ? major.majorName
+                  : major || "--"
+              }
+            />
           </Paragraph>
         </Col>
       </Row>

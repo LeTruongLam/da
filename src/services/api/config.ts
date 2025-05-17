@@ -24,7 +24,7 @@ export const API_CONFIG = {
       MY_THESES: "/users/my-thesis",
       DETAIL: (id: number) => `/theses/${id}`,
       CREATE: "/theses",
-      UPDATE: (id: string) => `/theses/${id}`,
+      UPDATE: "/theses",
       DELETE: (id: number) => `/theses/${id}`,
       DOCUMENTS: (thesisId: string) => `/theses/${thesisId}/documents`,
     },
