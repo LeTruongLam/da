@@ -25,9 +25,14 @@ const { Title, Text } = Typography;
 
 const demoAccounts = [
   {
-    role: USER_ROLES.STUDENT,
+    role: USER_ROLES.INSIDE_LECTURER,
     email: "Nguyenvanphucnkc@gmail.com",
     password: "stm#CA0HIL",
+  },
+    {
+    role: USER_ROLES.STUDENT,
+    email: "tuonglam962002@gmail.com",
+    password: "123123",
   },
 ];
 
