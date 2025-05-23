@@ -25,9 +25,9 @@ interface HeaderProps {
   onLogout: () => void;
 }
 
-const getRoleTagColor = (role?: string) => {
-  if (!role) return "default";
-  return USER_ROLE_COLORS[role as keyof typeof USER_ROLE_COLORS] || "default";
+const getRoleTagColor = (roleName?: string) => {
+  if (!roleName) return "default";
+  return USER_ROLE_COLORS[roleName as keyof typeof USER_ROLE_COLORS] || "default";
 };
 
 const getRoleLabel = (role?: string) => {
@@ -45,13 +45,13 @@ const Header = ({
   const { token: themeToken } = theme.useToken();
 
   const { data: userProfile } = useQuery({
-    queryKey: ["userProfile", user?.userId],
+    queryKey: ["userProfile", user?.user_id],
     queryFn: async () => {
       if (!user) {
         return null;
       }
       try {
-        const response = await getUserProfile(user.userId);
+        const response = await getUserProfile(user.user_id);
         return response;
       } catch (error) {
         console.error("Error fetching user profile:", error);

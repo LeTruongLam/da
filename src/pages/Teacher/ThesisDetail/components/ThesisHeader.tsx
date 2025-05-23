@@ -8,7 +8,6 @@ interface ThesisHeaderProps {
   id: string;
   title: string;
   description: string;
-  major: string | { majorName: string } | any;
   status: string;
   onEdit: () => void;
   onDelete: () => void;
@@ -26,7 +25,6 @@ const statusColors = {
 const ThesisHeader: React.FC<ThesisHeaderProps> = ({
   title,
   description,
-  major,
   status,
   onEdit,
   onDelete,
@@ -61,12 +59,6 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({
           </Paragraph>
         </Col>
         <Col span={8}>
-          <Paragraph>
-            <Text strong>Chuyên ngành: </Text>
-            {typeof major === "object" && major?.majorName
-              ? major.majorName
-              : major || "--"}
-          </Paragraph>
           <Paragraph>
             <Text strong>Trạng thái: </Text>
             <Tag color={statusColors[status as keyof typeof statusColors]}>

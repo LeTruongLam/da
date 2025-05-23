@@ -3,48 +3,41 @@ import { API_CONFIG } from "./config";
 import { store } from "@/store";
 
 export interface ThesisResponse {
-  thesisId: number;
+  thesis_id: number;
   title: string;
-  description: string;
   status:
     | "available"
     | "in_progress"
     | "completed"
     | "not available"
     | "on hold";
-  lecturer: {
-    userId: string;
-    name: string;
-    email: string;
-  };
-  major: {
-    majorId: string;
-    majorName: string;
-    facultyId: string;
-    facultyName: string;
-  };
-  createAt: string;
+  create_by: number;
+  creator_name: string;
+}
+
+export interface MaterialsType {
+  material_id: number;
+  file_name: string;
+  file_path: string;
+  file_type: string;
+  user_public_id: number;
+  user_name: string;
+  thesis_id: number;
+  create_at: string;
+  update_at: string;
+  deleted: boolean;
 }
 
 export interface ThesisDetailResponse {
-  thesisId: number;
+  thesis_id: number;
   title: string;
   description: string;
-  createAt: string;
   status: string;
-  lecturer: {
-    userId: string;
-    name: string;
-    email: string;
-  };
-  major: {
-    majorId: string;
-    majorName: string;
-    facultyId: string;
-    facultyName: string;
-  };
-  tasks: any[];
-  materials: any[];
+  create_at: string;
+  update_at: string;
+  create_by: number;
+  creator_name: string;
+  materials: MaterialsType[];
 }
 
 export interface ThesisDocument {
@@ -59,7 +52,15 @@ export interface ThesisDocument {
 export interface ThesisCreateRequest {
   title: string;
   description: string;
-  majorId: number;
+  status: string;
+  create_by: number;
+}
+
+export interface ThesisUpdateRequest {
+  title: string;
+  description: string;
+  status: string;
+  thesis_id: number;
 }
 
 /**
@@ -86,7 +87,7 @@ export const createThesis = (data: ThesisCreateRequest) =>
   );
 
 // Update thesis
-export const updateThesis = (id: string, data: Partial<ThesisResponse>) =>
+export const updateThesis = (id: number, data: ThesisUpdateRequest) =>
   put<ThesisResponse>(
     API_CONFIG.ENDPOINTS.THESIS.UPDATE(id),
     data as unknown as Record<string, unknown>

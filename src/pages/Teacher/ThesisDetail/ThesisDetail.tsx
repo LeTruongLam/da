@@ -3,10 +3,13 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import dayjs from "dayjs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { getThesisById, deleteThesis } from "@/services/api/thesis";
-import EditThesisModal from "@/components/Modals/EditThesisModal";
+import {
+  getThesisById,
+  deleteThesis,
+  type ThesisDetailResponse,
+} from "@/services/api/thesis";
+import EditThesisModal from "@/components/modals/EditThesisModal";
 
-// Import components
 import {
   ThesisHeader,
   StudentCard,
@@ -42,68 +45,6 @@ interface ExtendedSubTask extends SubTask {
   score?: number;
 }
 
-// Mock data
-// Mock dữ liệu đề tài
-const thesisData = {
-  id: "1",
-  title: "Ứng dụng AI trong giáo dục",
-  description:
-    "Nghiên cứu và phát triển ứng dụng AI hỗ trợ học tập trong giáo dục.",
-  major: "Công nghệ thông tin",
-  status: "Đang thực hiện",
-  deadline: "2024-08-30",
-  student: {
-    id: "1",
-    name: "Nguyễn Văn A",
-    studentId: "20020001",
-    progress: 60,
-    rating: 4,
-    email: "nguyenvana@example.com",
-    phone: "0912345678",
-    submittedTasks: [
-      {
-        key: "1",
-        name: "Nộp đề cương",
-        description:
-          "Đề cương nghiên cứu, bao gồm mục tiêu, phạm vi, và phương pháp",
-        startDate: "2024-06-01",
-        deadline: "2024-06-15",
-        status: "completed",
-        submittedAt: "2024-06-12",
-        feedback: "Tốt, cần bổ sung phần phương pháp nghiên cứu chi tiết hơn.",
-        score: 8,
-      },
-      {
-        key: "2",
-        name: "Nộp chương 1",
-        description:
-          "Giới thiệu tổng quan về đề tài, tầm quan trọng và mục tiêu nghiên cứu",
-        startDate: "2024-06-16",
-        deadline: "2024-07-01",
-        status: "completed",
-        submittedAt: "2024-06-29",
-        feedback:
-          "Đã đáp ứng yêu cầu, tuy nhiên cần bổ sung thêm tài liệu tham khảo.",
-        score: 7,
-      },
-    ],
-  },
-  requirements:
-    "Yêu cầu sinh viên có kiến thức về Machine Learning, Python và các thư viện AI.",
-  objectives:
-    "Xây dựng ứng dụng demo minh họa việc ứng dụng AI trong giáo dục.",
-  subTasks: [
-    {
-      key: "1",
-      name: "Nộp đề cương",
-      startDate: "2024-06-01",
-      deadline: "2024-06-15",
-      description:
-        "Đề cương nghiên cứu, bao gồm mục tiêu, phạm vi, và phương pháp",
-    },
-  ],
-};
-
 // Mock dữ liệu tài liệu liên quan
 const mockDocuments: Document[] = [
   // Tài liệu do giảng viên tải lên
@@ -130,41 +71,8 @@ const mockMeetings: Meeting[] = [
 ];
 
 // Mẫu đề tài chưa có sinh viên đăng ký
-const thesisDataNoStudent = {
-  id: "2",
-  title: "Nghiên cứu Blockchain trong lĩnh vực tài chính",
-  description:
-    "Phân tích và đánh giá ứng dụng của công nghệ Blockchain trong lĩnh vực tài chính, ngân hàng.",
-  major: "Công nghệ thông tin",
-  status: "Đang mở",
-  deadline: "2024-09-30",
-  student: null,
-  requirements:
-    "Yêu cầu sinh viên có kiến thức về Blockchain, ngôn ngữ lập trình Solidity và kiến thức cơ bản về tài chính.",
-  objectives:
-    "Xây dựng một hệ thống demo minh họa ứng dụng Blockchain trong giao dịch tài chính an toàn.",
-  subTasks: [
-    {
-      key: "1",
-      name: "Nộp đề cương",
-      startDate: "2024-06-15",
-      deadline: "2024-07-01",
-      description:
-        "Đề cương nghiên cứu, bao gồm mục tiêu, phạm vi, và phương pháp",
-    },
-  ],
-};
 
 // Define the type for API response
-interface ThesisDetailResponse {
-  id?: string;
-  title?: string;
-  description?: string;
-  major?: string | { majorName: string };
-  status?: string;
-  subTasks?: SubTask[];
-  student?: Student | null;
-}
 
 const ThesisDetail = () => {
   const navigate = useNavigate();
@@ -211,21 +119,11 @@ const ThesisDetail = () => {
     useState(false);
   const [isDeletingThesis, setIsDeletingThesis] = useState(false);
 
-  const [thesis, setThesis] = useState<
-    typeof thesisData | typeof thesisDataNoStudent
-  >(thesisData);
+  const [thesis, setThesis] = useState([]);
 
   // Add loading states for various API calls
   const [documentsLoading, setDocumentsLoading] = useState(false);
   const [meetingsLoading, setMeetingsLoading] = useState(false);
-
-  const toggleThesisDemo = () => {
-    if (thesis.id === "1") {
-      setThesis(thesisDataNoStudent as typeof thesisDataNoStudent);
-    } else {
-      setThesis(thesisData as typeof thesisData);
-    }
-  };
 
   const { data: thesisDataResponse, isLoading } = useQuery<
     ThesisDetailResponse,
@@ -300,25 +198,6 @@ const ThesisDetail = () => {
 
   const openEditModal = () => {
     setIsEditModalVisible(true);
-  };
-
-  const handleEditSubmit = (values: {
-    title: string;
-    description: string;
-    major: string;
-    status: string;
-    deadline: dayjs.Dayjs;
-  }) => {
-    setThesis({
-      ...thesis,
-      title: values.title,
-      description: values.description,
-      major: values.major,
-      status: values.status,
-      deadline: values.deadline.format("YYYY-MM-DD"),
-    });
-    message.success("Cập nhật thông tin đề tài thành công!");
-    setIsEditModalVisible(false);
   };
 
   const openSubtaskModal = (subtask?: SubTask) => {
@@ -402,7 +281,9 @@ const ThesisDetail = () => {
       }
 
       await deleteThesis(Number(thesisId));
-      message.success(`Đã xóa đề tài "${thesis.title}" thành công`);
+      message.success(
+        `Đã xóa đề tài "${thesisDataResponse?.title}" thành công`
+      );
       queryClient.invalidateQueries({ queryKey: ["myTheses"] });
       navigate("/thesis-management");
     } catch (error) {
@@ -451,17 +332,12 @@ const ThesisDetail = () => {
         <Row gutter={[24, 24]}>
           <Col span={24}>
             <ThesisHeader
-              id={thesisDataResponse?.id?.toString() || thesis.id}
-              title={thesisDataResponse?.title || thesis.title}
-              description={
-                thesisDataResponse?.description || thesis.description
-              }
-              major={thesisDataResponse?.major || thesis.major}
-              status={thesisDataResponse?.status || thesis.status}
+              id={thesisDataResponse?.thesis_id.toString() || "--"}
+              title={thesisDataResponse?.title || "--"}
+              description={thesisDataResponse?.description || "--"}
+              status={thesisDataResponse?.status || "--"}
               onEdit={openEditModal}
               onDelete={openDeleteThesisModal}
-              onToggleDemo={toggleThesisDemo}
-              showDemo={thesis.id === "1"}
             />
           </Col>
 
@@ -567,9 +443,7 @@ const ThesisDetail = () => {
 
         <EditThesisModal
           visible={isEditModalVisible}
-          thesis={thesis}
           onCancel={() => setIsEditModalVisible(false)}
-          onOk={handleEditSubmit}
         />
 
         <SubtaskModal
@@ -612,7 +486,7 @@ const ThesisDetail = () => {
           visible={isDeleteThesisModalVisible}
           title="Xác nhận xóa đề tài"
           description="Tất cả thông tin liên quan đến đề tài này sẽ bị xóa vĩnh viễn."
-          itemName={`đề tài "${thesis.title}"`}
+          itemName={`đề tài "${thesisDataResponse?.title}"`}
           loading={isDeletingThesis}
           onCancel={() => setIsDeleteThesisModalVisible(false)}
           onConfirm={handleDeleteThesis}

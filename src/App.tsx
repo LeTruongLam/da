@@ -38,18 +38,19 @@ const App = () => {
           ) : (
             <Route path="/" element={<Layout />}>
               {/* Dashboard động theo vai trò */}
-              {user.role === USER_ROLES.STUDENT && (
+              {user.role_name === USER_ROLES.STUDENT && (
                 <Route index element={<StudentDashboard />} />
               )}
-              {user.role === USER_ROLES.LECTURER && (
+              {(user.role_name === USER_ROLES.INSIDE_LECTURER ||
+                user.role_name === USER_ROLES.OUTSIDE_LECTURER) && (
                 <Route index element={<TeacherDashboard />} />
               )}
-              {user.role === USER_ROLES.ADMIN && (
+              {user.role_name === USER_ROLES.ADMIN && (
                 <Route index element={<UserManagement />} />
               )}
 
               {/* Routes cho Sinh viên */}
-              {user.role === USER_ROLES.STUDENT && (
+              {user.role_name === USER_ROLES.STUDENT && (
                 <>
                   <Route path="thesis-list" element={<ThesisList />} />
                   <Route path="teacher-list" element={<TeacherList />} />
@@ -58,7 +59,8 @@ const App = () => {
               )}
 
               {/* Routes cho Giảng viên */}
-              {user.role === USER_ROLES.LECTURER && (
+              {(user.role_name === USER_ROLES.INSIDE_LECTURER ||
+                user.role_name === USER_ROLES.OUTSIDE_LECTURER) && (
                 <>
                   <Route
                     path="thesis-management"
@@ -85,7 +87,7 @@ const App = () => {
               )}
 
               {/* Routes cho Admin */}
-              {user.role === USER_ROLES.ADMIN && (
+              {user.role_name === USER_ROLES.ADMIN && (
                 <>
                   <Route path="user-management" element={<UserManagement />} />
                   <Route path="system-settings" element={<SystemSettings />} />

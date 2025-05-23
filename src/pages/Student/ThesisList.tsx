@@ -29,7 +29,6 @@ import type { RootState } from "../../store";
 import { useNavigate } from "react-router-dom";
 import { getAllTheses, getMyTheses } from "@/services/api/thesis";
 import type { ThesisResponse } from "@/services/api/thesis";
-import { formatDate } from "@/lib/ultils";
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
@@ -90,9 +89,9 @@ const ThesisList = () => {
   const { data: myTheses = [], isLoading: isLoadingMy } = useQuery<
     ThesisResponse[]
   >({
-    queryKey: ["myTheses", user?.userId],
+    queryKey: ["myTheses", user?.user_id],
     queryFn: async () => {
-      if (!user?.userId) return [];
+      if (!user?.user_id) return [];
       try {
         const response = await getMyTheses();
         return response;
@@ -104,37 +103,17 @@ const ThesisList = () => {
         return [];
       }
     },
-    enabled: !!user?.userId,
+    enabled: !!user?.user_id,
   });
 
-  console.log("myTheses", myTheses);
-
   // Filter theses based on search text
-  const filteredAllTheses = allTheses.filter(
-    (thesis) =>
-      thesis.title.toLowerCase().includes(searchAllTheses.toLowerCase()) ||
-      thesis.description
-        .toLowerCase()
-        .includes(searchAllTheses.toLowerCase()) ||
-      thesis.lecturer.name
-        .toLowerCase()
-        .includes(searchAllTheses.toLowerCase()) ||
-      thesis.major.majorName
-        .toLowerCase()
-        .includes(searchAllTheses.toLowerCase())
+  const filteredAllTheses = allTheses.filter((thesis) =>
+    thesis.title.toLowerCase().includes(searchAllTheses.toLowerCase())
   );
 
   // Filter my theses based on search text
-  const filteredMyTheses = myTheses.filter(
-    (thesis) =>
-      thesis.title.toLowerCase().includes(searchMyTheses.toLowerCase()) ||
-      thesis.description.toLowerCase().includes(searchMyTheses.toLowerCase()) ||
-      thesis.lecturer.name
-        .toLowerCase()
-        .includes(searchMyTheses.toLowerCase()) ||
-      thesis.major.majorName
-        .toLowerCase()
-        .includes(searchMyTheses.toLowerCase())
+  const filteredMyTheses = myTheses.filter((thesis) =>
+    thesis.title.toLowerCase().includes(searchMyTheses.toLowerCase())
   );
 
   // Handle registering for a thesis
@@ -166,7 +145,7 @@ const ThesisList = () => {
 
   // View thesis detail
   const viewThesisDetail = (thesis: ThesisResponse) => {
-    navigate(`/my-thesis/${thesis.thesisId}`);
+    navigate(`/my-thesis/${thesis.thesis_id}`);
   };
 
   // Show thesis details modal
@@ -189,55 +168,18 @@ const ThesisList = () => {
       ellipsis: true,
     },
     {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-      render: (text: string) => {
-        const maxLength = 100;
-        const truncated =
-          text && text.length > maxLength
-            ? `${text.slice(0, maxLength)}...`
-            : text || "--";
-        return <Text>{truncated}</Text>;
-      },
+      title: "Người tạo",
+      dataIndex: "creator_name",
+      key: "creator_name",
+      render: (value: string) => <Space>{value || "--"}</Space>,
     },
-    {
-      title: "Giảng viên hướng dẫn",
-      dataIndex: "lecturer",
-      key: "lecturer",
-      render: (lecturer: ThesisResponse["lecturer"]) => (
-        <Space>{lecturer.name || "--"}</Space>
-      ),
-    },
-    {
-      title: "Ngành",
-      dataIndex: "major",
-      key: "major",
-      render: (major: ThesisResponse["major"]) => (
-        <Space>
-          <BookOutlined />
-          {major.majorName || "--"}
-        </Space>
-      ),
-    },
+
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       width: 150,
       render: (status: ThesisResponse["status"]) => getStatusTag(status),
-    },
-    {
-      title: "Thao tác",
-      key: "action",
-      width: 150,
-      render: (_: unknown, record: ThesisResponse) => (
-        <Space>
-          <Button type="primary" onClick={() => showThesisDetails(record)}>
-            Chi tiết
-          </Button>
-        </Space>
-      ),
     },
   ];
 
@@ -256,25 +198,9 @@ const ThesisList = () => {
     },
     {
       title: "Giảng viên hướng dẫn",
-      dataIndex: "lecturer",
-      key: "lecturer",
-      render: (lecturer: ThesisResponse["lecturer"]) => (
-        <Space>
-          <Avatar icon={<UserOutlined />} />
-          {lecturer.name}
-        </Space>
-      ),
-    },
-    {
-      title: "Ngành",
-      dataIndex: "major",
-      key: "major",
-      render: (major: ThesisResponse["major"]) => (
-        <Space>
-          <BookOutlined />
-          {major.majorName}
-        </Space>
-      ),
+      dataIndex: "creator_name",
+      key: "creator_name",
+      render: (value: string) => <Space>{value || "--"}</Space>,
     },
     {
       title: "Trạng thái",
@@ -429,19 +355,11 @@ const ThesisList = () => {
                   }
                   size="small"
                 >
-                  <Space direction="vertical" style={{ width: "100%" }}>
+                  {/* <Space direction="vertical" style={{ width: "100%" }}>
                     {_renderContent({
                       title: "Mô tả",
                       content: selectedThesis.description,
                     })}
-                    <Row gutter={16}>
-                      <Col span={12}>
-                        {_renderContent({
-                          title: "Ngành",
-                          content: selectedThesis.major.majorName,
-                        })}
-                      </Col>
-                    </Row>
                     <Paragraph>
                       <Text strong>Trạng thái: </Text>
                       {getStatusTag(selectedThesis.status)}
@@ -452,7 +370,7 @@ const ThesisList = () => {
                         content: formatDate(selectedThesis.createAt),
                       })}
                     </Paragraph>
-                  </Space>
+                  </Space> */}
                 </Card>
               </Col>
             </Row>

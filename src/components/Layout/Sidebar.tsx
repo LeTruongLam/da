@@ -25,7 +25,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
   const { token } = theme.useToken();
 
   const menuItems = [
-    ...(user?.role !== USER_ROLES.ADMIN
+    ...(user?.role_name !== USER_ROLES.ADMIN
       ? [
           {
             key: "/",
@@ -34,7 +34,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
           },
         ]
       : []),
-    ...(user?.role === USER_ROLES.STUDENT
+    ...(user?.role_name === USER_ROLES.STUDENT
       ? [
           {
             key: "/thesis-list",
@@ -48,7 +48,8 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
           },
         ]
       : []),
-    ...(user?.role === USER_ROLES.LECTURER
+    ...(user?.role_name === USER_ROLES.INSIDE_LECTURER ||
+    user?.role_name === USER_ROLES.OUTSIDE_LECTURER
       ? [
           {
             key: "/thesis-management",
@@ -67,7 +68,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
           },
         ]
       : []),
-    ...(user?.role === USER_ROLES.ADMIN
+    ...(user?.role_name === USER_ROLES.ADMIN
       ? [
           {
             key: "/user-management",
@@ -123,10 +124,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
         selectedKeys={[
           location.pathname.includes("create-thesis") ||
           (location.pathname.includes("thesis-detail") &&
-            user?.role === USER_ROLES.LECTURER)
+            (user?.role_name === USER_ROLES.INSIDE_LECTURER ||
+              user?.role_name === USER_ROLES.OUTSIDE_LECTURER))
             ? "/thesis-management"
             : location.pathname.includes("my-thesis") &&
-              user?.role === USER_ROLES.STUDENT
+              user?.role_name === USER_ROLES.STUDENT
             ? "/thesis-list"
             : location.pathname,
         ]}

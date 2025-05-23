@@ -6,7 +6,6 @@ import {
   Form,
   Input,
   notification,
-  Select,
   Switch,
   Tag,
 } from "antd";
@@ -17,8 +16,6 @@ import { useState } from "react";
 import { resetPassword } from "@/services/api/auth";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getUserProfile, updateUserProfile } from "@/services/api/profile";
-import { getMajors } from "@/services/api/major";
-import type { Major } from "@/services/api/major";
 
 interface ProfileModalProps {
   open: boolean;
@@ -36,31 +33,25 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
 
-  const { data: userProfile } = useQuery({
-    queryKey: ["userProfile"],
-    queryFn: async () => {
-      if (!user) {
-        return null;
-      }
-      try {
-        const response = await getUserProfile(user.userId);
-        return response;
-      } catch {
-        notification.error({
-          message: "Lỗi",
-          description:
-            "Không thể tải thông tin người dùng. Vui lòng thử lại sau!",
-        });
-        return null;
-      }
-    },
-    enabled: !!token,
-  });
-
-  const { data: majors } = useQuery({
-    queryKey: ["majors"],
-    queryFn: getMajors,
-  });
+  // const { data: userProfile } = useQuery({
+  //   queryKey: ["userProfile"],
+  //   queryFn: async () => {
+  //     if (!user) {
+  //       return null;
+  //     }
+  //     try {
+  //       const response = await getUserProfile(user.user_id);
+  //       return response;
+  //     } catch {
+  //       notification.error({
+  //         message: "Lỗi",
+  //         description:
+  //           "Không thể tải thông tin người dùng. Vui lòng thử lại sau!",
+  //       });
+  //     }
+  //   },
+  //   enabled: !!token,
+  // });
 
   const handleResetPassword = async (values: { newPassword: string }) => {
     try {
@@ -72,6 +63,8 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
         });
         return;
       }
+
+
       await resetPassword(token, values.newPassword);
       notification.success({
         message: "Thành công",
@@ -138,14 +131,14 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
           <Button
             key="edit"
             type="primary"
-            onClick={() => {
-              setIsEditProfileModalOpen(true);
-              editForm.setFieldsValue({
-                name: userProfile?.name,
-                majorId: userProfile?.major.majorId,
-                isNotificationsEnabled: userProfile?.isNotificationsEnabled,
-              });
-            }}
+            // onClick={() => {
+            //   setIsEditProfileModalOpen(true);
+            //   editForm.setFieldsValue({
+            //     name: userProfile?.name,
+            //     majorId: userProfile?.major.majorId,
+            //     isNotificationsEnabled: userProfile?.isNotificationsEnabled,
+            //   });
+            // }}
             loading={isEditingProfile}
             disabled={isResettingPassword}
           >
@@ -160,7 +153,7 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
         <div style={{ textAlign: "center", marginBottom: 24 }}>
           <Avatar size={64} icon={<UserOutlined />} />
         </div>
-        <Descriptions bordered column={1}>
+        {/* <Descriptions bordered column={1}>
           <Descriptions.Item label="Họ và tên">
             {userProfile?.name}
           </Descriptions.Item>
@@ -177,7 +170,7 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
               <Tag color="error">Đã tắt</Tag>
             )}
           </Descriptions.Item>
-        </Descriptions>
+        </Descriptions> */}
       </Modal>
 
       <Modal
@@ -232,19 +225,6 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
             rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
           >
             <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="majorId"
-            label="Chuyên ngành"
-            rules={[{ required: true, message: "Vui lòng chọn chuyên ngành!" }]}
-          >
-            <Select
-              options={majors?.map((major: Major) => ({
-                label: major.majorName,
-                value: major.majorId,
-              }))}
-            />
           </Form.Item>
 
           <Form.Item

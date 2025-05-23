@@ -2,26 +2,23 @@ import { Card, Form, Input, Button, message, Spin, Select } from "antd";
 import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { createThesis } from "@/services/api/thesis";
 import type { ThesisCreateRequest } from "@/services/api/thesis";
-import { getMajors } from "@/services/api/major";
 import type { Major } from "@/services/api/major";
 import { useNavigate } from "react-router-dom";
+import { THESIS_STATUS, THESIS_STATUS_LABELS } from "@/lib/constants";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 interface FormValues {
   title: string;
-  description?: string;
-  majorId: number;
+  description: string;
+  status: string;
 }
 
 const CreateThesis = () => {
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
+  const { user } = useSelector((state: RootState) => state.auth);
   const navigate = useNavigate();
-
-  // Fetch majors using React Query
-  const { data: majors = [], isLoading: isLoadingMajors } = useQuery({
-    queryKey: ["majors"],
-    queryFn: getMajors,
-  });
 
   // Create thesis mutation
   const createThesisMutation = useMutation({
@@ -41,8 +38,9 @@ const CreateThesis = () => {
   const onFinish = (values: FormValues) => {
     const thesisData: ThesisCreateRequest = {
       title: values.title,
-      description: values.description || "",
-      majorId: values.majorId,
+      description: values.description,
+      status: THESIS_STATUS.AVAILABLE,
+      create_by: user?.user_id || 0,
     };
 
     createThesisMutation.mutate(thesisData);
@@ -87,21 +85,24 @@ const CreateThesis = () => {
           </Form.Item>
 
           <Form.Item
-            name="majorId"
-            label="Chuyên ngành"
-            rules={[{ required: true, message: "Chọn chuyên ngành!" }]}
+            name="status"
+            label="Trạng thái"
+            hidden={true}
           >
             <Select
-              placeholder="Chọn chuyên ngành"
-              loading={isLoadingMajors}
-              options={majors.map((major: Major) => ({
-                label: major.majorName,
-                value: major.majorId,
+              placeholder="Chọn trạng thái"
+              options={Object.entries(THESIS_STATUS).map(([key, value]) => ({
+                label: THESIS_STATUS_LABELS[value],
+                value: value,
               }))}
             />
           </Form.Item>
 
-          <Form.Item name="description" label="Mô tả đề tài">
+          <Form.Item
+            name="description"
+            label="Mô tả đề tài"
+            rules={[{ required: true }]}
+          >
             <Input.TextArea rows={3} placeholder="Mô tả chi tiết đề tài..." />
           </Form.Item>
 

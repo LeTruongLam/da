@@ -1,18 +1,10 @@
 import { get, post } from "@/lib/base-api";
 import { API_CONFIG } from "./config";
-import type { UserRole } from "@/store/slices/authSlice";
+import type { User } from "@/store/slices/authSlice";
 
 // Define User type since it's not exported from types.ts
-export interface User {
-  userId: string;
-  name: string;
-  email: string;
-  faculty: string;
-  major: string;
-  role: UserRole;
-}
 
-interface LoginRequest {
+export interface LoginRequest {
   email: string;
   password: string;
 }
@@ -28,6 +20,11 @@ interface RegisterData {
   email: string;
   password: string;
   majorId: number;
+}
+
+export interface forgotPasswordRequest {
+  newPassword: string;
+  token: string;
 }
 
 /**
@@ -66,8 +63,8 @@ export const forgotPassword = (email: string) =>
   });
 
 // Reset password
-export const resetPassword = (token: string, newPassword: string) =>
-  post<{ message: string }>(API_CONFIG.ENDPOINTS.AUTH.RESET_PASSWORD, {
+export const resetPassword = async (token: string, newPassword: string) =>
+  await post<unknown>(API_CONFIG.ENDPOINTS.AUTH.RESET_PASSWORD, {
     token,
     newPassword,
   });

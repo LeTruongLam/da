@@ -1,12 +1,12 @@
 import { Card, Table, Tag, Button, Pagination, Alert } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { EyeOutlined, UserOutlined } from "@ant-design/icons";
+import { EyeOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { getMyTheses } from "@/services/api/thesis";
 import type { ThesisResponse } from "@/services/api/thesis";
 import type { Key } from "react";
-import { formatDate } from "@/lib/ultils";
+import { TASK_STATUS_COLORS, THESIS_STATUS, THESIS_STATUS_LABELS } from "@/lib/constants";
 
 const ThesisManagement = () => {
   const navigate = useNavigate();
@@ -32,50 +32,25 @@ const ThesisManagement = () => {
       width: 280,
     },
     {
-      title: "Giảng viên",
-      dataIndex: "lecturer",
-      key: "lecturer",
-      render: (lecturer: ThesisResponse["lecturer"]) => (
-        <span>
-          <UserOutlined /> {lecturer.name}
-        </span>
-      ),
-    },
-    {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      filters: [
-        { text: "Đang mở", value: "available" },
-        { text: "Đang thực hiện", value: "in_progress" },
-        { text: "Hoàn thành", value: "completed" },
-        { text: "Không khả dụng", value: "not available" },
-        { text: "Tạm hoãn", value: "on hold" },
-      ],
-      onFilter: (value: boolean | Key, record: ThesisResponse) =>
+      filters: Object.entries(THESIS_STATUS).map(([_, value]) => ({
+        text: THESIS_STATUS_LABELS[value],
+        value,
+      })),
+      onFilter: (value: string | number | boolean, record: ThesisResponse) =>
         record.status === value,
-      render: (status: ThesisResponse["status"]) => {
-        const statusMap = {
-          available: { color: "processing", text: "Đang mở" },
-          in_progress: { color: "processing", text: "Đang thực hiện" },
-          completed: { color: "success", text: "Hoàn thành" },
-          "not available": { color: "default", text: "Không khả dụng" },
-          "on hold": { color: "warning", text: "Tạm hoãn" },
-        };
-        const { color, text } = statusMap[status];
-        return <Tag color={color}>{text}</Tag>;
-      },
+      render: (status: ThesisResponse["status"]) => (
+        <Tag color={TASK_STATUS_COLORS[status]}>{THESIS_STATUS_LABELS[status]}</Tag>
+      ),
     },
-    {
-      title: "Ngành",
-      dataIndex: ["major", "majorName"],
-      key: "major",
-    },
+
     {
       title: "Ngày tạo",
       dataIndex: "createAt",
       key: "createAt",
-      render: (createAt: ThesisResponse["createAt"]) => formatDate(createAt),
+      render: () => "--",
     },
     {
       title: "Thao tác",
@@ -85,7 +60,7 @@ const ThesisManagement = () => {
         <Button
           type="link"
           icon={<EyeOutlined />}
-          onClick={() => navigate(`/thesis-detail/${record.thesisId}`)}
+          onClick={() => navigate(`/thesis-detail/${record.thesis_id}`)}
         >
           Chi tiết
         </Button>

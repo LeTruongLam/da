@@ -74,7 +74,6 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
                 </Space>
               ),
             },
-            { title: "Kích thước", dataIndex: "size", key: "size" },
             {
               title: "Thao tác",
               key: "action",

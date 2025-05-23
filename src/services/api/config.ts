@@ -1,5 +1,6 @@
 export const API_CONFIG = {
-  BASE_URL: "https://thesis-h7aqe0buf9hncygr.ukwest-01.azurewebsites.net/api",
+  // BASE_URL: "https://thesis-h7aqe0buf9hncygr.ukwest-01.azurewebsites.net/api",
+  BASE_URL: "https://localhost:5070/api",
   ENDPOINTS: {
     AUTH: {
       LOGIN: "/auth/login",
@@ -21,10 +22,10 @@ export const API_CONFIG = {
     },
     THESIS: {
       LIST: "/theses",
-      MY_THESES: "/users/my-thesis",
+      MY_THESES: "/theses/my-thesis",
       DETAIL: (id: number) => `/theses/${id}`,
       CREATE: "/theses",
-      UPDATE: (id: string) => `/theses/${id}`,
+      UPDATE: (id: number) => `/theses/${id}`,
       DELETE: (id: number) => `/theses/${id}`,
       DOCUMENTS: (thesisId: string) => `/theses/${thesisId}/documents`,
     },

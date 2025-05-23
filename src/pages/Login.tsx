@@ -18,7 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { setCredentials } from "../store/slices/authSlice";
 import { useState } from "react";
-import { login } from "../services/api/auth";
+import { login, type LoginRequest } from "../services/api/auth";
 import { USER_ROLES } from "../lib/constants";
 
 const { Title, Text } = Typography;
@@ -26,20 +26,11 @@ const { Title, Text } = Typography;
 const demoAccounts = [
   {
     role: USER_ROLES.STUDENT,
-    email: "PhucNVHE171648@fpt.edu.vn",
-    password: "PhucNVHE171648",
-  },
-  {
-    role: USER_ROLES.LECTURER,
-    email: "truonglam962002@gmail.com",
-    password: "q-uL39oQ?N",
-  },
-  {
-    role: USER_ROLES.ADMIN,
-    email: "admin@fpt.edu.vn",
-    password: "Admin@123",
+    email: "Nguyenvanphucnkc@gmail.com",
+    password: "stm#CA0HIL",
   },
 ];
+
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -47,15 +38,14 @@ const Login = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
 
-  const handleLogin = async (values: { email: string; password: string }) => {
+  const handleLogin = async (values: LoginRequest) => {
     try {
       setLoading(true);
       const result = await login(values);
 
-      // Dispatch credentials to Redux store
       dispatch(
         setCredentials({
-          user: { ...result.user, userId: Number(result.user.userId) },
+          user: result.user,
           token: result.token,
           expiresIn: result.expiresIn,
         })

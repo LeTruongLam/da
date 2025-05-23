@@ -1,60 +1,58 @@
 import { useEffect } from "react";
-import { Form, Input, Modal, DatePicker, Select, Row, Col } from "antd";
+import { Form, Input, Modal, Select } from "antd";
 import { useForm } from "antd/es/form/Form";
-import dayjs from "dayjs";
-import { getMajors } from "@/services/api/major";
-import type { Major } from "@/services/api/major";
-import { useQuery } from "@tanstack/react-query";
+import { useParams } from "react-router-dom";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  getThesisById,
+  updateThesis as updateThesisApi,
+  type ThesisUpdateRequest,
+} from "@/services/api";
+import { THESIS_STATUS, THESIS_STATUS_LABELS } from "@/lib/constants";
 
 const { TextArea } = Input;
-
-interface ThesisData {
-  id: string;
-  title: string;
-  description: string;
-  major: string;
-  status: string;
-  deadline: string;
-}
 
 interface EditThesisFormValues {
   title: string;
   description: string;
-  major: string;
   status: string;
-  deadline: dayjs.Dayjs;
 }
 
 interface EditThesisModalProps {
   visible: boolean;
-  thesis: ThesisData;
   onCancel: () => void;
-  onOk: (values: EditThesisFormValues) => void;
 }
 
-const EditThesisModal = ({
-  visible,
-  thesis,
-  onCancel,
-  onOk,
-}: EditThesisModalProps) => {
+const EditThesisModal = ({ visible, onCancel }: EditThesisModalProps) => {
   const [form] = useForm();
+  const { id } = useParams<{ id: string }>();
 
-  // Fetch majors data using react-query
-  const { data: majors, isLoading: isMajorsLoading } = useQuery({
-    queryKey: ["majors"],
-    queryFn: getMajors,
+  const thesisId = Number(id);
+
+  const { data: thesis } = useQuery({
+    queryKey: ["thesis", thesisId],
+    queryFn: () => getThesisById(thesisId),
+    enabled: !!id,
   });
 
-  // Set form values when modal becomes visible or thesis changes
+  const { mutate: handleUpdateThesis, isPending } = useMutation({
+    mutationFn: (values: ThesisUpdateRequest) =>
+      updateThesisApi(thesisId, { ...values, thesis_id: thesisId }),
+    onSuccess: () => {
+      form.resetFields();
+      onCancel();
+    },
+    onError: (error) => {
+      console.error("Cập nhật thất bại:", error);
+    },
+  });
+
   useEffect(() => {
     if (visible && thesis) {
       form.setFieldsValue({
         title: thesis.title,
         description: thesis.description,
-        major: thesis.major,
         status: thesis.status,
-        deadline: thesis.deadline ? dayjs(thesis.deadline) : undefined,
       });
     }
   }, [visible, thesis, form]);
@@ -62,6 +60,10 @@ const EditThesisModal = ({
   const handleCancel = () => {
     form.resetFields();
     onCancel();
+  };
+
+  const handleSubmit = (values: EditThesisFormValues) => {
+    handleUpdateThesis(values as ThesisUpdateRequest);
   };
 
   return (
@@ -72,9 +74,10 @@ const EditThesisModal = ({
       onOk={() => form.submit()}
       okText="Lưu thay đổi"
       cancelText="Hủy"
+      confirmLoading={isPending}
       width={700}
     >
-      <Form form={form} layout="vertical" onFinish={onOk}>
+      <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item
           name="title"
           label="Tiêu đề đề tài"
@@ -83,43 +86,16 @@ const EditThesisModal = ({
           <Input placeholder="Nhập tiêu đề đề tài" />
         </Form.Item>
 
-        <Row gutter={16}>
-          <Col span={12}>
-            <Form.Item
-              name="major"
-              label="Chuyên ngành"
-              rules={[
-                { required: true, message: "Vui lòng chọn chuyên ngành" },
-              ]}
-            >
-              <Select placeholder="Chọn chuyên ngành" loading={isMajorsLoading}>
-                {majors?.map((major: Major) => (
-                  <Select.Option
-                    key={major.majorId}
-                    value={major.majorId.toString()}
-                  >
-                    {major.majorName}
-                  </Select.Option>
-                ))}
-              </Select>
-            </Form.Item>
-          </Col>
-          <Col span={12}>
-            <Form.Item
-              name="status"
-              label="Trạng thái"
-              rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
-            >
-              <Select placeholder="Chọn trạng thái">
-                <Select.Option value="Đang mở">Đang mở</Select.Option>
-                <Select.Option value="Đã đóng">Đã đóng</Select.Option>
-                <Select.Option value="Đã hoàn thành">
-                  Đã hoàn thành
-                </Select.Option>
-              </Select>
-            </Form.Item>
-          </Col>
-        </Row>
+        <Form.Item name="status" label="Trạng thái">
+          <Select
+            placeholder="Chọn trạng thái"
+            options={Object.entries(THESIS_STATUS).map(([key, value]) => ({
+              label: THESIS_STATUS_LABELS[value],
+              value,
+            }))}
+          />
+        </Form.Item>
+
         <Form.Item
           name="description"
           label="Mô tả"
