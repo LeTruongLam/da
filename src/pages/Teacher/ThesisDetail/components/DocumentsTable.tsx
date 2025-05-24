@@ -5,6 +5,7 @@ import {
   DownloadOutlined,
   DeleteOutlined,
 } from "@ant-design/icons";
+import type { MaterialsType } from "@/services/api";
 
 export interface Document {
   key: string;
@@ -17,7 +18,7 @@ export interface Document {
 }
 
 interface DocumentsTableProps {
-  documents: Document[];
+  documents: MaterialsType[];
   currentPage: number;
   pageSize: number;
   onUpload: () => void;
@@ -39,7 +40,19 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   title = "Tài liệu",
   loading = false,
 }) => {
-  const filteredDocuments = filter ? documents.filter(filter) : documents;
+  const mappedDocuments = documents.map((material) => ({
+    key: material.material_id.toString(),
+    name: material.file_name,
+    type: material.file_type,
+    uploadedBy: material.user_name,
+    uploadedAt: material.create_at,
+    size: "N/A",
+    url: material.file_path,
+  }));
+
+  const filteredDocuments = filter
+    ? mappedDocuments.filter(filter)
+    : mappedDocuments;
   const paginatedDocuments = filteredDocuments.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize

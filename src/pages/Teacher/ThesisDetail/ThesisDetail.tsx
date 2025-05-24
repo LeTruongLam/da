@@ -119,7 +119,7 @@ const ThesisDetail = () => {
     useState(false);
   const [isDeletingThesis, setIsDeletingThesis] = useState(false);
 
-  const [thesis, setThesis] = useState([]);
+  const [thesis, setThesis] = useState<ThesisDetailResponse | null>(null);
 
   // Add loading states for various API calls
   const [documentsLoading, setDocumentsLoading] = useState(false);
@@ -132,6 +132,12 @@ const ThesisDetail = () => {
     queryKey: ["thesis", thesisId],
     queryFn: () => getThesisById(thesisId as unknown as number),
   });
+
+  useEffect(() => {
+    if (thesisDataResponse) {
+      setThesis(thesisDataResponse);
+    }
+  }, [thesisDataResponse]);
 
   const openEvaluationModal = (student: Student) => {
     setCurrentStudent(student);
@@ -347,7 +353,6 @@ const ThesisDetail = () => {
                 <Row gutter={[24, 24]}>
                   <Col span={24}>
                     <StudentCard
-                      student={thesis.student}
                       onEvaluate={openEvaluationModal}
                       onScheduleMeeting={openMeetingModal}
                       onAddStudent={() => navigate("/approve-requests")}
@@ -356,8 +361,7 @@ const ThesisDetail = () => {
 
                   <Col span={24}>
                     <TasksTable
-                      tasks={thesis.subTasks}
-                      student={thesis.student}
+                      tasks={[]}
                       onAddTask={() => openSubtaskModal()}
                       onEditTask={openSubtaskModal}
                       onDeleteTask={openDeleteSubtaskModal}
@@ -366,7 +370,7 @@ const ThesisDetail = () => {
 
                   <Col span={12}>
                     <DocumentsTable
-                      documents={mockDocuments}
+                      documents={thesis?.materials || []}
                       currentPage={documentPage}
                       pageSize={PAGE_SIZE}
                       onUpload={openDocumentUploadModal}
@@ -393,10 +397,9 @@ const ThesisDetail = () => {
               <TabPane
                 tab="Đánh giá sinh viên"
                 key="2"
-                disabled={!thesis.student}
               >
                 <StudentEvaluation
-                  student={thesis.student}
+                  student={null}
                   documents={mockDocuments}
                   onEvaluate={openEvaluationModal}
                   onScheduleMeeting={openMeetingModal}

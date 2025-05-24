@@ -31,7 +31,7 @@ const demoAccounts = [
   },
     {
     role: USER_ROLES.STUDENT,
-    email: "tuonglam962002@gmail.com",
+    email: "truonglam962002@gmail.com",
     password: "123123",
   },
 ];

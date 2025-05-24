@@ -29,7 +29,7 @@ export interface Student {
 }
 
 interface StudentCardProps {
-  student: Student | null;
+  student?: Student;
   onEvaluate: (student: Student) => void;
   onScheduleMeeting: (student: Student) => void;
   onAddStudent?: () => void;
@@ -59,27 +59,21 @@ const StudentCard: React.FC<StudentCardProps> = ({
       <Row gutter={24}>
         <Col span={16}>
           <Title level={5}>
-            <UserOutlined /> {student.name}
+            <UserOutlined /> Nguyễn Văn A
           </Title>
-          {student.email && (
-            <Paragraph>
-              <Text strong>Email: </Text>
-              {student.email}
-            </Paragraph>
-          )}
+          <Paragraph>
+            <Text strong>Email: </Text>
+            truonglam962002@gmail.com
+          </Paragraph>
         </Col>
         <Col span={8}>
           <div>
             <Text strong>Tiến độ: </Text>
-            <Progress
-              percent={student.progress}
-              size="small"
-              status={student.progress < 40 ? "exception" : "active"}
-            />
+            <Progress percent={50} size="small" status="active" />
           </div>
           <div style={{ marginTop: 16 }}>
             <Text strong>Đánh giá: </Text>
-            <Rate disabled defaultValue={student.rating} />
+            <Rate disabled defaultValue={4} />
           </div>
           <Space style={{ marginTop: 24 }}>
             <Button icon={<StarOutlined />} onClick={() => onEvaluate(student)}>

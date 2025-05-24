@@ -150,27 +150,18 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
         ]}
         width={600}
       >
-        <div style={{ textAlign: "center", marginBottom: 24 }}>
-          <Avatar size={64} icon={<UserOutlined />} />
-        </div>
-        {/* <Descriptions bordered column={1}>
+        <Descriptions bordered column={1}>
           <Descriptions.Item label="Họ và tên">
-            {userProfile?.name}
+            Nguyễn Văn A
           </Descriptions.Item>
           <Descriptions.Item label="Email">
-            {userProfile?.email}
+            truonglam962002@gmail.com
           </Descriptions.Item>
-          <Descriptions.Item label="Chuyên ngành">
-            {userProfile?.major.majorName}
+          <Descriptions.Item label="Mã số">
+            20250001
           </Descriptions.Item>
-          <Descriptions.Item label="Cài đặt thông báo">
-            {userProfile?.isNotificationsEnabled ? (
-              <Tag color="success">Đã bật</Tag>
-            ) : (
-              <Tag color="error">Đã tắt</Tag>
-            )}
-          </Descriptions.Item>
-        </Descriptions> */}
+          
+        </Descriptions>
       </Modal>
 
       <Modal
