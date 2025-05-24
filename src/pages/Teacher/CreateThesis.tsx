@@ -1,8 +1,7 @@
 import { Card, Form, Input, Button, message, Spin, Select } from "antd";
-import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createThesis } from "@/services/api/thesis";
 import type { ThesisCreateRequest } from "@/services/api/thesis";
-import type { Major } from "@/services/api/major";
 import { useNavigate } from "react-router-dom";
 import { THESIS_STATUS, THESIS_STATUS_LABELS } from "@/lib/constants";
 import { useSelector } from "react-redux";
@@ -84,11 +83,7 @@ const CreateThesis = () => {
             <Input placeholder="Nhập tiêu đề đề tài" />
           </Form.Item>
 
-          <Form.Item
-            name="status"
-            label="Trạng thái"
-            hidden={true}
-          >
+          <Form.Item name="status" label="Trạng thái" hidden={true}>
             <Select
               placeholder="Chọn trạng thái"
               options={Object.entries(THESIS_STATUS).map(([key, value]) => ({

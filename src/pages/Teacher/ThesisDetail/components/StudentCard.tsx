@@ -31,14 +31,12 @@ export interface Student {
 interface StudentCardProps {
   student?: Student;
   onEvaluate: (student: Student) => void;
-  onScheduleMeeting: (student: Student) => void;
   onAddStudent?: () => void;
 }
 
 const StudentCard: React.FC<StudentCardProps> = ({
   student,
   onEvaluate,
-  onScheduleMeeting,
   onAddStudent,
 }) => {
   if (!student) {
@@ -78,12 +76,6 @@ const StudentCard: React.FC<StudentCardProps> = ({
           <Space style={{ marginTop: 24 }}>
             <Button icon={<StarOutlined />} onClick={() => onEvaluate(student)}>
               Đánh giá
-            </Button>
-            <Button
-              icon={<CalendarOutlined />}
-              onClick={() => onScheduleMeeting(student)}
-            >
-              Lịch họp
             </Button>
           </Space>
         </Col>

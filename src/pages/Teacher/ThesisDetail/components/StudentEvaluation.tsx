@@ -14,13 +14,11 @@ import {
 import {
   UserOutlined,
   StarOutlined,
-  CalendarOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
   ClockCircleOutlined,
   CommentOutlined,
   DownloadOutlined,
-  EditOutlined,
   FileTextOutlined,
 } from "@ant-design/icons";
 import type { SubTask } from "./TasksTable";
@@ -33,7 +31,6 @@ interface StudentEvaluationProps {
   student: Student | null;
   documents: Document[];
   onEvaluate: (student: Student) => void;
-  onScheduleMeeting: (student: Student) => void;
   onTaskFeedback: (student: Student, task: SubTask) => void;
   onUpdateProgress: (student: Student) => void;
   onComment: (document: Document) => void;
@@ -43,7 +40,6 @@ const StudentEvaluation: React.FC<StudentEvaluationProps> = ({
   student,
   documents,
   onEvaluate,
-  onScheduleMeeting,
   onTaskFeedback,
   onUpdateProgress,
   onComment,
@@ -112,12 +108,6 @@ const StudentEvaluation: React.FC<StudentEvaluationProps> = ({
                     onClick={() => onEvaluate(student)}
                   >
                     Đánh giá
-                  </Button>
-                  <Button
-                    icon={<CalendarOutlined />}
-                    onClick={() => onScheduleMeeting(student)}
-                  >
-                    Lịch họp
                   </Button>
                 </Space>
               </Space>

@@ -17,7 +17,6 @@ import SystemSettings from "@/pages/Admin/SystemSettings";
 import ApproveRequests from "@/pages/Teacher/ApproveRequests";
 import TeacherThesisDetail from "@/pages/Teacher/ThesisDetail/ThesisDetail";
 import TeacherList from "@/pages/Student/TeacherList";
-import MeetingApproval from "@/pages/Teacher/MeetingApproval";
 import SystemNotifications from "@/pages/Admin/SystemNotifications";
 import { USER_ROLES } from "./lib/constants";
 
@@ -78,10 +77,6 @@ const App = () => {
                   <Route
                     path="student-thesis-detail/:studentId"
                     element={<TeacherThesisDetail />}
-                  />
-                  <Route
-                    path="meeting-approval"
-                    element={<MeetingApproval />}
                   />
                 </>
               )}

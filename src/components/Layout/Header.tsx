@@ -14,7 +14,11 @@ import {
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
-import { USER_ROLE_LABELS, USER_ROLE_COLORS } from "@/lib/constants";
+import {
+  USER_ROLE_LABELS,
+  USER_ROLE_COLORS,
+  USER_ROLES,
+} from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
 import { getUserProfile } from "@/services/api/profile";
 
@@ -27,7 +31,9 @@ interface HeaderProps {
 
 const getRoleTagColor = (roleName?: string) => {
   if (!roleName) return "default";
-  return USER_ROLE_COLORS[roleName as keyof typeof USER_ROLE_COLORS] || "default";
+  return (
+    USER_ROLE_COLORS[roleName as keyof typeof USER_ROLE_COLORS] || "default"
+  );
 };
 
 const getRoleLabel = (role?: string) => {
@@ -106,6 +112,11 @@ const Header = ({
         />
       </Space>
       <Space>
+        <Tag color="blue">
+          <span>
+            {USER_ROLE_LABELS[user?.role_name as keyof typeof USER_ROLES]}
+          </span>
+        </Tag>
         <Dropdown
           menu={{
             items: userMenuItems,

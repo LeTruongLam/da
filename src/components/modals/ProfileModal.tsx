@@ -64,7 +64,6 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
         return;
       }
 
-
       await resetPassword(token, values.newPassword);
       notification.success({
         message: "Thành công",
@@ -151,16 +150,11 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
         width={600}
       >
         <Descriptions bordered column={1}>
-          <Descriptions.Item label="Họ và tên">
-            Nguyễn Văn A
-          </Descriptions.Item>
+          <Descriptions.Item label="Họ và tên">Nguyễn Văn A</Descriptions.Item>
           <Descriptions.Item label="Email">
             truonglam962002@gmail.com
           </Descriptions.Item>
-          <Descriptions.Item label="Mã số">
-            20250001
-          </Descriptions.Item>
-          
+          <Descriptions.Item label="Mã số">20250001</Descriptions.Item>
         </Descriptions>
       </Modal>
 

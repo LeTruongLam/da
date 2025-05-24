@@ -61,11 +61,6 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             icon: <TeamOutlined />,
             label: "Duyệt đăng ký",
           },
-          {
-            key: "/meeting-approval",
-            icon: <CalendarOutlined />,
-            label: "Quản lý lịch hẹn",
-          },
         ]
       : []),
     ...(user?.role_name === USER_ROLES.ADMIN

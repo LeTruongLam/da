@@ -64,7 +64,9 @@ export const forgotPassword = (email: string) =>
 
 // Reset password
 export const resetPassword = async (token: string, newPassword: string) =>
-  await post<unknown>(API_CONFIG.ENDPOINTS.AUTH.RESET_PASSWORD, {
-    token,
-    newPassword,
-  });
+  await post<unknown>(
+    `${API_CONFIG.ENDPOINTS.AUTH.RESET_PASSWORD}?${new URLSearchParams({
+      token,
+      newPassword,
+    }).toString()}`
+  );

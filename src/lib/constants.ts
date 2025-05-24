@@ -105,5 +105,4 @@ export const ROUTES = {
   CREATE_THESIS: "/create-thesis",
   THESIS_DETAIL_TEACHER: "/thesis-detail",
   APPROVE_REQUESTS: "/approve-requests",
-  MEETING_APPROVAL: "/meeting-approval",
 };

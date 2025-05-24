@@ -15,11 +15,9 @@ import {
   StudentCard,
   TasksTable,
   DocumentsTable,
-  MeetingsTable,
   StudentEvaluation,
   EvaluationModal,
   TaskFeedbackModal,
-  MeetingModal,
   DocumentUploadModal,
   SubtaskModal,
   DeleteConfirmModal,
@@ -30,8 +28,6 @@ import type {
   Student,
   SubTask,
   Document,
-  Meeting,
-  MeetingFormValues,
   SubtaskFormValues,
 } from "./components";
 
@@ -59,20 +55,6 @@ const mockDocuments: Document[] = [
   },
 ];
 
-// Mock lịch họp
-const mockMeetings: Meeting[] = [
-  {
-    id: "1",
-    title: "Họp khởi động đề tài",
-    time: "2024-06-05 10:00",
-    student: "Nguyễn Văn A",
-    link: "https://meet.google.com/abc-defg-hij",
-  },
-];
-
-// Mẫu đề tài chưa có sinh viên đăng ký
-
-// Define the type for API response
 
 const ThesisDetail = () => {
   const navigate = useNavigate();
@@ -82,14 +64,12 @@ const ThesisDetail = () => {
   const queryClient = useQueryClient();
 
   const [documentPage, setDocumentPage] = useState(1);
-  const [meetingPage, setMeetingPage] = useState(1);
   const [activeTab, setActiveTab] = useState(initialTab);
 
   const [isEvaluationModalVisible, setIsEvaluationModalVisible] =
     useState(false);
   const [isTaskFeedbackModalVisible, setIsTaskFeedbackModalVisible] =
     useState(false);
-  const [isMeetingModalVisible, setIsMeetingModalVisible] = useState(false);
   const [isDocumentUploadModalVisible, setIsDocumentUploadModalVisible] =
     useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -101,14 +81,10 @@ const ThesisDetail = () => {
 
   const [evaluationForm] = Form.useForm();
   const [taskFeedbackForm] = Form.useForm();
-  const [meetingForm] = Form.useForm();
   const [documentForm] = Form.useForm();
   const [subtaskForm] = Form.useForm();
   const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-  const [isDeleteMeetingModalVisible, setIsDeleteMeetingModalVisible] =
-    useState(false);
-  const [meetingToDelete, setMeetingToDelete] = useState<Meeting | null>(null);
 
   const [isDeleteDocumentModalVisible, setIsDeleteDocumentModalVisible] =
     useState(false);
@@ -123,7 +99,6 @@ const ThesisDetail = () => {
 
   // Add loading states for various API calls
   const [documentsLoading, setDocumentsLoading] = useState(false);
-  const [meetingsLoading, setMeetingsLoading] = useState(false);
 
   const { data: thesisDataResponse, isLoading } = useQuery<
     ThesisDetailResponse,
@@ -177,20 +152,6 @@ const ThesisDetail = () => {
     taskFeedbackForm.resetFields();
   };
 
-  const openMeetingModal = (student: Student) => {
-    setCurrentStudent(student);
-    setIsMeetingModalVisible(true);
-  };
-
-  const handleScheduleMeeting = (values: MeetingFormValues) => {
-    message.success(
-      `Đã lên lịch họp với ${
-        currentStudent?.name
-      } vào ${values.meetingDate.format("DD/MM/YYYY HH:mm")}`
-    );
-    setIsMeetingModalVisible(false);
-    meetingForm.resetFields();
-  };
 
   const openDocumentUploadModal = () => {
     setIsDocumentUploadModalVisible(true);
@@ -254,15 +215,7 @@ const ThesisDetail = () => {
     setIsDeleteModalVisible(false);
   };
 
-  const openDeleteMeetingModal = (meeting: Meeting) => {
-    setMeetingToDelete(meeting);
-    setIsDeleteMeetingModalVisible(true);
-  };
-
-  const handleDeleteMeeting = () => {
-    message.success(`Đã xóa lịch họp "${meetingToDelete?.title}"`);
-    setIsDeleteMeetingModalVisible(false);
-  };
+ 
 
   const openDeleteDocumentModal = (document: Document) => {
     setDocumentToDelete(document);
@@ -318,18 +271,10 @@ const ThesisDetail = () => {
     }, 800);
   };
 
-  const loadMeetings = () => {
-    setMeetingsLoading(true);
-    // Simulate API call to load meetings
-    setTimeout(() => {
-      setMeetingsLoading(false);
-    }, 800);
-  };
 
   // Use these functions in useEffect to load data when component mounts
   useEffect(() => {
     loadDocuments();
-    loadMeetings();
   }, []);
 
   return (
@@ -354,7 +299,6 @@ const ThesisDetail = () => {
                   <Col span={24}>
                     <StudentCard
                       onEvaluate={openEvaluationModal}
-                      onScheduleMeeting={openMeetingModal}
                       onAddStudent={() => navigate("/approve-requests")}
                     />
                   </Col>
@@ -368,7 +312,7 @@ const ThesisDetail = () => {
                     />
                   </Col>
 
-                  <Col span={12}>
+                  <Col span={24}>
                     <DocumentsTable
                       documents={thesis?.materials || []}
                       currentPage={documentPage}
@@ -377,18 +321,6 @@ const ThesisDetail = () => {
                       onDelete={openDeleteDocumentModal}
                       onPageChange={setDocumentPage}
                       loading={documentsLoading}
-                    />
-                  </Col>
-
-                  <Col span={12}>
-                    <MeetingsTable
-                      meetings={mockMeetings}
-                      currentPage={meetingPage}
-                      pageSize={PAGE_SIZE}
-                      onAddMeeting={() => setIsMeetingModalVisible(true)}
-                      onDeleteMeeting={openDeleteMeetingModal}
-                      onPageChange={setMeetingPage}
-                      loading={meetingsLoading}
                     />
                   </Col>
                 </Row>
@@ -402,7 +334,6 @@ const ThesisDetail = () => {
                   student={null}
                   documents={mockDocuments}
                   onEvaluate={openEvaluationModal}
-                  onScheduleMeeting={openMeetingModal}
                   onTaskFeedback={openTaskFeedbackModal}
                   onUpdateProgress={handleUpdateProgress}
                   onComment={handleCommentDocument}
@@ -429,13 +360,6 @@ const ThesisDetail = () => {
           form={taskFeedbackForm}
         />
 
-        <MeetingModal
-          visible={isMeetingModalVisible}
-          student={currentStudent}
-          onCancel={() => setIsMeetingModalVisible(false)}
-          onSubmit={handleScheduleMeeting}
-          form={meetingForm}
-        />
 
         <DocumentUploadModal
           visible={isDocumentUploadModalVisible}
@@ -467,14 +391,6 @@ const ThesisDetail = () => {
           onConfirm={handleDeleteSubtask}
         />
 
-        <DeleteConfirmModal
-          visible={isDeleteMeetingModalVisible}
-          title="Xác nhận xóa lịch họp"
-          description="Hành động này không thể hoàn tác."
-          itemName={`lịch họp "${meetingToDelete?.title}"`}
-          onCancel={() => setIsDeleteMeetingModalVisible(false)}
-          onConfirm={handleDeleteMeeting}
-        />
 
         <DeleteConfirmModal
           visible={isDeleteDocumentModalVisible}
