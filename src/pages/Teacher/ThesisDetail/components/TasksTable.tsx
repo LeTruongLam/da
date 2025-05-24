@@ -10,6 +10,7 @@ import { TASK_STATUS_LABELS } from "@/lib/constants";
 import SubtaskModal from "./SubtaskModal";
 import { useState } from "react";
 import DeleteConfirmModal from "./DeleteConfirmModal";
+import dayjs from "dayjs";
 
 interface TasksTableProps {
   tasks: TaskResponse[];
@@ -39,7 +40,6 @@ const TasksTable: React.FC<TasksTableProps> = ({
     // Handle delete task logic here
   };
 
-
   return (
     <>
       <Card
@@ -55,8 +55,8 @@ const TasksTable: React.FC<TasksTableProps> = ({
           columns={[
             {
               title: "Tên công việc",
-              dataIndex: "name",
-              key: "name",
+              dataIndex: "task_name",
+              key: "task_name",
               render: (text: string) => (
                 <Space>
                   <FileTextOutlined />
@@ -66,9 +66,11 @@ const TasksTable: React.FC<TasksTableProps> = ({
             },
             {
               title: "Deadline",
-              dataIndex: "deadline",
-              key: "deadline",
-              render: (deadline: string) => <span>{deadline}</span>,
+              dataIndex: "due_date",
+              key: "due_date",
+              render: (deadline: string) => (
+                <span>{dayjs(deadline).format("DD/MM/YYYY HH:mm")}</span>
+              ),
             },
             {
               title: "Trạng thái",
