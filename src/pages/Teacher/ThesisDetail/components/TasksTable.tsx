@@ -5,133 +5,135 @@ import {
   DeleteOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-
-export interface SubTask {
-  key: string;
-  name: string;
-  description?: string;
-  startDate: string;
-  deadline: string;
-  status?: "not_started" | "in_progress" | "completed" | "late" | string;
-}
-
-interface Student {
-  submittedTasks: SubTask[];
-}
+import type { TaskResponse } from "@/services/api/task";
+import { TASK_STATUS_LABELS } from "@/lib/constants";
+import SubtaskModal from "./SubtaskModal";
+import { useState } from "react";
+import DeleteConfirmModal from "./DeleteConfirmModal";
 
 interface TasksTableProps {
-  tasks: SubTask[];
-  student?: Student | null;
-  onAddTask: () => void;
-  onEditTask: (task: SubTask) => void;
-  onDeleteTask: (task: SubTask) => void;
+  tasks: TaskResponse[];
+  refetchTasks: () => void;
+  tasksLoading: boolean;
 }
 
 const TasksTable: React.FC<TasksTableProps> = ({
   tasks,
-  student,
-  onAddTask,
-  onEditTask,
-  onDeleteTask,
+  refetchTasks,
+  tasksLoading,
 }) => {
-  const getTaskStatusTag = (status?: string) => {
-    if (!status) return <Tag>Chưa bắt đầu</Tag>;
+  const [isSubtaskModalVisible, setIsSubtaskModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
 
-    const statusConfig = {
-      not_started: { color: "default", text: "Chưa bắt đầu" },
-      in_progress: { color: "processing", text: "Đang thực hiện" },
-      completed: { color: "success", text: "Hoàn thành" },
-      late: { color: "error", text: "Trễ hạn" },
-    };
-
-    const { color, text } =
-      statusConfig[status as keyof typeof statusConfig] ||
-      statusConfig.not_started;
-    return <Tag color={color}>{text}</Tag>;
+  const onAddTask = () => {
+    // Handle add task logic here
+    setIsSubtaskModalVisible(true);
   };
 
+  const onEditTask = (record: TaskResponse) => {
+    // Handle edit task logic here
+    return record;
+  };
+
+  const handleDeleteTask = () => {
+    // Handle delete task logic here
+  };
+
+
   return (
-    <Card
-      title="Các công việc"
-      extra={
-        <Button type="primary" icon={<PlusOutlined />} onClick={onAddTask}>
-          Thêm công việc
-        </Button>
-      }
-    >
-      <Table
-        columns={[
-          {
-            title: "Tên công việc",
-            dataIndex: "name",
-            key: "name",
-            render: (text) => (
-              <Space>
-                <FileTextOutlined />
-                {text}
-              </Space>
-            ),
-          },
-          {
-            title: "Ngày bắt đầu",
-            dataIndex: "startDate",
-            key: "startDate",
-          },
-          {
-            title: "Deadline",
-            dataIndex: "deadline",
-            key: "deadline",
-          },
-          {
-            title: "Mô tả",
-            dataIndex: "description",
-            key: "description",
-            ellipsis: true,
-            width: 300,
-          },
-          {
-            title: "Trạng thái",
-            key: "status",
-            render: (_, record) => {
-              const studentTask = student?.submittedTasks?.find(
-                (task) => task.key === record.key
-              );
-              return studentTask ? (
-                getTaskStatusTag(studentTask.status)
-              ) : (
-                <Tag>Chưa bắt đầu</Tag>
-              );
+    <>
+      <Card
+        title="Các công việc"
+        extra={
+          <Button type="primary" icon={<PlusOutlined />} onClick={onAddTask}>
+            Thêm công việc
+          </Button>
+        }
+      >
+        <Table
+          loading={tasksLoading}
+          columns={[
+            {
+              title: "Tên công việc",
+              dataIndex: "name",
+              key: "name",
+              render: (text: string) => (
+                <Space>
+                  <FileTextOutlined />
+                  {text}
+                </Space>
+              ),
             },
-          },
-          {
-            title: "Thao tác",
-            key: "action",
-            render: (_, record) => (
-              <Space>
-                <Button
-                  type="link"
-                  icon={<EditOutlined />}
-                  onClick={() => onEditTask(record)}
+            {
+              title: "Deadline",
+              dataIndex: "deadline",
+              key: "deadline",
+              render: (deadline: string) => <span>{deadline}</span>,
+            },
+            {
+              title: "Trạng thái",
+              dataIndex: "status",
+              key: "status",
+              render: (status: string) => (
+                <Tag
+                  color={
+                    status === "late"
+                      ? "red"
+                      : status === "completed"
+                      ? "green"
+                      : "blue"
+                  }
                 >
-                  Chỉnh sửa
-                </Button>
-                <Button
-                  type="link"
-                  icon={<DeleteOutlined />}
-                  danger
-                  onClick={() => onDeleteTask(record)}
-                >
-                  Xóa
-                </Button>
-              </Space>
-            ),
-          },
-        ]}
-        dataSource={tasks}
-        pagination={false}
-        rowKey="key"
+                  {TASK_STATUS_LABELS[status] || status}
+                </Tag>
+              ),
+            },
+            {
+              title: "Thao tác",
+              key: "action",
+              render: (_, record: TaskResponse) => (
+                <Space>
+                  <Button
+                    type="link"
+                    icon={<EditOutlined />}
+                    onClick={() => onEditTask(record)}
+                  >
+                    Chỉnh sửa
+                  </Button>
+                  <Button
+                    type="link"
+                    icon={<DeleteOutlined />}
+                    danger
+                    onClick={() => setIsDeleteModalVisible(true)}
+                  >
+                    Xóa
+                  </Button>
+                </Space>
+              ),
+            },
+          ]}
+          dataSource={tasks}
+          pagination={false}
+          rowKey="key"
+        />
+      </Card>
+      <SubtaskModal
+        visible={isSubtaskModalVisible}
+        subtask={null}
+        onCancel={() => setIsSubtaskModalVisible(false)}
+        refetchTasks={refetchTasks}
       />
-    </Card>
+
+      {/* Confirmation Modals */}
+      <DeleteConfirmModal
+        visible={isDeleteModalVisible}
+        title="Xác nhận xóa"
+        description="Hành động này không thể hoàn tác."
+        itemName={`công việc "123"`}
+        onCancel={() => setIsDeleteModalVisible(false)}
+        onConfirm={handleDeleteTask}
+      />
+    </>
   );
 };
 

@@ -51,36 +51,21 @@ export const THESIS_STATUS_COLORS = {
 
 // Task Status
 export const TASK_STATUS = {
-  NOT_STARTED: "not_started",
   IN_PROGRESS: "in_progress",
-  COMPLETED: "completed",
-  LATE: "late",
-  UPCOMING: "upcoming",
-  PENDING: "pending",
-  APPROVED: "approved",
-  REJECTED: "rejected",
+  TO_DO: "to_do",
+  DONE: "done",
 };
 
 export const TASK_STATUS_LABELS = {
-  [TASK_STATUS.NOT_STARTED]: "Chưa bắt đầu",
+  [TASK_STATUS.TO_DO]: "Chưa bắt đầu",
   [TASK_STATUS.IN_PROGRESS]: "Đang thực hiện",
-  [TASK_STATUS.COMPLETED]: "Hoàn thành",
-  [TASK_STATUS.LATE]: "Trễ hạn",
-  [TASK_STATUS.UPCOMING]: "Sắp tới",
-  [TASK_STATUS.PENDING]: "Chờ xác nhận",
-  [TASK_STATUS.APPROVED]: "Đã xác nhận",
-  [TASK_STATUS.REJECTED]: "Từ chối",
+  [TASK_STATUS.DONE]: "Hoàn thành",
 };
 
 export const TASK_STATUS_COLORS = {
-  [TASK_STATUS.NOT_STARTED]: "default",
+  [TASK_STATUS.TO_DO]: "default",
   [TASK_STATUS.IN_PROGRESS]: "processing",
-  [TASK_STATUS.COMPLETED]: "success",
-  [TASK_STATUS.LATE]: "error",
-  [TASK_STATUS.UPCOMING]: "blue",
-  [TASK_STATUS.PENDING]: "orange",
-  [TASK_STATUS.APPROVED]: "cyan",
-  [TASK_STATUS.REJECTED]: "red",
+  [TASK_STATUS.DONE]: "success",
 };
 
 // Date Formats

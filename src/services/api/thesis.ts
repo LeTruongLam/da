@@ -88,7 +88,7 @@ export const createThesis = (data: ThesisCreateRequest) =>
 
 // Update thesis
 export const updateThesis = (id: number, data: ThesisUpdateRequest) =>
-  put<ThesisResponse>(
+  post<ThesisResponse>(
     API_CONFIG.ENDPOINTS.THESIS.UPDATE(id),
     data as unknown as Record<string, unknown>
   );

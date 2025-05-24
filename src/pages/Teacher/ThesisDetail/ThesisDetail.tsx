@@ -1,7 +1,6 @@
 import { Card, Row, Col, Tabs, Form, message, Spin } from "antd";
 import { useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import dayjs from "dayjs";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getThesisById,
@@ -19,17 +18,12 @@ import {
   EvaluationModal,
   TaskFeedbackModal,
   DocumentUploadModal,
-  SubtaskModal,
   DeleteConfirmModal,
 } from "./components";
 
 // Import types separately with type keyword
-import type {
-  Student,
-  SubTask,
-  Document,
-  SubtaskFormValues,
-} from "./components";
+import type { Student, SubTask, Document } from "./components";
+import { getTasks } from "@/services/api/task";
 
 const { TabPane } = Tabs;
 const PAGE_SIZE = 5;
@@ -40,21 +34,6 @@ interface ExtendedSubTask extends SubTask {
   feedback?: string;
   score?: number;
 }
-
-// Mock dữ liệu tài liệu liên quan
-const mockDocuments: Document[] = [
-  // Tài liệu do giảng viên tải lên
-  {
-    key: "1",
-    name: "Hướng dẫn thực hiện đồ án.pdf",
-    type: "PDF",
-    uploadedBy: "Giảng viên",
-    uploadedAt: "2024-05-15",
-    size: "1.2MB",
-    url: "#",
-  },
-];
-
 
 const ThesisDetail = () => {
   const navigate = useNavigate();
@@ -73,18 +52,13 @@ const ThesisDetail = () => {
   const [isDocumentUploadModalVisible, setIsDocumentUploadModalVisible] =
     useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [isSubtaskModalVisible, setIsSubtaskModalVisible] = useState(false);
 
   const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
   const [currentTask, setCurrentTask] = useState<ExtendedSubTask | null>(null);
-  const [currentSubtask, setCurrentSubtask] = useState<SubTask | null>(null);
 
   const [evaluationForm] = Form.useForm();
   const [taskFeedbackForm] = Form.useForm();
   const [documentForm] = Form.useForm();
-  const [subtaskForm] = Form.useForm();
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
-
 
   const [isDeleteDocumentModalVisible, setIsDeleteDocumentModalVisible] =
     useState(false);
@@ -106,6 +80,18 @@ const ThesisDetail = () => {
   >({
     queryKey: ["thesis", thesisId],
     queryFn: () => getThesisById(thesisId as unknown as number),
+  });
+
+  const {
+    data: tasksData,
+    isLoading: tasksLoading,
+    refetch: refetchTasks,
+  } = useQuery({
+    queryKey: ["tasks", thesisId],
+    queryFn: async () => {
+      const response = await getTasks();
+      return response;
+    },
   });
 
   useEffect(() => {
@@ -152,7 +138,6 @@ const ThesisDetail = () => {
     taskFeedbackForm.resetFields();
   };
 
-
   const openDocumentUploadModal = () => {
     setIsDocumentUploadModalVisible(true);
   };
@@ -166,56 +151,6 @@ const ThesisDetail = () => {
   const openEditModal = () => {
     setIsEditModalVisible(true);
   };
-
-  const openSubtaskModal = (subtask?: SubTask) => {
-    if (subtask) {
-      setCurrentSubtask(subtask);
-      subtaskForm.setFieldsValue({
-        name: subtask.name,
-        description: subtask.description || "",
-        startDate: subtask.startDate ? dayjs(subtask.startDate) : undefined,
-        deadline: subtask.deadline ? dayjs(subtask.deadline) : undefined,
-        status: subtask.status || "not_started",
-      });
-    } else {
-      setCurrentSubtask(null);
-      subtaskForm.resetFields();
-      subtaskForm.setFieldsValue({
-        status: "not_started",
-      });
-    }
-    setIsSubtaskModalVisible(true);
-  };
-
-  const handleSubtaskSubmit = (values: SubtaskFormValues) => {
-    const formattedValues = {
-      ...values,
-      startDate: values.startDate.format("YYYY-MM-DD"),
-      deadline: values.deadline.format("YYYY-MM-DD"),
-    };
-
-    if (currentSubtask) {
-      message.success(
-        `Đã cập nhật công việc "${values.name}" với trạng thái ${values.status}`
-      );
-    } else {
-      message.success(`Đã thêm công việc mới "${values.name}"`);
-    }
-    setIsSubtaskModalVisible(false);
-    subtaskForm.resetFields();
-  };
-
-  const openDeleteSubtaskModal = (subtask: SubTask) => {
-    setCurrentSubtask(subtask);
-    setIsDeleteModalVisible(true);
-  };
-
-  const handleDeleteSubtask = () => {
-    message.success(`Đã xóa công việc "${currentSubtask?.name}"`);
-    setIsDeleteModalVisible(false);
-  };
-
- 
 
   const openDeleteDocumentModal = (document: Document) => {
     setDocumentToDelete(document);
@@ -271,7 +206,6 @@ const ThesisDetail = () => {
     }, 800);
   };
 
-
   // Use these functions in useEffect to load data when component mounts
   useEffect(() => {
     loadDocuments();
@@ -305,10 +239,9 @@ const ThesisDetail = () => {
 
                   <Col span={24}>
                     <TasksTable
-                      tasks={[]}
-                      onAddTask={() => openSubtaskModal()}
-                      onEditTask={openSubtaskModal}
-                      onDeleteTask={openDeleteSubtaskModal}
+                      tasks={tasksData || []}
+                      refetchTasks={refetchTasks}
+                      tasksLoading={tasksLoading}
                     />
                   </Col>
 
@@ -326,13 +259,10 @@ const ThesisDetail = () => {
                 </Row>
               </TabPane>
 
-              <TabPane
-                tab="Đánh giá sinh viên"
-                key="2"
-              >
+              <TabPane tab="Đánh giá sinh viên" key="2">
                 <StudentEvaluation
                   student={null}
-                  documents={mockDocuments}
+                  documents={[]}
                   onEvaluate={openEvaluationModal}
                   onTaskFeedback={openTaskFeedbackModal}
                   onUpdateProgress={handleUpdateProgress}
@@ -360,7 +290,6 @@ const ThesisDetail = () => {
           form={taskFeedbackForm}
         />
 
-
         <DocumentUploadModal
           visible={isDocumentUploadModalVisible}
           onCancel={() => setIsDocumentUploadModalVisible(false)}
@@ -372,25 +301,6 @@ const ThesisDetail = () => {
           visible={isEditModalVisible}
           onCancel={() => setIsEditModalVisible(false)}
         />
-
-        <SubtaskModal
-          visible={isSubtaskModalVisible}
-          subtask={currentSubtask}
-          onCancel={() => setIsSubtaskModalVisible(false)}
-          onSubmit={handleSubtaskSubmit}
-          form={subtaskForm}
-        />
-
-        {/* Confirmation Modals */}
-        <DeleteConfirmModal
-          visible={isDeleteModalVisible}
-          title="Xác nhận xóa"
-          description="Hành động này không thể hoàn tác."
-          itemName={`công việc "${currentSubtask?.name}"`}
-          onCancel={() => setIsDeleteModalVisible(false)}
-          onConfirm={handleDeleteSubtask}
-        />
-
 
         <DeleteConfirmModal
           visible={isDeleteDocumentModalVisible}

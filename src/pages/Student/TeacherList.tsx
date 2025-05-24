@@ -8,7 +8,10 @@ import {
   SearchOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { getAllTeachers } from "@/services/api/teacher";
+import {
+  getInternalLecturers,
+  getExternalLecturers,
+} from "@/services/api/teacher";
 import type { TeacherResponse } from "@/services/api/teacher";
 import { formatDate } from "@/lib/ultils";
 import { THESIS_STATUS } from "@/lib/constants";
@@ -18,13 +21,23 @@ const { Title, Text } = Typography;
 
 const TeacherList = () => {
   const [searchText, setSearchText] = useState("");
-  const { data: teachers = [], isLoading } = useQuery<TeacherResponse[]>({
-    queryKey: ["teachers"],
-    queryFn: getAllTeachers,
+  const { data: internalLecturers = [], isLoading } = useQuery<
+    TeacherResponse[]
+  >({
+    queryKey: ["internalLecturers"],
+    queryFn: getInternalLecturers,
   });
 
-  const filteredTeachers = teachers.filter((teacher) =>
-    teacher.name.toLowerCase().includes(searchText.toLowerCase())
+  const {
+    data: externalLecturers = [],
+    isLoading: isExternalLecturersLoading,
+  } = useQuery<TeacherResponse[]>({
+    queryKey: ["externalLecturers"],
+    queryFn: getExternalLecturers,
+  });
+
+  const filteredTeachers = [...internalLecturers, ...externalLecturers].filter(
+    (teacher) => teacher.name.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
@@ -51,7 +64,7 @@ const TeacherList = () => {
           dataSource={filteredTeachers}
           renderItem={(teacher) => (
             <List.Item
-              key={teacher.userId}
+              key={teacher.user_id}
               style={{
                 padding: "24px",
                 marginBottom: "16px",
@@ -75,55 +88,18 @@ const TeacherList = () => {
                   </Space>
                 }
                 description={
-                  <Space
-                    direction="vertical"
-                    size="middle"
-                    style={{ marginTop: 16 }}
-                  >
+                  <Space direction="vertical" size="middle">
                     <Space>
                       <MailOutlined style={{ color: "#1890ff" }} />
                       <Text>{teacher.email}</Text>
                     </Space>
-                    <div>
-                      <Text
-                        strong
-                        style={{ display: "block", marginBottom: 8 }}
-                      >
-                        Đề tài đang hướng dẫn:{" "}
-                        {
-                          teacher.theses.filter(
-                            (thesis) =>
-                              thesis.status === THESIS_STATUS.IN_PROGRESS
-                          ).length
-                        }{" "}
-                        đề tài <BookOutlined />
-                      </Text>
-                      <Space wrap>
-                        {teacher.theses
-                          .filter(
-                            (thesis) =>
-                              thesis.status === THESIS_STATUS.IN_PROGRESS
-                          )
-                          .map((thesis) => (
-                            <Tag
-                              color="blue"
-                              key={thesis.thesisId}
-                              style={{
-                                padding: "4px 8px",
-                                margin: "4px",
-                                borderRadius: "4px",
-                              }}
-                            >
-                              <Space>
-                                <BookOutlined />
-                                <span>{thesis.title}</span>
-                                <CalendarOutlined style={{ marginLeft: 4 }} />
-                                <span>{formatDate(thesis.createAt)}</span>
-                              </Space>
-                            </Tag>
-                          ))}
-                      </Space>
-                    </div>
+                    <Space>
+                      <Tag color="blue">
+                        {teacher.role_name === "inside lecturer"
+                          ? "Giảng viên trong trường"
+                          : "Giảng viên ngoài trường"}
+                      </Tag>
+                    </Space>
                   </Space>
                 }
               />

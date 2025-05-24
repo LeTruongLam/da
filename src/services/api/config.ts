@@ -31,6 +31,8 @@ export const API_CONFIG = {
     },
     TEACHER: {
       LIST: "/users/lectures",
+      INTERNAL_LECTURERS: "/users/internal-lecturers",
+      EXTERNAL_LECTURERS: "/users/external-lecturers",
       DETAIL: (id: string) => `/teachers/${id}`,
     },
     DASHBOARD: {
@@ -47,6 +49,16 @@ export const API_CONFIG = {
       CREATE: "/majors",
       UPDATE: (id: number) => `/majors/${id}`,
       DELETE: (id: number) => `/majors/${id}`,
+    },
+    TASK: {
+      LIST: "/tasks",
+      DETAIL: (id: number) => `/tasks/${id}`,
+      CREATE: "/tasks",
+      UPDATE: (id: number) => `/tasks/${id}`,
+      DELETE: (id: number) => `/tasks/${id}`,
+      UPDATE_STATUS: (id: number) => `/tasks/${id}/status`,
+      UPLOAD_FILE: (id: number) => `/tasks/${id}/file`,
+      DOWNLOAD_FILE: (id: number) => `/tasks/${id}/file`,
     },
   },
 } as const;

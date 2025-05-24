@@ -1,16 +1,19 @@
 import { get } from "@/lib/base-api";
 import { API_CONFIG } from "./config";
-import type { ThesisResponse } from "./thesis";
 export interface TeacherResponse {
-  userId: string;
+  user_id: number;
   name: string;
+  code: string;
   email: string;
-  theses: ThesisResponse[];
+  role_name: string;
+  isRevoke: boolean;
 }
 
-// Get all teachers
-export const getAllTeachers = () =>
-  get<TeacherResponse[]>(API_CONFIG.ENDPOINTS.TEACHER.LIST);
+export const getInternalLecturers = () =>
+  get<TeacherResponse[]>(API_CONFIG.ENDPOINTS.TEACHER.INTERNAL_LECTURERS);
+
+export const getExternalLecturers = () =>
+  get<TeacherResponse[]>(API_CONFIG.ENDPOINTS.TEACHER.EXTERNAL_LECTURERS);
 
 // // Get teacher by ID
 // export const getTeacherById = (id: string) =>
