@@ -17,6 +17,17 @@ export type CurrentRequestResponse = {
   status: string;
 };
 
+export type AllRequestResponse = {
+  request_id: number;
+  student_name: string;
+  student_code: string;
+  lecturer_name: string;
+  lecturer_code: string;
+  thesis_title: string;
+  status: string;
+  create_at: string;
+};
+
 export type RequestDetailResponse = {
   request_id: number;
   student: {
@@ -39,11 +50,24 @@ export type RequestDetailResponse = {
   tasks: [];
 };
 
+export type UpdateStatusRequest = {
+  status: string;
+  rejectReason: string;
+};
+
 export const createRequest = (data: RequestDataRequest) =>
   post<unknown>(API_CONFIG.ENDPOINTS.REQUEST.CREATE, data);
 
 export const getRequestsCurrent = () =>
   get<CurrentRequestResponse>(API_CONFIG.ENDPOINTS.REQUEST.CURRENT);
 
+export const getRequestsAll = () =>
+  get<AllRequestResponse[]>(API_CONFIG.ENDPOINTS.REQUEST.ALL);
+
 export const getRequestDetail = (id: number) =>
   get<RequestDetailResponse>(API_CONFIG.ENDPOINTS.REQUEST.DETAIL(id));
+
+export const updateRequestStatus = (id: number, data: UpdateStatusRequest) =>
+  put<unknown>(API_CONFIG.ENDPOINTS.REQUEST.UPDATE_STATUS(id), {
+    data,
+  });

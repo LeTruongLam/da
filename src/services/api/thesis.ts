@@ -7,7 +7,9 @@ export interface ThesisResponse {
   title: string;
   status: string;
   create_by: number;
+  create_at: string;
   creator_name: string;
+  role_name: string;
 }
 
 export interface MaterialsType {

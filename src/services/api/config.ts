@@ -64,10 +64,12 @@ export const API_CONFIG = {
     REQUEST: {
       LIST: "/requests",
       DETAIL: (id: number) => `/requests/${id}`,
-      CREATE: "/requests",
+      CREATE: "/requests/create",
       UPDATE: (id: number) => `/requests/${id}`,
       DELETE: (id: number) => `/requests/${id}`,
       CURRENT: "/requests/current",
+      ALL: "/requests/all",
+      UPDATE_STATUS: (id: number) => `/requests/${id}/status`,
     }
   },
 } as const;

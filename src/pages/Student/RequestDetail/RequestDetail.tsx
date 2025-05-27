@@ -71,7 +71,7 @@ interface SubmissionFormValues {
   note: string;
 }
 
-const ThesisDetail = () => {
+const RequestDetailPage = () => {
   const { id: request_id } = useParams();
 
   // States
@@ -490,4 +490,4 @@ const ThesisDetail = () => {
   );
 };
 
-export default ThesisDetail;
+export default RequestDetailPage;

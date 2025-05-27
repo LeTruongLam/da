@@ -1,18 +1,19 @@
-import { REQUEST_STATUS, ROUTES, THESIS_STATUS_LABELS } from "@/lib/constants";
+import { REQUEST_STATUS, THESIS_STATUS_LABELS } from "@/lib/constants";
 import type { ThesisResponse } from "@/services/api";
-import { getRequestsCurrent } from "@/services/api/request";
+import { getRequestsAll, type AllRequestResponse } from "@/services/api/request";
 import { useQuery } from "@tanstack/react-query";
 import { Button, Empty, Space, Table } from "antd";
+import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
 
 const RequestTab = () => {
   const navigate = useNavigate();
-  const { data: currentData, isLoading } = useQuery({
-    queryKey: ["currentRequest"],
-    queryFn: () => getRequestsCurrent(),
+  const { data: requestData, isLoading } = useQuery({
+    queryKey: ["request-all"],
+    queryFn: () => getRequestsAll(),
   });
 
-  if (!currentData && !isLoading) {
+  if (!requestData && !isLoading) {
     return (
       <Empty
         description="Bạn chưa đăng ký đề tài nào"
@@ -21,19 +22,26 @@ const RequestTab = () => {
     );
   }
 
-  const getMyThesesColumns = () => [
+  console.log(requestData);
+
+  const getRequestColumns = () => [
     {
       title: "Tên đề tài",
-      dataIndex: "thesisTitle",
-      key: "thesisTitle",
-      render: (text: string) => <span>{text}</span>, // ✅ Sửa lỗi JSX
-      ellipsis: true,
+      dataIndex: "thesis_title",
+      key: "thesis_title",
+      render: (text: string) => <span>{text}</span>,
     },
     {
       title: "Giáo viên hướng dẫn",
-      dataIndex: "lecturerName",
-      key: "lecturerName",
+      dataIndex: "lecturer_name",
+      key: "lecturer_name",
       render: (value: string) => <Space>{value || "--"}</Space>,
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "create_at",
+      key: "create_at",
+      render: (value: string) => dayjs(value).format("DD/MM/YYYY"),
     },
     {
       title: "Trạng thái",
@@ -48,12 +56,12 @@ const RequestTab = () => {
     {
       title: "Thao tác",
       key: "action",
-      render: () => (
+      render: (_, record: AllRequestResponse) => (
         <>
           <Button
-            disabled={currentData?.status !== REQUEST_STATUS.IN_PROGRESS}
+            disabled={record?.status !== REQUEST_STATUS.IN_PROGRESS}
             onClick={() =>
-              navigate(`${ROUTES.THESIS_DETAIL}/${currentData?.request_id}`)
+              navigate(`/request-detail/${record?.request_id}`)
             }
           >
             Xem chi tiết
@@ -65,10 +73,10 @@ const RequestTab = () => {
 
   return (
     <Table
-      dataSource={currentData ? [currentData] : []}
+      dataSource={requestData || []}
       rowKey="thesisId"
       loading={isLoading}
-      columns={getMyThesesColumns()}
+      columns={getRequestColumns()}
       pagination={false}
     />
   );

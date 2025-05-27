@@ -7,11 +7,11 @@ import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ThesisListPage from "@/pages/Student/ThesisList/ThesisListPage";
-import ThesisDetail from "@/pages/Student/ThesisDetail/ThesisDetail";
+import RequestDetailPage from "@/pages/Student/RequestDetail/RequestDetail";
 import ThesisManagement from "@/pages/Teacher/ThesisManagement";
 import CreateThesis from "@/pages/Teacher/CreateThesis";
 import UserManagement from "@/pages/Admin/UserManagement";
-import ApproveRequests from "@/pages/Teacher/ApproveRequests";
+import ApproveRequests from "@/pages/Admin/ApproveRequests";
 import TeacherThesisDetail from "@/pages/Teacher/ThesisDetail/ThesisDetail";
 import TeacherList from "@/pages/Student/TeacherList";
 import { USER_ROLES } from "./lib/constants";
@@ -39,7 +39,10 @@ const App = () => {
                 <>
                   <Route path="thesis-list" element={<ThesisListPage />} />
                   <Route path="teacher-list" element={<TeacherList />} />
-                  <Route path="my-thesis/:id" element={<ThesisDetail />} />
+                  <Route
+                    path="request-detail/:id"
+                    element={<RequestDetailPage />}
+                  />
                 </>
               )}
 
@@ -56,10 +59,7 @@ const App = () => {
                     path="thesis-detail/:id"
                     element={<TeacherThesisDetail />}
                   />
-                  <Route
-                    path="approve-requests"
-                    element={<ApproveRequests />}
-                  />
+
                   <Route
                     path="student-thesis-detail/:studentId"
                     element={<TeacherThesisDetail />}
@@ -71,6 +71,10 @@ const App = () => {
               {user.role_name === USER_ROLES.ADMIN && (
                 <>
                   <Route path="user-management" element={<UserManagement />} />
+                  <Route
+                    path="approve-requests"
+                    element={<ApproveRequests />}
+                  />
                 </>
               )}
 

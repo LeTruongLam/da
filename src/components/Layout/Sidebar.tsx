@@ -1,8 +1,5 @@
 import { Layout, Menu, theme } from "antd";
-import {
-  FileTextOutlined,
-  TeamOutlined,
-} from "@ant-design/icons";
+import { FileTextOutlined, TeamOutlined } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { RootState } from "@/store";
@@ -43,11 +40,6 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             icon: <FileTextOutlined />,
             label: "Quản lý đồ án",
           },
-          {
-            key: "/approve-requests",
-            icon: <TeamOutlined />,
-            label: "Duyệt đăng ký",
-          },
         ]
       : []),
     ...(user?.role_name === USER_ROLES.ADMIN
@@ -56,6 +48,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             key: "/user-management",
             icon: <TeamOutlined />,
             label: "Quản lý người dùng",
+          },
+          {
+            key: "/approve-requests",
+            icon: <TeamOutlined />,
+            label: "Duyệt đăng ký",
           },
         ]
       : []),
