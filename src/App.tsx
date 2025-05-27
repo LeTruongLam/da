@@ -6,19 +6,16 @@ import Layout from "@/components/Layout";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import ForgotPassword from "@/pages/ForgotPassword";
-import StudentDashboard from "@/pages/Student/Dashboard";
-import TeacherDashboard from "@/pages/Teacher/Dashboard";
-import ThesisList from "@/pages/Student/ThesisList";
-import ThesisDetail from "@/pages/Student/ThesisDetail";
+import ThesisListPage from "@/pages/Student/ThesisList/ThesisListPage";
+import ThesisDetail from "@/pages/Student/ThesisDetail/ThesisDetail";
 import ThesisManagement from "@/pages/Teacher/ThesisManagement";
 import CreateThesis from "@/pages/Teacher/CreateThesis";
 import UserManagement from "@/pages/Admin/UserManagement";
-import SystemSettings from "@/pages/Admin/SystemSettings";
 import ApproveRequests from "@/pages/Teacher/ApproveRequests";
 import TeacherThesisDetail from "@/pages/Teacher/ThesisDetail/ThesisDetail";
 import TeacherList from "@/pages/Student/TeacherList";
-import SystemNotifications from "@/pages/Admin/SystemNotifications";
 import { USER_ROLES } from "./lib/constants";
+import HomePage from "./pages/Home";
 
 const App = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -36,22 +33,11 @@ const App = () => {
             </>
           ) : (
             <Route path="/" element={<Layout />}>
-              {/* Dashboard động theo vai trò */}
-              {user.role_name === USER_ROLES.STUDENT && (
-                <Route index element={<StudentDashboard />} />
-              )}
-              {(user.role_name === USER_ROLES.INSIDE_LECTURER ||
-                user.role_name === USER_ROLES.OUTSIDE_LECTURER) && (
-                <Route index element={<TeacherDashboard />} />
-              )}
-              {user.role_name === USER_ROLES.ADMIN && (
-                <Route index element={<UserManagement />} />
-              )}
-
+              <Route index element={<HomePage />} />
               {/* Routes cho Sinh viên */}
               {user.role_name === USER_ROLES.STUDENT && (
                 <>
-                  <Route path="thesis-list" element={<ThesisList />} />
+                  <Route path="thesis-list" element={<ThesisListPage />} />
                   <Route path="teacher-list" element={<TeacherList />} />
                   <Route path="my-thesis/:id" element={<ThesisDetail />} />
                 </>
@@ -85,11 +71,6 @@ const App = () => {
               {user.role_name === USER_ROLES.ADMIN && (
                 <>
                   <Route path="user-management" element={<UserManagement />} />
-                  <Route path="system-settings" element={<SystemSettings />} />
-                  <Route
-                    path="system-notifications"
-                    element={<SystemNotifications />}
-                  />
                 </>
               )}
 

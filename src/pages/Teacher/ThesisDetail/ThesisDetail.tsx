@@ -17,7 +17,6 @@ import {
   StudentEvaluation,
   EvaluationModal,
   TaskFeedbackModal,
-  DocumentUploadModal,
   DeleteConfirmModal,
 } from "./components";
 
@@ -49,8 +48,7 @@ const ThesisDetail = () => {
     useState(false);
   const [isTaskFeedbackModalVisible, setIsTaskFeedbackModalVisible] =
     useState(false);
-  const [isDocumentUploadModalVisible, setIsDocumentUploadModalVisible] =
-    useState(false);
+
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
 
   const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
@@ -58,13 +56,7 @@ const ThesisDetail = () => {
 
   const [evaluationForm] = Form.useForm();
   const [taskFeedbackForm] = Form.useForm();
-  const [documentForm] = Form.useForm();
 
-  const [isDeleteDocumentModalVisible, setIsDeleteDocumentModalVisible] =
-    useState(false);
-  const [documentToDelete, setDocumentToDelete] = useState<Document | null>(
-    null
-  );
   const [isDeleteThesisModalVisible, setIsDeleteThesisModalVisible] =
     useState(false);
   const [isDeletingThesis, setIsDeletingThesis] = useState(false);
@@ -138,29 +130,10 @@ const ThesisDetail = () => {
     taskFeedbackForm.resetFields();
   };
 
-  const openDocumentUploadModal = () => {
-    setIsDocumentUploadModalVisible(true);
-  };
-
-  const handleDocumentUpload = () => {
-    message.success("Đã tải lên tài liệu thành công");
-    setIsDocumentUploadModalVisible(false);
-    documentForm.resetFields();
-  };
-
   const openEditModal = () => {
     setIsEditModalVisible(true);
   };
 
-  const openDeleteDocumentModal = (document: Document) => {
-    setDocumentToDelete(document);
-    setIsDeleteDocumentModalVisible(true);
-  };
-
-  const handleDeleteDocument = () => {
-    message.success(`Đã xóa tài liệu "${documentToDelete?.name}"`);
-    setIsDeleteDocumentModalVisible(false);
-  };
 
   const openDeleteThesisModal = () => {
     setIsDeleteThesisModalVisible(true);
@@ -250,8 +223,6 @@ const ThesisDetail = () => {
                       documents={thesis?.materials || []}
                       currentPage={documentPage}
                       pageSize={PAGE_SIZE}
-                      onUpload={openDocumentUploadModal}
-                      onDelete={openDeleteDocumentModal}
                       onPageChange={setDocumentPage}
                       loading={documentsLoading}
                     />
@@ -290,25 +261,9 @@ const ThesisDetail = () => {
           form={taskFeedbackForm}
         />
 
-        <DocumentUploadModal
-          visible={isDocumentUploadModalVisible}
-          onCancel={() => setIsDocumentUploadModalVisible(false)}
-          onSubmit={handleDocumentUpload}
-          form={documentForm}
-        />
-
         <EditThesisModal
           visible={isEditModalVisible}
           onCancel={() => setIsEditModalVisible(false)}
-        />
-
-        <DeleteConfirmModal
-          visible={isDeleteDocumentModalVisible}
-          title="Xác nhận xóa tài liệu"
-          description="Hành động này không thể hoàn tác."
-          itemName={`tài liệu "${documentToDelete?.name}"`}
-          onCancel={() => setIsDeleteDocumentModalVisible(false)}
-          onConfirm={handleDeleteDocument}
         />
 
         <DeleteConfirmModal

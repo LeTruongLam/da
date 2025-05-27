@@ -29,13 +29,12 @@ const demoAccounts = [
     email: "Nguyenvanphucnkc@gmail.com",
     password: "stm#CA0HIL",
   },
-    {
+  {
     role: USER_ROLES.STUDENT,
     email: "truonglam962002@gmail.com",
     password: "123123",
   },
 ];
-
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -57,8 +56,17 @@ const Login = () => {
       );
 
       message.success(`Xin chào, ${result.user.name}!`);
-      navigate("/", { replace: true });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
+
+      if (result.user.role_name === USER_ROLES.STUDENT) {
+        navigate("/thesis-list", { replace: true });
+      } else if (
+        result.user.role_name === USER_ROLES.INSIDE_LECTURER ||
+        result.user.role_name === USER_ROLES.OUTSIDE_LECTURER
+      ) {
+        navigate("/thesis-management", { replace: true });
+      } else {
+        navigate("/user-management", { replace: true });
+      }
     } catch (error: any) {
       message.error("Đăng nhập thất bại, vui lòng thử lại");
     } finally {

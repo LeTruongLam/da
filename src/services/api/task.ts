@@ -16,7 +16,6 @@ export interface CreateTaskRequest {
   request_id: number;
 }
 
-
 export const getTasks = (params?: Record<string, unknown>) =>
   get<TaskResponse[]>(API_CONFIG.ENDPOINTS.TASK.LIST, params);
 
@@ -34,3 +33,6 @@ export const updateTask = (id: number, values: CreateTaskRequest) =>
     API_CONFIG.ENDPOINTS.TASK.UPDATE(id),
     values as unknown as Record<string, unknown>
   );
+
+export const getTasksByRequest = (id: number) =>
+  get<TaskResponse[]>(API_CONFIG.ENDPOINTS.TASK.LIST_BY_REQUEST(id));

@@ -28,26 +28,48 @@ export const USER_ROLE_COLORS = {
 export const THESIS_STATUS = {
   AVAILABLE: "available",
   IN_PROGRESS: "in_progress",
-  COMPLETED: "completed",
-  NOT_AVAILABLE: "not available",
-  ON_HOLD: "on hold",
+  CANCEL: "cancel",
+  LECTURER_REJECT: "lecturer_reject",
+  ADMIN_REJECT: "admin_reject",
+  ON_HOLD: "on_hold",
 } as const;
 
 export const THESIS_STATUS_LABELS = {
   [THESIS_STATUS.AVAILABLE]: "Đang mở",
   [THESIS_STATUS.IN_PROGRESS]: "Đang thực hiện",
-  [THESIS_STATUS.COMPLETED]: "Hoàn thành",
-  [THESIS_STATUS.NOT_AVAILABLE]: "Không khả dụng",
-  [THESIS_STATUS.ON_HOLD]: "Tạm hoãn",
+  [THESIS_STATUS.CANCEL]: "Hủy",
+  [THESIS_STATUS.LECTURER_REJECT]: "Giảng viên từ chối",
+  [THESIS_STATUS.ADMIN_REJECT]: "Quản trị viên từ chối",
+  [THESIS_STATUS.ON_HOLD]: "Đang chờ duyệt",
 } as const;
 
 export const THESIS_STATUS_COLORS = {
   [THESIS_STATUS.AVAILABLE]: "processing",
   [THESIS_STATUS.IN_PROGRESS]: "processing",
-  [THESIS_STATUS.COMPLETED]: "success",
-  [THESIS_STATUS.NOT_AVAILABLE]: "default",
+  [THESIS_STATUS.CANCEL]: "default",
+  [THESIS_STATUS.LECTURER_REJECT]: "warning",
+  [THESIS_STATUS.ADMIN_REJECT]: "warning",
   [THESIS_STATUS.ON_HOLD]: "warning",
 } as const;
+
+// request status
+export const REQUEST_STATUS = {
+  IN_PROGRESS: "in_progress",
+  CANCEL: "cancel",
+  LECTURER_REJECT: "lecturer_reject",
+  ADMIN_REJECT: "admin_reject",
+  ON_HOLD: "on_hold",
+  REVOKE: "revoke",
+};
+
+export const REQUEST_STATUS_LABELS = {
+  [REQUEST_STATUS.IN_PROGRESS]: "Đang thực hiện",
+  [REQUEST_STATUS.CANCEL]: "Hủy",
+  [REQUEST_STATUS.LECTURER_REJECT]: "Giảng viên từ chối",
+  [REQUEST_STATUS.ADMIN_REJECT]: "Quản trị viên từ chối",
+  [REQUEST_STATUS.ON_HOLD]: "Đang chờ duyệt",
+  [REQUEST_STATUS.REVOKE]: "Hệ thống hủy tư cách",
+}
 
 // Task Status
 export const TASK_STATUS = {

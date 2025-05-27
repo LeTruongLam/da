@@ -6,6 +6,9 @@ import {
   DeleteOutlined,
 } from "@ant-design/icons";
 import type { MaterialsType } from "@/services/api";
+import DocumentUploadModal from "./DocumentUploadModal";
+import { useState } from "react";
+import DeleteConfirmModal from "./DeleteConfirmModal";
 
 export interface Document {
   key: string;
@@ -21,8 +24,6 @@ interface DocumentsTableProps {
   documents: MaterialsType[];
   currentPage: number;
   pageSize: number;
-  onUpload: () => void;
-  onDelete: (document: Document) => void;
   onPageChange: (page: number) => void;
   filter?: (doc: Document) => boolean;
   title?: string;
@@ -33,13 +34,15 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
   documents,
   currentPage,
   pageSize,
-  onUpload,
-  onDelete,
   onPageChange,
   filter,
   title = "Tài liệu",
   loading = false,
 }) => {
+  const [isDocumentUploadModalVisible, setIsDocumentUploadModalVisible] =
+    useState(false);
+  const [isDeleteDocumentModalVisible, setIsDeleteDocumentModalVisible] =
+    useState(false);
   const mappedDocuments = documents.map((material) => ({
     key: material.material_id.toString(),
     name: material.file_name,
@@ -58,72 +61,95 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({
     currentPage * pageSize
   );
 
+  const onUpload = () => {
+    setIsDocumentUploadModalVisible(true);
+  };
+
+  const handleDeleteDocument = () => {
+    setIsDeleteDocumentModalVisible(false);
+  };
+
   return (
-    <Card
-      title={title}
-      extra={
-        <Button type="primary" icon={<FileAddOutlined />} onClick={onUpload}>
-          Tải lên
-        </Button>
-      }
-    >
-      <Spin spinning={loading}>
-        <Table
-          columns={[
-            {
-              title: "Tên tài liệu",
-              dataIndex: "name",
-              key: "name",
-              render: (text, record) => (
-                <Space>
-                  <FileTextOutlined />
-                  <a
-                    href={record.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {text}
-                  </a>
-                </Space>
-              ),
-            },
-            {
-              title: "Thao tác",
-              key: "action",
-              render: (_, record) => (
-                <Space>
-                  <Button type="link" icon={<DownloadOutlined />}>
-                    Tải xuống
-                  </Button>
-                  <Button
-                    type="link"
-                    danger
-                    icon={<DeleteOutlined />}
-                    onClick={() => onDelete(record)}
-                  >
-                    Xóa
-                  </Button>
-                </Space>
-              ),
-            },
-          ]}
-          dataSource={paginatedDocuments}
-          pagination={false}
-          size="small"
-          loading={loading}
-        />
-        {filteredDocuments.length > pageSize && (
-          <Pagination
-            current={currentPage}
-            total={filteredDocuments.length}
-            pageSize={pageSize}
-            onChange={onPageChange}
+    <>
+      <Card
+        title={title}
+        extra={
+          <Button type="primary" icon={<FileAddOutlined />} onClick={onUpload}>
+            Tải lên
+          </Button>
+        }
+      >
+        <Spin spinning={loading}>
+          <Table
+            columns={[
+              {
+                title: "Tên tài liệu",
+                dataIndex: "name",
+                key: "name",
+                render: (text, record) => (
+                  <Space>
+                    <FileTextOutlined />
+                    <a
+                      href={record.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {text}
+                    </a>
+                  </Space>
+                ),
+              },
+              {
+                title: "Thao tác",
+                key: "action",
+                render: (_, record) => (
+                  <Space>
+                    <Button type="link" icon={<DownloadOutlined />}>
+                      Tải xuống
+                    </Button>
+                    <Button
+                      type="link"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => setIsDeleteDocumentModalVisible(true)}
+                    >
+                      Xóa
+                    </Button>
+                  </Space>
+                ),
+              },
+            ]}
+            dataSource={paginatedDocuments}
+            pagination={false}
             size="small"
-            style={{ marginTop: 16, textAlign: "right" }}
+            loading={loading}
           />
-        )}
-      </Spin>
-    </Card>
+          {filteredDocuments.length > pageSize && (
+            <Pagination
+              current={currentPage}
+              total={filteredDocuments.length}
+              pageSize={pageSize}
+              onChange={onPageChange}
+              size="small"
+              style={{ marginTop: 16, textAlign: "right" }}
+            />
+          )}
+        </Spin>
+      </Card>
+      <DocumentUploadModal
+        visible={isDocumentUploadModalVisible}
+        onCancel={() => setIsDocumentUploadModalVisible(false)}
+      />
+
+      <DeleteConfirmModal
+        visible={isDeleteDocumentModalVisible}
+        title="Xác nhận xóa tài liệu"
+        description="Hành động này không thể hoàn tác."
+        itemName={`tài liệu `}
+        onCancel={() => setIsDeleteDocumentModalVisible(false)}
+        onConfirm={handleDeleteDocument}
+      />
+    </>
   );
 };
 

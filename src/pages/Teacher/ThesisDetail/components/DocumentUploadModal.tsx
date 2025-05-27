@@ -1,23 +1,23 @@
-import { Modal, Form, Input, Select, Upload, message } from "antd";
+import { Modal, Form, Input, Upload, message } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import type { FormInstance } from "antd/es/form";
 import type { UploadChangeParam, UploadFile } from "antd/es/upload/interface";
-
-const { TextArea } = Input;
 
 interface DocumentUploadModalProps {
   visible: boolean;
   onCancel: () => void;
-  onSubmit: () => void;
-  form: FormInstance;
 }
+
+type DocumentFormType = {
+  document_title: string;
+  document_file: UploadFile[];
+};
 
 const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
   visible,
   onCancel,
-  onSubmit,
-  form,
 }) => {
+  const [form] = Form.useForm<DocumentFormType>();
+
   const handleUpload = (info: UploadChangeParam<UploadFile>) => {
     if (info.file.status === "done") {
       message.success(`${info.file.name} tải lên thành công`);
@@ -25,6 +25,8 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
       message.error(`${info.file.name} tải lên thất bại.`);
     }
   };
+
+  const onSubmit = () => {};
 
   return (
     <Modal
@@ -40,7 +42,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
     >
       <Form form={form} layout="vertical" onFinish={onSubmit}>
         <Form.Item
-          name="documentTitle"
+          name="document_title"
           label="Tiêu đề tài liệu"
           rules={[
             { required: true, message: "Vui lòng nhập tiêu đề tài liệu" },
@@ -49,19 +51,7 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
           <Input placeholder="Nhập tiêu đề tài liệu" />
         </Form.Item>
         <Form.Item
-          name="documentType"
-          label="Loại tài liệu"
-          rules={[{ required: true, message: "Vui lòng chọn loại tài liệu" }]}
-        >
-          <Select placeholder="Chọn loại tài liệu">
-            <Select.Option value="reference">Tài liệu tham khảo</Select.Option>
-            <Select.Option value="template">Mẫu báo cáo</Select.Option>
-            <Select.Option value="guide">Hướng dẫn</Select.Option>
-            <Select.Option value="other">Khác</Select.Option>
-          </Select>
-        </Form.Item>
-        <Form.Item
-          name="documentFile"
+          name="document_file"
           label="Tập tin"
           rules={[{ required: true, message: "Vui lòng chọn tập tin" }]}
         >
@@ -82,9 +72,6 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
               Hỗ trợ tải lên một tập tin duy nhất.
             </p>
           </Upload.Dragger>
-        </Form.Item>
-        <Form.Item name="description" label="Mô tả">
-          <TextArea rows={4} placeholder="Mô tả tài liệu (không bắt buộc)" />
         </Form.Item>
       </Form>
     </Modal>

@@ -1,11 +1,7 @@
 import { Layout, Menu, theme } from "antd";
 import {
-  DashboardOutlined,
   FileTextOutlined,
   TeamOutlined,
-  SettingOutlined,
-  CalendarOutlined,
-  BellOutlined,
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -25,15 +21,6 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
   const { token } = theme.useToken();
 
   const menuItems = [
-    ...(user?.role_name !== USER_ROLES.ADMIN
-      ? [
-          {
-            key: "/",
-            icon: <DashboardOutlined />,
-            label: "Dashboard",
-          },
-        ]
-      : []),
     ...(user?.role_name === USER_ROLES.STUDENT
       ? [
           {
@@ -69,16 +56,6 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             key: "/user-management",
             icon: <TeamOutlined />,
             label: "Quản lý người dùng",
-          },
-          {
-            key: "/system-notifications",
-            icon: <BellOutlined />,
-            label: "Thông báo hệ thống",
-          },
-          {
-            key: "/system-settings",
-            icon: <SettingOutlined />,
-            label: "Cài đặt hệ thống",
           },
         ]
       : []),

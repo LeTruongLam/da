@@ -59,6 +59,15 @@ export const API_CONFIG = {
       UPDATE_STATUS: (id: number) => `/tasks/${id}/status`,
       UPLOAD_FILE: (id: number) => `/tasks/${id}/file`,
       DOWNLOAD_FILE: (id: number) => `/tasks/${id}/file`,
+      LIST_BY_REQUEST: (id: number) => `/tasks/requests/${id}`,
     },
+    REQUEST: {
+      LIST: "/requests",
+      DETAIL: (id: number) => `/requests/${id}`,
+      CREATE: "/requests",
+      UPDATE: (id: number) => `/requests/${id}`,
+      DELETE: (id: number) => `/requests/${id}`,
+      CURRENT: "/requests/current",
+    }
   },
 } as const;

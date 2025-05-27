@@ -5,12 +5,7 @@ import { store } from "@/store";
 export interface ThesisResponse {
   thesis_id: number;
   title: string;
-  status:
-    | "available"
-    | "in_progress"
-    | "completed"
-    | "not available"
-    | "on hold";
+  status: string;
   create_by: number;
   creator_name: string;
 }
