@@ -50,6 +50,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             label: "Quản lý người dùng",
           },
           {
+            key: "/thesis-list",
+            icon: <FileTextOutlined />,
+            label: "Danh sách đồ án",
+          },
+          {
             key: "/approve-requests",
             icon: <TeamOutlined />,
             label: "Duyệt đăng ký",

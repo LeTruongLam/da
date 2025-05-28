@@ -45,6 +45,7 @@ export type RequestDetailResponse = {
   thesis: {
     thesis_id: number;
     title: string;
+    description: string;
     status: string;
     create_by: number;
     creator_name: string;

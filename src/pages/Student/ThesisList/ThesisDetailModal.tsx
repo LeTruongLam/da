@@ -79,7 +79,16 @@ const ThesisDetailModal = ({
       onCancel={handleCancel}
       footer={
         <>
-          <Button key="delete" onClick={handleDelete}>
+          <Button
+            disabled={
+              thesis?.status === THESIS_STATUS.ADMIN_REJECT ||
+              thesis?.status === THESIS_STATUS.REVOKE ||
+              thesis?.status === THESIS_STATUS.IN_PROGRESS
+            }
+            danger
+            key="delete"
+            onClick={handleDelete}
+          >
             Xóa
           </Button>
 

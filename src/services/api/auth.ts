@@ -70,3 +70,41 @@ export const resetPassword = async (token: string, newPassword: string) =>
       newPassword,
     }).toString()}`
   );
+
+export type UserByIdResponse = {
+  user_id: number;
+  name: string;
+  code: string;
+  email: string;
+  semester: number;
+  year: number;
+  isRevoke: boolean;
+  revoke_reason: string | null;
+  createdTheses: {
+    thesis_id: number;
+    title: string;
+    description: string;
+    status: string;
+    create_by: number;
+    creator_name: string;
+  }[];
+  currentRequest: {
+    request_id: number;
+    thesis_id: number;
+    thesisTitle: string;
+    lecturerId: number;
+    lecturerName: string;
+    lecturerCode: string;
+    status: string;
+  };
+  tasks: {
+    task_id: number;
+    task_name: string;
+    description: string;
+    due_date: string;
+    status: string;
+  }[];
+};
+
+export const getUserById = (id: number) =>
+  get<UserByIdResponse>(API_CONFIG.ENDPOINTS.USER.BY_ID(id));

@@ -1,4 +1,4 @@
-import { Form, Input, Modal } from "antd";
+import { Form, Input, Modal, message } from "antd";
 import { useForm } from "antd/es/form/Form";
 import { useMutation } from "@tanstack/react-query";
 import { createThesis, type ThesisCreateRequest } from "@/services/api";
@@ -15,19 +15,27 @@ interface CreateThesisFormValues {
 interface CreateRequestModalProps {
   visible: boolean;
   onCancel: () => void;
+  refetch?: () => void;
 }
 
-const CreateRequestModal = ({ visible, onCancel }: CreateRequestModalProps) => {
+const CreateRequestModal = ({
+  visible,
+  onCancel,
+  refetch,
+}: CreateRequestModalProps) => {
   const [form] = useForm();
 
   const { mutate: handleCreateThesis, isPending } = useMutation({
     mutationFn: (data: ThesisCreateRequest) => createThesis(data),
     onSuccess: () => {
+      message.success("Tạo đề tài thành công!");
       form.resetFields();
       onCancel();
+      refetch?.();
     },
     onError: (error) => {
-      console.error("Cập nhật thất bại:", error);
+      console.error("Tạo đề tài thất bại:", error);
+      message.error("Tạo đề tài thất bại!");
     },
   });
 
@@ -41,18 +49,18 @@ const CreateRequestModal = ({ visible, onCancel }: CreateRequestModalProps) => {
       ...values,
       status: THESIS_STATUS.AVAILABLE,
     };
-    handleCreateThesis(data as ThesisCreateRequest);
+    handleCreateThesis(data);
   };
 
   return (
     <Modal
-      title="Thông tin đề tài"
+      title="Tạo đề tài mới"
       open={visible}
       onCancel={handleCancel}
       onOk={() => form.submit()}
-      okText="Lưu thay đổi"
+      okText="Tạo đề tài"
       cancelText="Hủy"
-      confirmLoading={isPending}
+      confirmLoading={isPending} // loading nút submit
       width={700}
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
@@ -61,7 +69,7 @@ const CreateRequestModal = ({ visible, onCancel }: CreateRequestModalProps) => {
           label="Tiêu đề đề tài"
           rules={[{ required: true, message: "Vui lòng nhập tiêu đề đề tài" }]}
         >
-          <Input placeholder="Nhập tiêu đề đề tài" />
+          <Input placeholder="Nhập tiêu đề đề tài" disabled={isPending} />
         </Form.Item>
 
         <Form.Item
@@ -69,7 +77,11 @@ const CreateRequestModal = ({ visible, onCancel }: CreateRequestModalProps) => {
           label="Mô tả"
           rules={[{ required: true, message: "Vui lòng nhập mô tả đề tài" }]}
         >
-          <TextArea rows={4} placeholder="Nhập mô tả chi tiết về đề tài" />
+          <TextArea
+            rows={4}
+            placeholder="Nhập mô tả chi tiết về đề tài"
+            disabled={isPending}
+          />
         </Form.Item>
       </Form>
     </Modal>

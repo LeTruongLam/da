@@ -16,6 +16,7 @@ import TeacherThesisDetail from "@/pages/Teacher/ThesisDetail/ThesisDetail";
 import TeacherList from "@/pages/Student/TeacherList";
 import { USER_ROLES } from "./lib/constants";
 import HomePage from "./pages/Home";
+import AdminThesisManagement from "./pages/Admin/AdminThesisManagement";
 
 const App = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -74,6 +75,10 @@ const App = () => {
                   <Route
                     path="approve-requests"
                     element={<ApproveRequests />}
+                  />
+                    <Route
+                    path="thesis-list"
+                    element={<AdminThesisManagement />}
                   />
                 </>
               )}

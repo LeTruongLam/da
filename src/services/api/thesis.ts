@@ -65,9 +65,17 @@ export interface ThesisUpdateRequest {
  */
 
 // Get all theses
-export const getAllTheses = () =>
-  get<ThesisResponse[]>(API_CONFIG.ENDPOINTS.THESIS.LIST);
 
+interface GetAllThesesParams {
+  status?: string;
+}
+
+export const getAllTheses = (params?: GetAllThesesParams) => {
+  return get<ThesisResponse[]>(
+    API_CONFIG.ENDPOINTS.THESIS.LIST,
+    params as Record<string, unknown>
+  );
+};
 // Get my theses
 export const getMyTheses = () =>
   get<ThesisResponse[]>(API_CONFIG.ENDPOINTS.THESIS.MY_THESES);
@@ -89,6 +97,9 @@ export const updateThesis = (id: number, data: ThesisUpdateRequest) =>
     API_CONFIG.ENDPOINTS.THESIS.UPDATE(id),
     data as unknown as Record<string, unknown>
   );
+
+export const updateThesisStatus = (id: number, status: string) =>
+  post<unknown>(API_CONFIG.ENDPOINTS.THESIS.UPDATE_STATUS(id, status));
 
 // Delete thesis
 export const deleteThesis = (id: number) =>

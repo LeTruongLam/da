@@ -134,7 +134,6 @@ const ThesisDetail = () => {
     setIsEditModalVisible(true);
   };
 
-
   const openDeleteThesisModal = () => {
     setIsDeleteThesisModalVisible(true);
   };
@@ -204,10 +203,7 @@ const ThesisDetail = () => {
               <TabPane tab="Tổng quan" key="1">
                 <Row gutter={[24, 24]}>
                   <Col span={24}>
-                    <StudentCard
-                      onEvaluate={openEvaluationModal}
-                      onAddStudent={() => navigate("/approve-requests")}
-                    />
+                    <StudentCard onEvaluate={openEvaluationModal} />
                   </Col>
 
                   <Col span={24}>

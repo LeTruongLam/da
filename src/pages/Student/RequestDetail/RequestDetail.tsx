@@ -234,7 +234,7 @@ const RequestDetailPage = () => {
                 <Card title="Thông tin đồ án">
                   <Paragraph>
                     <Text strong>Mô tả: </Text>
-                    {/* {requestData?.thesis. || "--"} */}
+                    {requestData?.thesis.description || "--"}
                   </Paragraph>
                   {/* <Paragraph>
                     <Text strong>Tiến độ tổng thể: </Text>

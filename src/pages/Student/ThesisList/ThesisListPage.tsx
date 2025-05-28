@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   Table,
@@ -30,6 +30,7 @@ import ThesisDetailModal from "./ThesisDetailModal";
 import dayjs from "dayjs";
 import { createRequest, type RequestDataRequest } from "@/services/api/request";
 import SelectLecturerModal from "@/components/modals/SelectLecturerModal";
+import { getUserById } from "@/services/api";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -50,10 +51,14 @@ const ThesisList = () => {
   const [isCreateRequestModalVisible, setIsCreateRequestModalVisible] =
     useState(false);
 
+  const [isHaveRequestActive, setIsHaveRequestActive] = useState(false);
+
   // Fetch theses data
-  const { data: allTheses = [], isLoading: isLoadingAll } = useQuery<
-    ThesisResponse[]
-  >({
+  const {
+    data: allTheses = [],
+    isLoading: isLoadingAll,
+    refetch: refetchAll,
+  } = useQuery<ThesisResponse[]>({
     queryKey: ["theses"],
     queryFn: () => getAllTheses(),
   });
@@ -92,6 +97,33 @@ const ThesisList = () => {
   const filteredMyTheses = myTheses.filter((thesis) =>
     thesis.title.toLowerCase().includes(searchMyTheses.toLowerCase())
   );
+
+  const { data: userData } = useQuery({
+    queryKey: ["user-data"],
+    queryFn: async () => {
+      if (!user?.user_id) return undefined;
+      return await getUserById(user.user_id);
+    },
+    enabled: !!user?.user_id, // Chỉ chạy khi có user_id
+  });
+
+  useEffect(() => {
+    if (
+      userData &&
+      userData.currentRequest &&
+      userData.currentRequest.status !== null
+    ) {
+      setIsHaveRequestActive(true);
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    if (activeTab === "all") {
+      refetchAll();
+    } else if (activeTab === "my") {
+      refetch();
+    }
+  }, [activeTab, refetchAll, refetch]);
 
   const { mutate: handleCreateRequestMutation } = useMutation({
     mutationFn: (data: RequestDataRequest) => createRequest(data),
@@ -142,6 +174,7 @@ const ThesisList = () => {
         <Button
           hidden={record.status !== THESIS_STATUS.AVAILABLE}
           type="primary"
+          disabled={isHaveRequestActive}
           onClick={() => {
             Modal.confirm({
               title: "Xác nhận gửi yêu cầu",
@@ -217,7 +250,9 @@ const ThesisList = () => {
           </Button>
           <Button
             style={{ marginLeft: 8 }}
-            disabled={record.status !== THESIS_STATUS.AVAILABLE}
+            disabled={
+              record.status !== THESIS_STATUS.AVAILABLE || isHaveRequestActive
+            }
             type="primary"
             onClick={() => {
               setIsCreateRequestTeacher(true);
@@ -331,6 +366,7 @@ const ThesisList = () => {
       <CreateRequestModal
         visible={isCreateRequestModalVisible}
         onCancel={() => setIsCreateRequestModalVisible(false)}
+        refetch={refetch}
       />
 
       <SelectLecturerModal

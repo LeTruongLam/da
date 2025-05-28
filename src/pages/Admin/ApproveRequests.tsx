@@ -9,8 +9,9 @@ import {
   Form,
   Input,
   Select,
+  Checkbox,
 } from "antd";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -18,7 +19,11 @@ import {
   updateRequestStatus,
   type AllRequestResponse,
 } from "@/services/api/request";
-import { REQUEST_STATUS, THESIS_STATUS_LABELS } from "@/lib/constants";
+import {
+  REQUEST_STATUS,
+  THESIS_STATUS,
+  THESIS_STATUS_LABELS,
+} from "@/lib/constants";
 import dayjs from "dayjs";
 
 const { TextArea } = Input;
@@ -40,6 +45,18 @@ const ApproveRequests = () => {
   const [selectedRejectType, setSelectedRejectType] = useState("");
   const [feedbackForm] = Form.useForm();
 
+  const defaultStatuses = Object.values(THESIS_STATUS).filter(
+    (status) => status !== THESIS_STATUS.CANCEL
+  );
+  const [selectedStatuses, setSelectedStatuses] =
+    useState<string[]>(defaultStatuses);
+
+  const filteredRequests = useMemo(() => {
+    if (!requestData) return [];
+    return requestData.filter((request) =>
+      selectedStatuses.includes(request.status)
+    );
+  }, [requestData, selectedStatuses]);
   const handleApprove = async (id: number) => {
     try {
       await updateRequestStatus(id, {
@@ -81,7 +98,7 @@ const ApproveRequests = () => {
 
   const columns = [
     {
-      title: "Họ và tên",
+      title: "Sinh viên",
       dataIndex: "student_name",
       key: "student_name",
     },
@@ -117,13 +134,14 @@ const ApproveRequests = () => {
       render: (_, record: AllRequestResponse) => (
         <Space>
           <Button
-            type="link"
+            type="primary"
             icon={<CheckOutlined />}
-            style={{ color: "green" }}
             onClick={() => handleApprove(record.request_id)}
             disabled={
               record.status === REQUEST_STATUS.REVOKE ||
-              record.status === REQUEST_STATUS.IN_PROGRESS
+              record.status === REQUEST_STATUS.IN_PROGRESS ||
+              record.status === REQUEST_STATUS.ADMIN_REJECT ||
+              record.status === REQUEST_STATUS.CANCEL
             }
           >
             Duyệt
@@ -132,7 +150,12 @@ const ApproveRequests = () => {
             type="link"
             danger
             icon={<CloseOutlined />}
-            disabled={record.status === REQUEST_STATUS.REVOKE || record.status === REQUEST_STATUS.IN_PROGRESS}
+            disabled={
+              record.status === REQUEST_STATUS.REVOKE ||
+              record.status === REQUEST_STATUS.IN_PROGRESS ||
+              record.status === REQUEST_STATUS.ADMIN_REJECT ||
+              record.status === REQUEST_STATUS.CANCEL
+            }
             onClick={() => {
               setSelectedRequestId(record.request_id);
               handleReject({
@@ -149,8 +172,13 @@ const ApproveRequests = () => {
               setSelectedRequestId(record.request_id);
               setIsRejectModalVisible(true);
             }}
-            style={{ backgroundColor: "red", color: "white" }}
+            style={
+              record.status === REQUEST_STATUS.CANCEL
+                ? {}
+                : { backgroundColor: "red", color: "white" }
+            }
             type="link"
+            disabled={record.status === REQUEST_STATUS.CANCEL}
           >
             Hủy tư cách
           </Button>
@@ -161,10 +189,24 @@ const ApproveRequests = () => {
 
   return (
     <>
-      <Card title="Quản lý yêu cầu đăng ký đề tài">
+      <Card title="Quản lý yêu cầu đăng ký đề tài và giáo viên hướng dẫn">
+        <Checkbox.Group
+          options={Object.entries(THESIS_STATUS_LABELS).map(
+            ([value, label]) => ({
+              label,
+              value,
+            })
+          )}
+          value={selectedStatuses}
+          onChange={(checkedValues) =>
+            setSelectedStatuses(checkedValues as string[])
+          }
+          style={{ marginBottom: 16, display: "block" }}
+        />
+
         <Table
           columns={columns}
-          dataSource={requestData || []}
+          dataSource={filteredRequests || []}
           rowKey="id"
           pagination={{ pageSize: 5 }}
           loading={isLoading}
@@ -190,7 +232,7 @@ const ApproveRequests = () => {
             handleReject({
               id: selectedRequestId,
               feedback: values.feedback,
-              rejectType: selectedRejectType,
+              rejectType: REQUEST_STATUS.REVOKE,
             });
           }}
         >

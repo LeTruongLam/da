@@ -15,6 +15,7 @@ export const API_CONFIG = {
       LIST: "/users",
       DETAIL: (id: number) => `/users/${id}`,
       UPDATE: "/users/update",
+      BY_ID: (id: number) => `/users/${id}`,
     },
     PROFILE: {
       CHANGE_PASSWORD: "/users/change-password",
@@ -28,6 +29,7 @@ export const API_CONFIG = {
       UPDATE: (id: number) => `/theses/${id}`,
       DELETE: (id: number) => `/theses/${id}`,
       DOCUMENTS: (thesisId: string) => `/theses/${thesisId}/documents`,
+      UPDATE_STATUS: (id: number, status: string) => `/theses/${id}/status?status=${status}`,
     },
     TEACHER: {
       LIST: "/users/lectures",
@@ -70,6 +72,6 @@ export const API_CONFIG = {
       CURRENT: "/requests/current",
       ALL: "/requests/all",
       UPDATE_STATUS: (id: number) => `/requests/${id}/status`,
-    }
+    },
   },
 } as const;

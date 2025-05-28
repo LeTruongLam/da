@@ -6,7 +6,12 @@ import { useQuery } from "@tanstack/react-query";
 import { getMyTheses } from "@/services/api/thesis";
 import type { ThesisResponse } from "@/services/api/thesis";
 import type { Key } from "react";
-import { TASK_STATUS_COLORS, THESIS_STATUS, THESIS_STATUS_LABELS } from "@/lib/constants";
+import {
+  TASK_STATUS_COLORS,
+  THESIS_STATUS,
+  THESIS_STATUS_LABELS,
+} from "@/lib/constants";
+import dayjs from "dayjs";
 
 const ThesisManagement = () => {
   const navigate = useNavigate();
@@ -42,15 +47,17 @@ const ThesisManagement = () => {
       onFilter: (value: string | number | boolean, record: ThesisResponse) =>
         record.status === value,
       render: (status: ThesisResponse["status"]) => (
-        <Tag color={TASK_STATUS_COLORS[status]}>{THESIS_STATUS_LABELS[status]}</Tag>
+        <Tag color={TASK_STATUS_COLORS[status]}>
+          {THESIS_STATUS_LABELS[status]}
+        </Tag>
       ),
     },
 
     {
       title: "Ngày tạo",
-      dataIndex: "createAt",
-      key: "createAt",
-      render: () => "--",
+      dataIndex: "created_at",
+      key: "created_at",
+      render: (value: string) => dayjs(value).format("DD/MM/YYYY"),
     },
     {
       title: "Thao tác",

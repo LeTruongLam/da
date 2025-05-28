@@ -31,22 +31,17 @@ export interface Student {
 interface StudentCardProps {
   student?: Student;
   onEvaluate: (student: Student) => void;
-  onAddStudent?: () => void;
 }
 
 const StudentCard: React.FC<StudentCardProps> = ({
   student,
   onEvaluate,
-  onAddStudent,
 }) => {
   if (!student) {
     return (
       <Card title="Sinh viên đăng ký">
         <div style={{ textAlign: "center", padding: "30px 0" }}>
           <p>Chưa có sinh viên đăng ký đề tài này</p>
-          <Button type="primary" icon={<UserOutlined />} onClick={onAddStudent}>
-            Thêm sinh viên
-          </Button>
         </div>
       </Card>
     );
