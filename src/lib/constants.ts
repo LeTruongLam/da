@@ -32,6 +32,7 @@ export const THESIS_STATUS = {
   LECTURER_REJECT: "lecturer_reject",
   ADMIN_REJECT: "admin_reject",
   ON_HOLD: "on_hold",
+  REVOKE: "revoke",
 } as const;
 
 export const THESIS_STATUS_LABELS = {
@@ -40,6 +41,7 @@ export const THESIS_STATUS_LABELS = {
   [THESIS_STATUS.CANCEL]: "Hủy",
   [THESIS_STATUS.LECTURER_REJECT]: "Giảng viên từ chối",
   [THESIS_STATUS.ADMIN_REJECT]: "Quản trị viên từ chối",
+  [THESIS_STATUS.REVOKE]: "Hệ thống hủy tư cách",
   [THESIS_STATUS.ON_HOLD]: "Đang chờ duyệt",
 } as const;
 

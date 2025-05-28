@@ -86,11 +86,6 @@ const ApproveRequests = () => {
       key: "student_name",
     },
     {
-      title: "Mã sinh viên",
-      dataIndex: "student_code",
-      key: "student_code",
-    },
-    {
       title: "Giáo viên hướng dẫn",
       dataIndex: "lecturer_name",
       key: "lecturer_name",
@@ -126,6 +121,10 @@ const ApproveRequests = () => {
             icon={<CheckOutlined />}
             style={{ color: "green" }}
             onClick={() => handleApprove(record.request_id)}
+            disabled={
+              record.status === REQUEST_STATUS.REVOKE ||
+              record.status === REQUEST_STATUS.IN_PROGRESS
+            }
           >
             Duyệt
           </Button>
@@ -133,12 +132,27 @@ const ApproveRequests = () => {
             type="link"
             danger
             icon={<CloseOutlined />}
+            disabled={record.status === REQUEST_STATUS.REVOKE || record.status === REQUEST_STATUS.IN_PROGRESS}
+            onClick={() => {
+              setSelectedRequestId(record.request_id);
+              handleReject({
+                id: record.request_id,
+                feedback: "",
+                rejectType: REQUEST_STATUS.ADMIN_REJECT,
+              });
+            }}
+          >
+            Từ chối
+          </Button>
+          <Button
             onClick={() => {
               setSelectedRequestId(record.request_id);
               setIsRejectModalVisible(true);
             }}
+            style={{ backgroundColor: "red", color: "white" }}
+            type="link"
           >
-            Từ chối
+            Hủy tư cách
           </Button>
         </Space>
       ),
@@ -172,37 +186,23 @@ const ApproveRequests = () => {
         <Form
           form={feedbackForm}
           layout="vertical"
-          onFinish={(values) =>
+          onFinish={(values) => {
             handleReject({
               id: selectedRequestId,
               feedback: values.feedback,
               rejectType: selectedRejectType,
-            })
-          }
+            });
+          }}
         >
-          <Form.Item
-            label="Chọn loại từ chối"
-            required
-            rules={[{ required: true, message: "Vui lòng chọn lý do!" }]}
-          >
-            <Select
-              value={selectedRejectType}
-              onChange={setSelectedRejectType}
-              placeholder="Chọn loại từ chối"
-            >
-              <Select.Option value={REQUEST_STATUS.ADMIN_REJECT}>
-                Quản lý khoa từ chối
-              </Select.Option>
-              <Select.Option value={REQUEST_STATUS.REVOKE}>
-                Bị hủy tư cách
-              </Select.Option>
-            </Select>
-          </Form.Item>
-
           <Form.Item
             name="feedback"
             label="Phản hồi"
-            rules={[{ required: true, message: "Vui lòng nhập phản hồi!" }]}
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập lý do từ chối",
+              },
+            ]}
           >
             <TextArea rows={4} placeholder="Nhập lý do từ chối..." />
           </Form.Item>

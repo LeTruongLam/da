@@ -42,7 +42,13 @@ export type RequestDetailResponse = {
     code: string;
     email: string;
   };
-  thesis: any;
+  thesis: {
+    thesis_id: number;
+    title: string;
+    status: string;
+    create_by: number;
+    creator_name: string;
+  };
   status: string;
   reject_reason: null;
   create_at: string;
@@ -68,6 +74,4 @@ export const getRequestDetail = (id: number) =>
   get<RequestDetailResponse>(API_CONFIG.ENDPOINTS.REQUEST.DETAIL(id));
 
 export const updateRequestStatus = (id: number, data: UpdateStatusRequest) =>
-  put<unknown>(API_CONFIG.ENDPOINTS.REQUEST.UPDATE_STATUS(id), {
-    data,
-  });
+  put<unknown>(API_CONFIG.ENDPOINTS.REQUEST.UPDATE_STATUS(id), data);

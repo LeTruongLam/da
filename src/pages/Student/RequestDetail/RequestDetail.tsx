@@ -2,7 +2,6 @@ import {
   Card,
   Row,
   Col,
-  Progress,
   Table,
   Tag,
   Pagination,
@@ -26,17 +25,14 @@ import {
   CommentOutlined,
   UploadOutlined,
   MailOutlined,
-  DeleteOutlined,
   InboxOutlined,
+  DownloadOutlined,
 } from "@ant-design/icons";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
-import type { RootState } from "../../../store";
+import { useQuery } from "@tanstack/react-query";
 import type { UploadProps } from "antd/es/upload/interface";
 import { getRequestDetail } from "@/services/api/request";
-import { getTasksByRequest, type TaskResponse } from "@/services/api/task";
 
 // Custom interface definitions to replace those from api.ts
 interface Document {
@@ -218,8 +214,7 @@ const RequestDetailPage = () => {
           <Row align="middle" gutter={16}>
             <Col>
               <Title level={4} style={{ margin: 0 }}>
-                {/* <FileTextOutlined /> {thesis.title} */}
-                <FileTextOutlined /> Ten de tai
+                <FileTextOutlined /> {requestData?.thesis.title || "--"}
               </Title>
             </Col>
             {/* <Col>
@@ -239,7 +234,7 @@ const RequestDetailPage = () => {
                 <Card title="Thông tin đồ án">
                   <Paragraph>
                     <Text strong>Mô tả: </Text>
-                    {/* {thesis.description} */}
+                    {/* {requestData?.thesis. || "--"} */}
                   </Paragraph>
                   {/* <Paragraph>
                     <Text strong>Tiến độ tổng thể: </Text>
@@ -275,7 +270,7 @@ const RequestDetailPage = () => {
             <Row gutter={[24, 24]}>
               <Col span={24}>
                 <Card title="Danh sách công việc">
-                  {requestData?.tasks.length > 0 ? (
+                  {requestData?.tasks ? (
                     <Table
                       dataSource={requestData?.tasks || []}
                       rowKey="key"
@@ -342,16 +337,7 @@ const RequestDetailPage = () => {
             <Row gutter={[24, 24]}>
               <Col span={24}>
                 <Card
-                  title="Tài liệu đã nộp"
-                  extra={
-                    <Button
-                      type="primary"
-                      icon={<UploadOutlined />}
-                      onClick={() => setIsSubmissionModalVisible(true)}
-                    >
-                      Tải lên tài liệu mới
-                    </Button>
-                  }
+                  title="Tài liệu tham khảo"
                 >
                   {documentsLoading ? (
                     <Spin tip="Đang tải dữ liệu..." />
@@ -373,13 +359,9 @@ const RequestDetailPage = () => {
                               </a>
                             ),
                           },
+                         
                           {
-                            title: "Người tải lên",
-                            dataIndex: "uploadedBy",
-                            key: "uploadedBy",
-                          },
-                          {
-                            title: "Ngày nộp",
+                            title: "Ngày tải lên",
                             dataIndex: "uploadedAt",
                             key: "uploadedAt",
                           },
@@ -388,14 +370,13 @@ const RequestDetailPage = () => {
                             key: "action",
                             render: () => (
                               <Button
-                                type="link"
-                                danger
-                                icon={<DeleteOutlined />}
+                                type="primary"
+                                icon={<DownloadOutlined />}
                                 onClick={() =>
                                   message.info("Chức năng xóa đang cập nhật")
                                 }
                               >
-                                Xóa
+                                Tải về
                               </Button>
                             ),
                           },
