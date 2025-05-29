@@ -54,7 +54,13 @@ export type RequestDetailResponse = {
   reject_reason: null;
   create_at: string;
   accept_at: null;
-  tasks: [];
+  tasks: {
+    task_id: number;
+    task_name: string;
+    status: string;
+    due_date: string;
+    num_Submit: number;
+  }[];
 };
 
 export type UpdateStatusRequest = {

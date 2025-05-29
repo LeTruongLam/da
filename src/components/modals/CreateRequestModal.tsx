@@ -36,6 +36,7 @@ const CreateRequestModal = ({
     onError: (error) => {
       console.error("Tạo đề tài thất bại:", error);
       message.error("Tạo đề tài thất bại!");
+      onCancel();
     },
   });
 

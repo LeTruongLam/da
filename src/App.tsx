@@ -8,7 +8,7 @@ import Register from "@/pages/Register";
 import ForgotPassword from "@/pages/ForgotPassword";
 import ThesisListPage from "@/pages/Student/ThesisList/ThesisListPage";
 import RequestDetailPage from "@/pages/Student/RequestDetail/RequestDetail";
-import ThesisManagement from "@/pages/Teacher/ThesisManagement";
+import ThesisManagement from "@/pages/Teacher/ThesisManagement/ThesisManagement";
 import CreateThesis from "@/pages/Teacher/CreateThesis";
 import UserManagement from "@/pages/Admin/UserManagement";
 import ApproveRequests from "@/pages/Admin/ApproveRequests";

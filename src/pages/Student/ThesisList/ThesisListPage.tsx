@@ -12,6 +12,7 @@ import {
   Tabs,
   message,
   Modal,
+  Alert,
 } from "antd";
 import { SearchOutlined, BookOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
@@ -275,6 +276,13 @@ const ThesisList = () => {
           </Title>
         }
       >
+        <Alert
+          message="Lưu ý: Mỗi sinh viên chỉ có 1 yêu cầu đăng ký đề tài với giáo viên" 
+          description="Nếu sinh viên đã có yêu cầu đăng ký giáo viên mà vẫn đăng ký thì yêu cầu cũ sẽ bị hủy "
+          type="info"
+          showIcon
+          style={{ marginBottom: 16 }}
+        />
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
           <TabPane tab="Tất cả đồ án" key="all">
             <div
@@ -373,6 +381,7 @@ const ThesisList = () => {
         isModalOpen={isCreaCreateRequestTeacher}
         thesis_id={selectedThesesId || 0}
         setIsModalOpen={setIsCreateRequestTeacher}
+        refetch={refetch}
       />
     </div>
   );

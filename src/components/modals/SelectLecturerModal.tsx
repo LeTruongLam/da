@@ -14,12 +14,14 @@ interface SelectLecturerModalProps {
   isModalOpen: boolean;
   setIsModalOpen: (open: boolean) => void;
   thesis_id: number;
+  refetch?: () => void;
 }
 
 const SelectLecturerModal = ({
   isModalOpen,
   setIsModalOpen,
   thesis_id,
+  refetch,
 }: SelectLecturerModalProps) => {
   const [form] = Form.useForm();
   const { user } = useSelector((state: RootState) => state.auth);
@@ -36,13 +38,17 @@ const SelectLecturerModal = ({
 
   const filteredTeachers = [...internalLecturers, ...externalLecturers];
 
-  const { mutate: handleCreateRequestMutation } = useMutation({
+  const { mutate: handleCreateRequestMutation, isPending } = useMutation({
     mutationFn: (data: RequestDataRequest) => createRequest(data),
     onSuccess: () => {
       message.success("Gửi yêu cầu thành công!");
+      setIsModalOpen(false);
+      form.resetFields();
+      refetch?.();
     },
     onError: () => {
       message.error("Gửi yêu cầu thất bại!");
+      setIsModalOpen(false);
     },
   });
 
@@ -54,7 +60,6 @@ const SelectLecturerModal = ({
     };
 
     handleCreateRequestMutation(value as RequestDataRequest, {});
-    setIsModalOpen(false);
   };
 
   return (
@@ -65,6 +70,8 @@ const SelectLecturerModal = ({
       onCancel={() => setIsModalOpen(false)}
       okText="Gửi yêu cầu"
       cancelText="Hủy"
+      cancelButtonProps={{ disabled: isPending }}
+      confirmLoading={isPending}
     >
       <Form form={form} layout="vertical">
         <Form.Item
@@ -73,6 +80,7 @@ const SelectLecturerModal = ({
           rules={[{ required: true, message: "Vui lòng chọn giáo viên" }]}
         >
           <Select
+            disabled={isPending}
             showSearch
             placeholder="Tìm và chọn giáo viên"
             filterOption={(input, option) =>

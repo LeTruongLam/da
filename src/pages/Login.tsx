@@ -1,40 +1,14 @@
-import {
-  Button,
-  Card,
-  Form,
-  Input,
-  Typography,
-  Space,
-  message,
-  Divider,
-  List,
-} from "antd";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Button, Card, Form, Input, Typography, Space, message } from "antd";
 import { useDispatch } from "react-redux";
-import {
-  UserOutlined,
-  LockOutlined,
-  InfoCircleOutlined,
-} from "@ant-design/icons";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { setCredentials } from "../store/slices/authSlice";
 import { useState } from "react";
 import { login, type LoginRequest } from "../services/api/auth";
 import { USER_ROLES } from "../lib/constants";
 
-const { Title, Text } = Typography;
-
-const demoAccounts = [
-  {
-    role: USER_ROLES.INSIDE_LECTURER,
-    email: "Nguyenvanphucnkc@gmail.com",
-    password: "stm#CA0HIL",
-  },
-  {
-    role: USER_ROLES.STUDENT,
-    email: "truonglam962002@gmail.com",
-    password: "123123",
-  },
-];
+const { Title } = Typography;
 
 const Login = () => {
   const [loading, setLoading] = useState(false);
@@ -56,29 +30,11 @@ const Login = () => {
       );
 
       message.success(`Xin chào, ${result.user.name}!`);
-
-      if (result.user.role_name === USER_ROLES.STUDENT) {
-        navigate("/thesis-list", { replace: true });
-      } else if (
-        result.user.role_name === USER_ROLES.INSIDE_LECTURER ||
-        result.user.role_name === USER_ROLES.OUTSIDE_LECTURER
-      ) {
-        navigate("/thesis-management", { replace: true });
-      } else {
-        navigate("/user-management", { replace: true });
-      }
     } catch (error: any) {
       message.error("Đăng nhập thất bại, vui lòng thử lại");
     } finally {
       setLoading(false);
     }
-  };
-
-  const fillLoginForm = (email: string, password: string) => {
-    form.setFieldsValue({
-      email,
-      password,
-    });
   };
 
   return (
@@ -155,43 +111,11 @@ const Login = () => {
               <Button type="link" onClick={() => navigate("/forgot-password")}>
                 Quên mật khẩu?
               </Button>
-              <Button type="link" onClick={() => navigate("/register")}>
+              {/* <Button type="link" onClick={() => navigate("/register")}>
                 Chưa có tài khoản? Đăng ký
-              </Button>
+              </Button> */}
             </div>
           </Form>
-
-          <Divider>
-            <InfoCircleOutlined /> Tài khoản demo
-          </Divider>
-
-          <List
-            size="small"
-            bordered
-            dataSource={demoAccounts}
-            renderItem={(item) => (
-              <List.Item
-                actions={[
-                  <Button
-                    type="link"
-                    onClick={() => fillLoginForm(item.email, item.password)}
-                  >
-                    Sử dụng
-                  </Button>,
-                ]}
-              >
-                <List.Item.Meta
-                  title={<Text strong>{item.role}</Text>}
-                  description={
-                    <Space direction="vertical" size={0}>
-                      <Text>Email: {item.email}</Text>
-                      <Text>Mật khẩu: {item.password}</Text>
-                    </Space>
-                  }
-                />
-              </List.Item>
-            )}
-          />
         </Space>
       </Card>
     </div>
