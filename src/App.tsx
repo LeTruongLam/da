@@ -12,11 +12,12 @@ import ThesisManagement from "@/pages/Teacher/ThesisManagement/ThesisManagement"
 import CreateThesis from "@/pages/Teacher/CreateThesis";
 import UserManagement from "@/pages/Admin/UserManagement";
 import ApproveRequests from "@/pages/Admin/ApproveRequests";
-import TeacherThesisDetail from "@/pages/Teacher/ThesisDetail/ThesisDetail";
+import TeacherRequestDetailPage from "@/pages/Teacher/RequestManagement/RequestDetailPage";
 import TeacherList from "@/pages/Student/TeacherList";
 import { USER_ROLES } from "./lib/constants";
 import HomePage from "./pages/Home";
 import AdminThesisManagement from "./pages/Admin/AdminThesisManagement";
+import RequestListPage from "./pages/Teacher/RequestManagement/RequestListPage";
 
 const App = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -57,14 +58,15 @@ const App = () => {
                   />
                   <Route path="create-thesis" element={<CreateThesis />} />
                   <Route
-                    path="thesis-detail/:id"
-                    element={<TeacherThesisDetail />}
+                    path="request-detail/:id"
+                    element={<TeacherRequestDetailPage />}
                   />
+                  <Route path="request-list" element={<RequestListPage />} />
 
-                  <Route
+                  {/* <Route
                     path="student-thesis-detail/:studentId"
                     element={<TeacherThesisDetail />}
-                  />
+                  /> */}
                 </>
               )}
 
@@ -76,7 +78,7 @@ const App = () => {
                     path="approve-requests"
                     element={<ApproveRequests />}
                   />
-                    <Route
+                  <Route
                     path="thesis-list"
                     element={<AdminThesisManagement />}
                   />

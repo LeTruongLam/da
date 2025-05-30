@@ -40,6 +40,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             icon: <FileTextOutlined />,
             label: "Quản lý đồ án",
           },
+          {
+            key: "/request-list",
+            icon: <TeamOutlined />,
+            label: "Danh sách đăng ký",
+          }
         ]
       : []),
     ...(user?.role_name === USER_ROLES.ADMIN

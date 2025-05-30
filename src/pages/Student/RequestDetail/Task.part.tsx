@@ -1,5 +1,6 @@
 import { TASK_STATUS_LABELS } from "@/lib/constants";
 import type { RequestDetailResponse } from "@/services/api/request";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 import {
   CommentOutlined,
   FileTextOutlined,
@@ -27,7 +28,6 @@ import React, { useState } from "react";
 
 const { Text } = Typography;
 const { Dragger } = Upload;
-const { TextArea } = Input;
 
 type OverviewPartProps = {
   requestData: RequestDetailResponse | undefined | null;
@@ -41,11 +41,20 @@ type TaskType = {
   feedback?: string;
 };
 
+interface SubmissionFormValues {
+  taskId: number;
+  taskName: string;
+  file: {
+    originFileObj: File;
+  }[];
+}
+
 const TaskPartComponent: React.FC<OverviewPartProps> = ({ requestData }) => {
   const [isSubmissionModalVisible, setIsSubmissionModalVisible] =
     useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskType | null>(null);
   const [submissionForm] = Form.useForm();
+  const [uploading, setUploading] = useState(false);
 
   const handleOpenModal = (task: TaskType) => {
     setSelectedTask(task);
@@ -56,15 +65,65 @@ const TaskPartComponent: React.FC<OverviewPartProps> = ({ requestData }) => {
     setIsSubmissionModalVisible(true);
   };
 
-  const handleSubmitTask = (values: any) => {
-    console.log("Submitted values:", values);
-    message.success("Nộp bài thành công!");
-    setIsSubmissionModalVisible(false);
-    submissionForm.resetFields();
+  const handleSubmitTask = async (values: SubmissionFormValues) => {
+    try {
+      setUploading(true);
+      const file = values.file[0]?.originFileObj;
+      if (!file) {
+        message.error("Vui lòng chọn file để upload!");
+        return;
+      }
+
+      // Create folder path based on task
+      const folder = "tasks"
+
+      // Upload to Cloudinary with folder
+      const fileUrl = await uploadToCloudinary(file, folder);
+      
+      // Here you would typically send the fileUrl to your backend
+      console.log("File uploaded to Cloudinary:", fileUrl);
+      
+      message.success("Nộp bài thành công!");
+      setIsSubmissionModalVisible(false);
+      submissionForm.resetFields();
+    } catch (error) {
+      console.error("Error uploading file:", error);
+      message.error("Có lỗi xảy ra khi nộp bài!");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const uploadProps = {
-    beforeUpload: () => false,
+    beforeUpload: (file: File) => {
+      const allowedTypes = [
+        'application/pdf',
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/zip',
+        'application/x-rar-compressed',
+        'image/jpeg',
+        'image/png'
+      ];
+      
+      const isAllowedType = allowedTypes.includes(file.type);
+      if (!isAllowedType) {
+        message.error('Chỉ chấp nhận file PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, ZIP, RAR, JPG, PNG!');
+        return Upload.LIST_IGNORE;
+      }
+
+      const isLt10M = file.size / 1024 / 1024 < 10;
+      if (!isLt10M) {
+        message.error('File phải nhỏ hơn 10MB!');
+        return Upload.LIST_IGNORE;
+      }
+
+      return false; // Prevent auto upload
+    },
     multiple: false,
   };
 
@@ -112,13 +171,15 @@ const TaskPartComponent: React.FC<OverviewPartProps> = ({ requestData }) => {
               Click hoặc kéo thả file vào khu vực này
             </p>
             <p className="ant-upload-hint">
-              Hỗ trợ các định dạng: PDF, DOC, DOCX, PPT, ZIP...
+              Hỗ trợ các định dạng: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, ZIP, RAR, JPG, PNG
+              <br />
+              Kích thước tối đa: 10MB
             </p>
           </Dragger>
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" block>
+          <Button type="primary" htmlType="submit" block loading={uploading}>
             Nộp bài
           </Button>
         </Form.Item>
