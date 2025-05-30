@@ -76,6 +76,7 @@ export const API_CONFIG = {
     },
     MATERIAL: {
       LIST_BY_THESIS: (thesisId: number) => `/material/${thesisId}/get-all`,
+      CREATE: "/material",
     },
   },
 } as const;

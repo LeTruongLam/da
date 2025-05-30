@@ -1,5 +1,5 @@
 import { API_CONFIG } from "./config";
-import { get, post, put, del } from "@/lib/base-api";
+import { get, post } from "@/lib/base-api";
 
 export type MaterialsByThesisType = {
   material_id: number;
@@ -17,4 +17,19 @@ export type MaterialsByThesisType = {
 export const getMaterialByThesis = (thesisId: number) =>
   get<MaterialsByThesisType>(
     API_CONFIG.ENDPOINTS.MATERIAL.LIST_BY_THESIS(thesisId)
+  );
+
+export type MaterialTypeRequest = {
+  fileName: string;
+  filePath: string;
+  fileType: string;
+  createAt: string;
+  user_public_id: number;
+  thesis_id: number;
+};
+
+export const createMaterial = (values: MaterialTypeRequest) =>
+  post<unknown>(
+    API_CONFIG.ENDPOINTS.MATERIAL.CREATE,
+    values as unknown as Record<string, unknown>
   );

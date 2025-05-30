@@ -6,7 +6,7 @@ import {
 } from "@ant-design/icons";
 import DocumentUploadModal from "./DocumentUploadModal";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   getMaterialByThesis,
   type MaterialsByThesisType,
@@ -19,17 +19,23 @@ interface DocumentsTableProps {
 const DocumentsTable: React.FC<DocumentsTableProps> = ({ thesisId }) => {
   const [isDocumentUploadModalVisible, setIsDocumentUploadModalVisible] =
     useState(false);
+  const queryClient = useQueryClient();
 
   const { data: documentsData = [], isLoading: loading } = useQuery({
-    queryKey: ["documents"],
+    queryKey: ["documents", thesisId],
     queryFn: () => {
-      if (!thesisId) return;
+      if (!thesisId) return [];
       return getMaterialByThesis(thesisId);
     },
   });
 
   const onUpload = () => {
     setIsDocumentUploadModalVisible(true);
+  };
+
+  const handleUploadSuccess = () => {
+    setIsDocumentUploadModalVisible(false);
+    queryClient.invalidateQueries({ queryKey: ["documents", thesisId] });
   };
 
   return (
@@ -65,7 +71,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({ thesisId }) => {
                 ),
               },
             ]}
-            dataSource={documentsData || []}
+            dataSource={documentsData}
             pagination={false}
             size="small"
             loading={loading}
@@ -75,6 +81,8 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({ thesisId }) => {
       <DocumentUploadModal
         visible={isDocumentUploadModalVisible}
         onCancel={() => setIsDocumentUploadModalVisible(false)}
+        onSuccess={handleUploadSuccess}
+        thesisId={thesisId}
       />
     </>
   );
