@@ -85,6 +85,13 @@ export const API_CONFIG = {
     FEEDBACK: {
       CREATE: "/feedback",
       GET_BY_TASK_ID: (taskId: number) => `/feedback/${taskId}/get-all`,
-    }
+    },
+    COUNCIL: {
+      CREATE: "/councils",
+      GET_BY_ID: (id: number) => `/councils/${id}`,
+      DELETE: (id: number) => `/councils/${id}`,
+      GET_ALL: "/councils",
+      GET_BY_REQUEST_ID: (id: number) => `/councils/${id}/get-all`,
+    },
   },
 } as const;

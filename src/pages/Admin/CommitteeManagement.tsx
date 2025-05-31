@@ -1,183 +1,208 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Card, Table, Button, Space, message, Modal, Tabs } from "antd";
+import {
+  Card,
+  Table,
+  Button,
+  message,
+  Modal,
+  Flex,
+  Descriptions,
+  Spin,
+} from "antd";
 import { useState } from "react";
-import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
-import { useQuery } from "@tanstack/react-query";
+import { CloseOutlined, EyeOutlined } from "@ant-design/icons";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
-  updateRequestStatus,
-  type AllRequestResponse,
-} from "@/services/api/request";
-import {
-  REQUEST_STATUS,
-  THESIS_STATUS,
-  THESIS_STATUS_LABELS,
-  USER_ROLE_LABELS,
-} from "@/lib/constants";
-import {
-  getAllTheses,
-  updateThesisStatus,
-  type ThesisResponse,
-} from "@/services/api";
+  createCouncil,
+  getAllCouncils,
+  deleteCouncil,
+  getCouncilById,
+  type Council,
+  type CouncilById,
+} from "@/services/api/councils";
 import dayjs from "dayjs";
 
-const CommitteeManagement = () => {
-  const [activeTab, setActiveTab] = useState("all");
-  const [modal, contextHolder] = Modal.useModal();
+type UserType = {
+  user_id: number;
+  name: string;
+  code: string;
+  email: string;
+};
 
+const CommitteeManagement = () => {
+  const [modal, contextHolder] = Modal.useModal();
+  const [isDetailVisible, setIsDetailVisible] = useState(false);
+  const [detailData, setDetailData] = useState<CouncilById | null>(null);
+  const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+
+  // Lấy danh sách tất cả các hội đồng
   const {
-    data: allTheses,
+    data: allCouncils = [],
     isLoading: isLoadingAll,
     refetch: refetchAll,
   } = useQuery({
-    queryKey: ["theses", "all"],
-    queryFn: () => getAllTheses(),
+    queryKey: ["get-all-councils"],
+    queryFn: () => getAllCouncils(),
   });
 
-  const {
-    data: onHoldTheses,
-    isLoading: isLoadingOnHold,
-    refetch: refetchOnHold,
-  } = useQuery({
-    queryKey: ["theses", "on-hold"],
-    queryFn: () => getAllTheses({ status: THESIS_STATUS.ON_HOLD }),
+  // Tạo hội đồng
+  const { mutate: createCouncilMutation, isPending: isCreating } = useMutation({
+    mutationFn: createCouncil,
+    onSuccess: () => {
+      message.success("Tạo hội đồng bảo vệ thành công");
+      refetchAll();
+    },
+    onError: () => message.error("Tạo hội đồng bảo vệ thất bại"),
   });
 
-  const handleUpdateStatus = async (
-    thesisId: number,
-    status: string,
-    actionLabel: string
-  ) => {
+  // Xóa hội đồng
+  const { mutate: deleteCouncilMutation, isPending: isDeleting } = useMutation({
+    mutationFn: deleteCouncil,
+    onSuccess: () => {
+      message.success("Xóa hội đồng thành công");
+      refetchAll();
+    },
+    onError: () => {
+      message.error("Xóa hội đồng thất bại");
+    },
+  });
+
+  const handleCreateCouncil = () => {
+    createCouncilMutation();
+  };
+
+  const handleDeleteCouncil = (id: number) => {
     modal.confirm({
-      title: `${actionLabel} đề tài`,
-      content: `Bạn có chắc chắn muốn ${actionLabel.toLowerCase()} đề tài này?`,
-      okText: "Xác nhận",
+      title: "Xác nhận xóa hội đồng?",
+      content: "Hành động này sẽ không thể hoàn tác.",
+      okText: "Xóa",
       cancelText: "Hủy",
-      async onOk() {
-        try {
-          await updateThesisStatus(thesisId, status);
-          message.success(`${actionLabel} thành công`);
-          refetchAll();
-          refetchOnHold();
-        } catch (err) {
-          message.error(`${actionLabel} thất bại`);
-        }
-      },
+      okButtonProps: { danger: true, loading: isDeleting },
+      onOk: () => deleteCouncilMutation(id),
     });
   };
 
-  const renderColumns = (withActions = false) => [
+  const handleViewDetail = async (id: number) => {
+    setIsLoadingDetail(true);
+    try {
+      const data = await getCouncilById(id);
+      setDetailData(data as CouncilById);
+      setIsDetailVisible(true);
+    } catch (error) {
+      message.error("Lấy chi tiết hội đồng thất bại");
+    } finally {
+      setIsLoadingDetail(false);
+    }
+  };
+
+  const handleCloseDetail = () => {
+    setIsDetailVisible(false);
+    setDetailData(null);
+  };
+
+  const renderColumns = () => [
     {
       title: "Tên đề tài",
-      dataIndex: "title",
-      key: "title",
+      dataIndex: "thesis_title",
+      key: "thesis_title",
     },
     {
-      title: "Người tạo",
-      dataIndex: "creator_name",
-      key: "creator_name",
-    },
-    {
-      title: "Vai trò",
-      dataIndex: "role_name",
-      key: "role_name",
-      render: (value: string) => (
-        <Space>
-          {USER_ROLE_LABELS[value as keyof typeof USER_ROLE_LABELS] || "--"}
-        </Space>
-      ),
-    },
-    {
-      title: "Ngày đăng ký",
-      dataIndex: "create_at",
-      key: "create_at",
+      title: "Thời gian bảo vệ",
+      dataIndex: "date",
+      width: 150,
+      key: "date",
       render: (value: string) => dayjs(value).format("DD/MM/YYYY"),
     },
     {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status: string) => {
-        const label =
-          THESIS_STATUS_LABELS[status as keyof typeof THESIS_STATUS_LABELS];
-        return label || "Không xác định";
-      },
+      title: "Giờ bảo vệ",
+      dataIndex: "time_to",
+      key: "time_to",
+      width: 150,
     },
-    ...(withActions
-      ? [
-          {
-            title: "Thao tác",
-            key: "action",
-            render: (_, record: ThesisResponse) => (
-              <Space>
-                <Button
-                  type="primary"
-                  icon={<CheckOutlined />}
-                  onClick={() =>
-                    handleUpdateStatus(
-                      record.thesis_id,
-                      THESIS_STATUS.AVAILABLE,
-                      "Duyệt"
-                    )
-                  }
-                >
-                  Duyệt
-                </Button>
-                <Button
-                  type="link"
-                  danger
-                  icon={<CloseOutlined />}
-                  onClick={() =>
-                    handleUpdateStatus(
-                      record.thesis_id,
-                      THESIS_STATUS.ADMIN_REJECT,
-                      "Từ chối"
-                    )
-                  }
-                >
-                  Từ chối
-                </Button>
-              </Space>
-            ),
-          },
-        ]
-      : []),
+    {
+      title: "Nơi bảo vệ",
+      dataIndex: "room",
+      width: 150,
+      key: "room",
+    },
+    {
+      title: "Thao tác",
+      key: "action",
+      width: 200,
+      render: (_: any, record: Council) => (
+        <Flex gap={8}>
+          <Button
+            icon={<EyeOutlined />}
+            onClick={() => handleViewDetail(record.council_id)}
+          >
+            Xem chi tiết
+          </Button>
+          <Button
+            danger
+            icon={<CloseOutlined />}
+            onClick={() => handleDeleteCouncil(record.council_id)}
+          >
+            Xóa
+          </Button>
+        </Flex>
+      ),
+    },
   ];
 
   return (
     <Card title="Quản lý hội đồng bảo vệ">
       {contextHolder}
-      <Tabs
-        activeKey={activeTab}
-        onChange={(key) => setActiveTab(key)}
-        items={[
-          {
-            key: "all",
-            label: "Tất cả đề tài",
-            children: (
-              <Table
-                columns={renderColumns()}
-                dataSource={allTheses || []}
-                rowKey="id"
-                loading={isLoadingAll}
-                pagination={{ pageSize: 5 }}
-              />
-            ),
-          },
-          {
-            key: "on-hold",
-            label: "Chờ duyệt",
-            children: (
-              <Table
-                columns={renderColumns(true)}
-                dataSource={onHoldTheses || []}
-                rowKey="id"
-                loading={isLoadingOnHold}
-                pagination={{ pageSize: 5 }}
-              />
-            ),
-          },
-        ]}
+      <Flex justify="end" align="center" className="mb-4">
+        <Button
+          type="primary"
+          loading={isCreating}
+          onClick={handleCreateCouncil}
+          style={{ marginBottom: 16 }}
+        >
+          Phân bổ hội đồng bảo vệ
+        </Button>
+      </Flex>
+      <Table
+        columns={renderColumns()}
+        dataSource={allCouncils}
+        rowKey="id"
+        loading={isLoadingAll}
+        pagination={{ pageSize: 5 }}
       />
+
+      <Modal
+        open={isDetailVisible}
+        title="Chi tiết hội đồng"
+        onCancel={handleCloseDetail}
+        footer={null}
+      >
+        {isLoadingDetail ? (
+          <Spin />
+        ) : detailData ? (
+          <Descriptions column={1} bordered size="small">
+            <Descriptions.Item label="Ngày bảo vệ">
+              {dayjs(detailData.date).format("DD/MM/YYYY")}
+            </Descriptions.Item>
+            <Descriptions.Item label="Giờ bảo vệ">
+              {detailData.time_to}
+            </Descriptions.Item>
+            <Descriptions.Item label="Phòng">
+              {detailData.room}
+            </Descriptions.Item>
+            <Descriptions.Item label="Danh sách hội đồng">
+              <ul style={{ paddingLeft: 16 }}>
+                {detailData.members.map((user) => (
+                  <li key={user.user_id}>
+                    {user.name} ({user.email})
+                  </li>
+                ))}
+              </ul>
+            </Descriptions.Item>
+          </Descriptions>
+        ) : (
+          <p>Không có dữ liệu</p>
+        )}
+      </Modal>
     </Card>
   );
 };
