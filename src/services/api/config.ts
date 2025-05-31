@@ -17,6 +17,8 @@ export const API_CONFIG = {
       UPDATE: "/users/update",
       BY_ID: (id: number) => `/users/${id}`,
       IS_REVOKE: (id: number) => `/users/${id}/is-revoke`,
+      CREATE_USER: "/users/import-user",
+      IMPORT_USERS_FROM_EXCEL: "/users/import-users-from-excel",
     },
     PROFILE: {
       CHANGE_PASSWORD: "/users/change-password",

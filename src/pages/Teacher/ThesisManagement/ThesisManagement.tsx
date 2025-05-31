@@ -11,9 +11,17 @@ import {
   message,
   Select,
 } from "antd";
-import { EyeOutlined, EditOutlined, DeleteOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  EditOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons";
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   getMyTheses,
   deleteThesis,
@@ -36,17 +44,10 @@ const ThesisManagement = () => {
 
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
-  // State quản lý modal xem chi tiết
   const [selectedThesisId, setSelectedThesisId] = useState<number | null>(null);
-
-  // State quản lý modal chỉnh sửa
   const [editingThesisId, setEditingThesisId] = useState<number | null>(null);
+  const [editingThesis, setEditingThesis] = useState<ThesisDetailResponse | null>(null);
 
-  // Dữ liệu đề tài được chọn để sửa
-  const [editingThesis, setEditingThesis] =
-    useState<ThesisDetailResponse | null>(null);
-
-  // Danh sách đề tài của user
   const {
     data: theses = [],
     isLoading,
@@ -56,7 +57,6 @@ const ThesisManagement = () => {
     queryFn: getMyTheses,
   });
 
-  // Lấy dữ liệu chi tiết đề tài xem chi tiết
   const {
     data: thesisDetail,
     isFetching: isFetchingDetail,
@@ -67,7 +67,6 @@ const ThesisManagement = () => {
     enabled: !!selectedThesisId,
   });
 
-  // Xóa đề tài
   const deleteMutation = useMutation({
     mutationFn: deleteThesis,
     onSuccess: () => {
@@ -79,7 +78,6 @@ const ThesisManagement = () => {
     },
   });
 
-  // Cập nhật đề tài
   const { mutate: updateThesisMutation, isPending: isUpdating } = useMutation({
     mutationFn: ({ thesisId, data }: { thesisId: number; data: any }) =>
       updateThesis(thesisId, data),
@@ -93,38 +91,50 @@ const ThesisManagement = () => {
     },
   });
 
-  // Khi có dữ liệu chi tiết sửa, set form và state editingThesis
   useEffect(() => {
-    if (thesisDetail) {
-      form.setFieldsValue({
-        title: thesisDetail.title,
-        description: thesisDetail.description,
-        status: thesisDetail.status,
-      });
-      setEditingThesis(thesisDetail);
-    }
-  }, [thesisDetail, form]);
+    const fetchEditingThesis = async () => {
+      if (editingThesisId) {
+        try {
+          const data = await queryClient.fetchQuery({
+            queryKey: ["thesisDetail", editingThesisId],
+            queryFn: () => getThesisById(editingThesisId),
+          });
+          form.setFieldsValue({
+            title: data.title,
+            description: data.description,
+            status: data.status,
+          });
+          setEditingThesis(data);
+        } catch (error) {
+          message.error("Không lấy được thông tin đề tài");
+        }
+      }
+    };
+    fetchEditingThesis();
+  }, [editingThesisId, form, queryClient]);
 
-  // Mở modal xem chi tiết
+  useEffect(() => {
+    if (selectedThesisId) {
+      refetchThesisDetail(); // Lấy lại dữ liệu mới mỗi lần mở modal
+    }
+  }, [selectedThesisId]);
+
   const openViewModal = (thesisId: number) => {
     setSelectedThesisId(thesisId);
   };
 
-  // Mở modal chỉnh sửa
+  const closeViewModal = () => {
+    setSelectedThesisId(null);
+  };
+
   const openEditModal = (thesisId: number) => {
     setEditingThesisId(thesisId);
   };
 
-  // Đóng modal chỉnh sửa
   const closeEditModal = () => {
     setEditingThesisId(null);
     setEditingThesis(null);
-    form.resetFields();
-  };
-
-  // Đóng modal xem chi tiết
-  const closeViewModal = () => {
-    setSelectedThesisId(null);
+    form.resetFields(); // Reset form khi đóng modal sửa
   };
 
   const handleEditSubmit = () => {
@@ -174,8 +184,7 @@ const ThesisManagement = () => {
       key: "status",
       width: 150,
       render: (status: string) => {
-        const label =
-          THESIS_STATUS_LABELS[status as keyof typeof THESIS_STATUS_LABELS];
+        const label = THESIS_STATUS_LABELS[status as keyof typeof THESIS_STATUS_LABELS];
         return label || "Không xác định";
       },
     },
@@ -316,22 +325,13 @@ const ThesisManagement = () => {
           <p>Đang tải...</p>
         ) : thesisDetail ? (
           <>
+            <p><strong>Tiêu đề:</strong> {thesisDetail.title}</p>
+            <p><strong>Mô tả:</strong> {thesisDetail.description}</p>
             <p>
-              <strong>Tiêu đề: </strong> {thesisDetail.title}
+              <strong>Trạng thái:</strong>{" "}
+              {THESIS_STATUS_LABELS[thesisDetail.status as keyof typeof THESIS_STATUS_LABELS] || "Không xác định"}
             </p>
-            <p>
-              <strong>Mô tả: </strong> {thesisDetail.description}
-            </p>
-            <p>
-              <strong>Trạng thái: </strong>
-              {THESIS_STATUS_LABELS[
-                thesisDetail.status as keyof typeof THESIS_STATUS_LABELS
-              ] || "Không xác định"}
-            </p>
-            <p>
-              <strong>Ngày tạo: </strong>
-              {dayjs(thesisDetail.create_at).format("DD/MM/YYYY")}
-            </p>
+            <p><strong>Ngày tạo:</strong> {dayjs(thesisDetail.created_at).format("DD/MM/YYYY")}</p>
           </>
         ) : (
           <p>Không tìm thấy dữ liệu đề tài</p>

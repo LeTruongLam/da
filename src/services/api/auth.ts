@@ -111,3 +111,30 @@ export const getUserById = (id: number) =>
 
 export const revokeUserById = (id: number) =>
   post<unknown>(API_CONFIG.ENDPOINTS.USER.IS_REVOKE(id));
+
+export type CreateUserRequest = {
+  email: string;
+  password: string;
+  name: string;
+  code: string;
+  isRevoke: boolean;
+  revoke_reason: string;
+  semester: number;
+  year: number;
+  role_id: number;
+};
+
+export const createUser = (data: CreateUserRequest) =>
+  post<LoginResponse>(
+    API_CONFIG.ENDPOINTS.USER.CREATE_USER,
+    data as unknown as Record<string, unknown>
+  );
+
+export const userRevoke = (id: number) =>
+  post<unknown>(API_CONFIG.ENDPOINTS.USER.IS_REVOKE(id));
+
+export const importUsersExcel = (data: string) =>
+  post<unknown>(
+    API_CONFIG.ENDPOINTS.USER.IMPORT_USERS_FROM_EXCEL,
+    JSON.stringify(data) as unknown as Record<string, unknown>
+  );

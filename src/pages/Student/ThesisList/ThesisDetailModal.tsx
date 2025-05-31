@@ -6,6 +6,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   deleteThesis,
   getThesisById,
+  updateThesis,
   updateThesis as updateThesisApi,
   type ThesisUpdateRequest,
 } from "@/services/api";
@@ -34,7 +35,7 @@ const ThesisDetailModal = ({
 }: ThesisModalProps) => {
   const [form] = useForm();
 
-  const { data: thesis } = useQuery({
+  const { data: thesis, refetch: refetchThesis } = useQuery({
     queryKey: ["thesis-detail-by-id", thesis_id],
     queryFn: () => getThesisById(thesis_id),
     enabled: !!thesis_id,
@@ -71,6 +72,21 @@ const ThesisDetailModal = ({
     handleDeleteMution();
   };
 
+  const { mutate: updateThesisMutation, isPending: isUpdating } = useMutation({
+    mutationFn: (data: ThesisUpdateRequest) => updateThesis(thesis_id, data),
+    onSuccess: () => {
+      message.success("Cập nhật đề tài thành công!");
+      onCancel();
+      refetchThesis();
+      refetch?.();
+    },
+    onError: () => {
+      message.error("Cập nhật đề tài thất bại");
+    },
+  });
+  const handleFormFinish = (values: ThesisUpdateRequest) => {
+    updateThesisMutation(values);
+  };
   return (
     <Modal
       title="Thông tin đề tài"
@@ -92,13 +108,18 @@ const ThesisDetailModal = ({
             Xóa
           </Button>
 
-          <Button key="confirm" type="primary" onClick={() => form.submit()}>
+          <Button
+            key="confirm"
+            type="primary"
+            onClick={() => form.submit()}
+            loading={isUpdating}
+          >
             Lưu thay đổi
           </Button>
         </>
       }
     >
-      <Form form={form} layout="vertical">
+      <Form form={form} layout="vertical" onFinish={handleFormFinish}>
         <Form.Item
           name="title"
           label="Tiêu đề đề tài"
