@@ -37,6 +37,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             icon: <TeamOutlined />,
             label: "Danh sách giảng viên",
           },
+          {
+            key: "/committee-management",
+            icon: <GroupOutlined />,
+            label: "Quản lý hội đồng",
+          },
         ]
       : []),
     ...(user?.role_name === USER_ROLES.INSIDE_LECTURER ||
@@ -51,6 +56,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             key: "/request-list",
             icon: <TeamOutlined />,
             label: "Danh sách đăng ký",
+          },
+          {
+            key: "/committee-management",
+            icon: <GroupOutlined />,
+            label: "Quản lý hội đồng",
           },
         ]
       : []),

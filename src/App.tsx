@@ -18,6 +18,7 @@ import HomePage from "./pages/Home";
 import AdminThesisManagement from "./pages/Admin/AdminThesisManagement";
 import RequestListPage from "./pages/Teacher/RequestManagement/RequestListPage";
 import CommitteeManagement from "./pages/Admin/CommitteeManagement";
+import ViewCommitteeListPage from "./components/ViewCommitteeList";
 
 const App = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -45,6 +46,11 @@ const App = () => {
                     path="request-detail/:id"
                     element={<RequestDetailPage />}
                   />
+
+                  <Route
+                    path="committee-management"
+                    element={<ViewCommitteeListPage />}
+                  />
                 </>
               )}
 
@@ -62,10 +68,10 @@ const App = () => {
                   />
                   <Route path="request-list" element={<RequestListPage />} />
 
-                  {/* <Route
-                    path="student-thesis-detail/:studentId"
-                    element={<TeacherThesisDetail />}
-                  /> */}
+                  <Route
+                    path="committee-management"
+                    element={<ViewCommitteeListPage />}
+                  />
                 </>
               )}
 
@@ -81,7 +87,7 @@ const App = () => {
                     path="thesis-list"
                     element={<AdminThesisManagement />}
                   />
-                   <Route
+                  <Route
                     path="committee-management"
                     element={<CommitteeManagement />}
                   />

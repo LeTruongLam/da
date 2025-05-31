@@ -108,3 +108,6 @@ export type UserByIdResponse = {
 
 export const getUserById = (id: number) =>
   get<UserByIdResponse>(API_CONFIG.ENDPOINTS.USER.BY_ID(id));
+
+export const revokeUserById = (id: number) =>
+  post<unknown>(API_CONFIG.ENDPOINTS.USER.IS_REVOKE(id));
