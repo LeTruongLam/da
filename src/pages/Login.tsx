@@ -57,7 +57,7 @@ const Login = () => {
           style={{ width: "100%", textAlign: "center" }}
         >
           <Title level={2} style={{ margin: 0 }}>
-            Thesis Management
+            UTT Thesis Management
           </Title>
           <Form
             form={form}

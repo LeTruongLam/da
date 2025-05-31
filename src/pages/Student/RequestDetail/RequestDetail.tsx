@@ -75,11 +75,11 @@ const RequestDetailPage = () => {
           </TabPane>
 
           <TabPane tab="Nhiệm vụ (Tasks)" key="tasks">
-            <TaskPartComponent requestData={requestData} />
+            <TaskPartComponent requestData={requestData} refetch={refetch} />
           </TabPane>
 
           <TabPane tab="Tài liệu" key="documents">
-            <DocumentPartComponent requestData={requestData} />
+            <DocumentPartComponent thesisId={requestData.thesis.thesis_id} />
           </TabPane>
         </Tabs>
       </Card>

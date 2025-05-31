@@ -31,7 +31,7 @@ const MainLayout = () => {
     <AntLayout>
       <Sidebar collapsed={collapsed} />
       <AntLayout
-        style={{ marginLeft: collapsed ? 80 : 200, minHeight: "100vh" }}
+        style={{ marginLeft: collapsed ? 80 : 250, minHeight: "100vh" }}
       >
         <Header
           collapsed={collapsed}

@@ -55,14 +55,14 @@ export const API_CONFIG = {
     },
     TASK: {
       LIST: "/tasks",
-      DETAIL: (id: number) => `/tasks/${id}`,
+      DETAIL: (id: number) => `/tasks/${id}/view`,
       CREATE: "/tasks",
-      UPDATE: (id: number) => `/tasks/${id}`,
+      UPDATE: (id: number) => `/tasks/${id}/update`,
       DELETE: (id: number) => `/tasks/${id}`,
       UPDATE_STATUS: (id: number) => `/tasks/${id}/status`,
       UPLOAD_FILE: (id: number) => `/tasks/${id}/file`,
       DOWNLOAD_FILE: (id: number) => `/tasks/${id}/file`,
-      LIST_BY_REQUEST: (id: number) => `/tasks/requests/${id}`,
+      LIST_BY_REQUEST: (id: number) => `/tasks/${id}`,
     },
     REQUEST: {
       LIST: "/requests",
@@ -77,6 +77,11 @@ export const API_CONFIG = {
     MATERIAL: {
       LIST_BY_THESIS: (thesisId: number) => `/material/${thesisId}/get-all`,
       CREATE: "/material",
+      DELETE: (id: number) => `/material/${id}`,
     },
+    FEEDBACK: {
+      CREATE: "/feedback",
+      GET_BY_TASK_ID: (taskId: number) => `/feedback/${taskId}/get-all`,
+    }
   },
 } as const;

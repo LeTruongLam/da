@@ -35,7 +35,7 @@ const StudentCard: React.FC<StudentCardProps> = ({ student }) => {
             {student?.email || "--"}
           </Paragraph>
         </Col>
-        <Col span={8}>
+        {/* <Col span={8}>
           <div style={{ marginTop: 16 }}>
             <Text strong>Đánh giá: </Text>
             <Rate disabled defaultValue={4} />
@@ -43,7 +43,7 @@ const StudentCard: React.FC<StudentCardProps> = ({ student }) => {
           <Space style={{ marginTop: 24 }}>
             <Button icon={<StarOutlined />}>Đánh giá</Button>
           </Space>
-        </Col>
+        </Col> */}
       </Row>
     </Card>
   );

@@ -1,4 +1,4 @@
-import { TASK_STATUS_LABELS } from "@/lib/constants";
+import { TASK_STATUS, TASK_STATUS_LABELS } from "@/lib/constants";
 import type { RequestDetailResponse } from "@/services/api/request";
 import { uploadToCloudinary } from "@/lib/cloudinary";
 import {
@@ -22,15 +22,23 @@ import {
   Input,
   Alert,
   Upload,
+  Timeline,
 } from "antd";
 import dayjs from "dayjs";
 import React, { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { updateTask } from "@/services/api/task";
+import {
+  getAllFeedbackByTaskId,
+  type FeedbackResponse,
+} from "@/services/api/feedback";
 
 const { Text } = Typography;
 const { Dragger } = Upload;
 
-type OverviewPartProps = {
+type TaskPartProps = {
   requestData: RequestDetailResponse | undefined | null;
+  refetch: () => void;
 };
 
 type TaskType = {
@@ -49,12 +57,34 @@ interface SubmissionFormValues {
   }[];
 }
 
-const TaskPartComponent: React.FC<OverviewPartProps> = ({ requestData }) => {
+const TaskPartComponent: React.FC<TaskPartProps> = ({
+  requestData,
+  refetch,
+}) => {
   const [isSubmissionModalVisible, setIsSubmissionModalVisible] =
     useState(false);
   const [selectedTask, setSelectedTask] = useState<TaskType | null>(null);
   const [submissionForm] = Form.useForm();
   const [uploading, setUploading] = useState(false);
+
+  // Modal xem đánh giá
+  const [isFeedbackModalVisible, setIsFeedbackModalVisible] = useState(false);
+  const [feedbackList, setFeedbackList] = useState<FeedbackResponse[]>([]);
+
+  const { mutate: updateTaskMutation } = useMutation({
+    mutationFn: ({ taskId, data }: { taskId: number; data: any }) =>
+      updateTask(taskId, data),
+    onSuccess: () => {
+      message.success("Nộp bài thành công!");
+      setIsSubmissionModalVisible(false);
+      submissionForm.resetFields();
+      refetch();
+    },
+    onError: (error) => {
+      console.error("Error submitting task:", error);
+      message.error("Có lỗi xảy ra khi nộp bài!");
+    },
+  });
 
   const handleOpenModal = (task: TaskType) => {
     setSelectedTask(task);
@@ -74,18 +104,23 @@ const TaskPartComponent: React.FC<OverviewPartProps> = ({ requestData }) => {
         return;
       }
 
-      // Create folder path based on task
-      const folder = "tasks"
+      const fileUploaded = await uploadToCloudinary(file, "tasks");
 
-      // Upload to Cloudinary with folder
-      const fileUrl = await uploadToCloudinary(file, folder);
-      
-      // Here you would typically send the fileUrl to your backend
-      console.log("File uploaded to Cloudinary:", fileUrl);
-      
-      message.success("Nộp bài thành công!");
-      setIsSubmissionModalVisible(false);
-      submissionForm.resetFields();
+      const originalName = fileUploaded.original_filename;
+      const extension = file.name.split(".").pop();
+      const fileNameWithExtension = `${originalName}.${extension}`;
+
+      const data = {
+        file_name: fileNameWithExtension,
+        file_path: fileUploaded.url,
+        status: TASK_STATUS.IN_PROGRESS,
+        due_date: selectedTask?.due_date,
+      };
+
+      updateTaskMutation({
+        taskId: values.taskId,
+        data,
+      });
     } catch (error) {
       console.error("Error uploading file:", error);
       message.error("Có lỗi xảy ra khi nộp bài!");
@@ -94,31 +129,44 @@ const TaskPartComponent: React.FC<OverviewPartProps> = ({ requestData }) => {
     }
   };
 
+  const handleViewFeedback = async (taskId: number) => {
+    try {
+      const data = await getAllFeedbackByTaskId(taskId);
+      setFeedbackList(data);
+      setIsFeedbackModalVisible(true);
+    } catch (error) {
+      console.error("Error loading feedback:", error);
+      message.error("Không thể tải danh sách nhận xét!");
+    }
+  };
+
   const uploadProps = {
     beforeUpload: (file: File) => {
       const allowedTypes = [
-        'application/pdf',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/vnd.ms-powerpoint',
-        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-        'application/vnd.ms-excel',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/zip',
-        'application/x-rar-compressed',
-        'image/jpeg',
-        'image/png'
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/vnd.ms-powerpoint",
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+        "application/vnd.ms-excel",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "application/zip",
+        "application/x-rar-compressed",
+        "image/jpeg",
+        "image/png",
       ];
-      
+
       const isAllowedType = allowedTypes.includes(file.type);
       if (!isAllowedType) {
-        message.error('Chỉ chấp nhận file PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, ZIP, RAR, JPG, PNG!');
+        message.error(
+          "Chỉ chấp nhận file PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, ZIP, RAR, JPG, PNG!"
+        );
         return Upload.LIST_IGNORE;
       }
 
       const isLt10M = file.size / 1024 / 1024 < 10;
       if (!isLt10M) {
-        message.error('File phải nhỏ hơn 10MB!');
+        message.error("File phải nhỏ hơn 10MB!");
         return Upload.LIST_IGNORE;
       }
 
@@ -171,7 +219,8 @@ const TaskPartComponent: React.FC<OverviewPartProps> = ({ requestData }) => {
               Click hoặc kéo thả file vào khu vực này
             </p>
             <p className="ant-upload-hint">
-              Hỗ trợ các định dạng: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, ZIP, RAR, JPG, PNG
+              Hỗ trợ các định dạng: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX, ZIP,
+              RAR, JPG, PNG
               <br />
               Kích thước tối đa: 10MB
             </p>
@@ -184,6 +233,35 @@ const TaskPartComponent: React.FC<OverviewPartProps> = ({ requestData }) => {
           </Button>
         </Form.Item>
       </Form>
+    </Modal>
+  );
+
+  const renderFeedbackModal = () => (
+    <Modal
+      title="Danh sách đánh giá"
+      open={isFeedbackModalVisible}
+      onCancel={() => setIsFeedbackModalVisible(false)}
+      footer={null}
+    >
+      <div style={{ marginTop: 16 }}>
+        {feedbackList.length > 0 ? (
+          <Timeline
+            mode="left"
+            items={feedbackList.map((item) => ({
+              label: dayjs(item.create_at).format("DD/MM/YYYY HH:mm"),
+              children: (
+                <div>
+                  <Text strong>{item.sender_name}</Text>
+                  <br />
+                  <Text>{item.comment}</Text>
+                </div>
+              ),
+            }))}
+          />
+        ) : (
+          <Empty description="Chưa có đánh giá nào" />
+        )}
+      </div>
     </Modal>
   );
 
@@ -241,15 +319,13 @@ const TaskPartComponent: React.FC<OverviewPartProps> = ({ requestData }) => {
                             Nộp bài
                           </Button>
                         )}
-                        {record.feedback && (
-                          <Button
-                            type="link"
-                            icon={<CommentOutlined />}
-                            onClick={() => message.info(record.feedback)}
-                          >
-                            Nhận xét
-                          </Button>
-                        )}
+                        <Button
+                          type="link"
+                          icon={<CommentOutlined />}
+                          onClick={() => handleViewFeedback(record.task_id)}
+                        >
+                          Xem đánh giá
+                        </Button>
                       </Space>
                     ),
                   },
@@ -263,6 +339,7 @@ const TaskPartComponent: React.FC<OverviewPartProps> = ({ requestData }) => {
       </Row>
 
       {renderModal()}
+      {renderFeedbackModal()}
     </>
   );
 };

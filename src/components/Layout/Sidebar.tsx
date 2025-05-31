@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { RootState } from "@/store";
 import { USER_ROLES } from "@/lib/constants";
+import LogoUTT from "./../../assets/Logo-DH-Cong-Nghe-Giao-Thong-Van-Tai..png";
 
 const { Sider } = Layout;
 
@@ -44,7 +45,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             key: "/request-list",
             icon: <TeamOutlined />,
             label: "Danh sách đăng ký",
-          }
+          },
         ]
       : []),
     ...(user?.role_name === USER_ROLES.ADMIN
@@ -83,18 +84,18 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
         height: "100vh",
         zIndex: 100,
       }}
+      width={256}
     >
       <div
         style={{
-          height: 64,
+          height: 100,
           display: "flex",
           alignItems: "center",
-          padding: "0 16px",
-          borderBottom: `1px solid ${token.colorBorderSecondary}`,
+          justifyContent: "center",
         }}
       >
-        <h2 style={{ margin: 0, color: token.colorPrimary }}>
-          {!collapsed && "Thesis Management"}
+        <h2 style={{ margin: 0 }}>
+          {!collapsed && <img src={LogoUTT} height={64} />}
         </h2>
       </div>
       <Menu
@@ -106,9 +107,15 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             (user?.role_name === USER_ROLES.INSIDE_LECTURER ||
               user?.role_name === USER_ROLES.OUTSIDE_LECTURER))
             ? "/thesis-management"
-            : location.pathname.includes("my-thesis") &&
-              user?.role_name === USER_ROLES.STUDENT
+            : (location.pathname.includes("my-thesis") &&
+                user?.role_name === USER_ROLES.STUDENT) ||
+              (location.pathname.includes("request-detail") &&
+                user?.role_name === USER_ROLES.STUDENT)
             ? "/thesis-list"
+            : location.pathname.includes("request-detail") &&
+              (user?.role_name === USER_ROLES.INSIDE_LECTURER ||
+                user?.role_name === USER_ROLES.OUTSIDE_LECTURER)
+            ? "/request-list"
             : location.pathname,
         ]}
         items={menuItems}

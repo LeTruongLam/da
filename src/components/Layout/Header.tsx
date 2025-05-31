@@ -90,11 +90,11 @@ const Header = ({
     <div
       style={{
         position: "fixed",
-        left: collapsed ? 80 : 200,
+        left: collapsed ? 80 : 250,
         right: 0,
         top: 0,
         zIndex: 101,
-        width: `calc(100% - ${collapsed ? 80 : 200}px)`,
+        width: `calc(100% - ${collapsed ? 80 : 250}px)`,
         padding: "0 16px",
         background: themeToken.colorBgContainer,
         borderBottom: `1px solid ${themeToken.colorBorderSecondary}`,

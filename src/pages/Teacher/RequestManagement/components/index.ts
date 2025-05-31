@@ -6,9 +6,5 @@ export { default as DocumentsTable } from "./DocumentsTable";
 export { default as StudentEvaluation } from "./StudentEvaluation";
 
 // Modal components
-export { default as EvaluationModal } from "./EvaluationModal";
-export { default as TaskFeedbackModal } from "./TaskFeedbackModal";
 export { default as DocumentUploadModal } from "./DocumentUploadModal";
 
-// Types
-export type { Document } from "./DocumentsTable";

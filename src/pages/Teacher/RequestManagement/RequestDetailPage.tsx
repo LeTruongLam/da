@@ -8,6 +8,7 @@ import {
   StudentCard,
   TasksTable,
   DocumentsTable,
+  StudentEvaluation,
 } from "./components";
 
 // Import types separately with type keyword
@@ -75,17 +76,17 @@ const RequestDetailPage = () => {
                   </Col>
 
                   <Col span={24}>
-                    <DocumentsTable thesisId={requestDetailData?.thesis.thesis_id} />
+                    <DocumentsTable
+                      thesisId={requestDetailData?.thesis.thesis_id}
+                    />
                   </Col>
                 </Row>
               </TabPane>
 
               <TabPane tab="Đánh giá sinh viên" key="2">
-                {/* <StudentEvaluation
-                  student={null}
-                  documents={[]}
-                  onComment={handleCommentDocument}
-                /> */}
+                <StudentEvaluation
+                  refetch={refetch}
+                />
               </TabPane>
             </Tabs>
           </Col>

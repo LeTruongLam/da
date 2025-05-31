@@ -1,5 +1,5 @@
 import { API_CONFIG } from "./config";
-import { get, post } from "@/lib/base-api";
+import { del, get, post } from "@/lib/base-api";
 
 export type MaterialsByThesisType = {
   material_id: number;
@@ -33,3 +33,6 @@ export const createMaterial = (values: MaterialTypeRequest) =>
     API_CONFIG.ENDPOINTS.MATERIAL.CREATE,
     values as unknown as Record<string, unknown>
   );
+
+  export const deleteMaterial = (materialId: number) =>
+  del<unknown>(API_CONFIG.ENDPOINTS.MATERIAL.DELETE(materialId));

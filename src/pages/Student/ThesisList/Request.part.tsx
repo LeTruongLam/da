@@ -9,18 +9,28 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { Button, Empty, message, Modal, Space, Table } from "antd";
 import dayjs from "dayjs";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const RequestTab = () => {
+type RequestTabProps = {
+  keyTab: string;
+};
+
+const RequestTab = ({ keyTab }: RequestTabProps) => {
   const navigate = useNavigate();
   const {
     data: requestData,
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["request-all"],
+    queryKey: ["request-all", keyTab],
     queryFn: () => getRequestsAll(),
   });
+
+  useEffect(() => {
+    refetch();
+    console.log(keyTab);
+  }, [keyTab, refetch]);
 
   if (!requestData && !isLoading) {
     return (
@@ -66,11 +76,13 @@ const RequestTab = () => {
     {
       title: "Giáo viên hướng dẫn",
       dataIndex: "lecturer_name",
+      width: 200,
       key: "lecturer_name",
       render: (value: string) => <Space>{value || "--"}</Space>,
     },
     {
       title: "Ngày tạo",
+      width: 150,
       dataIndex: "create_at",
       key: "create_at",
       render: (value: string) => dayjs(value).format("DD/MM/YYYY"),
@@ -78,15 +90,32 @@ const RequestTab = () => {
     {
       title: "Trạng thái",
       dataIndex: "status",
+      width: 150,
       key: "status",
       render: (status: ThesisResponse["status"]) => {
         const label =
           THESIS_STATUS_LABELS[status as keyof typeof THESIS_STATUS_LABELS];
         return label ?? "Không xác định";
       },
+      sorter: (a: AllRequestResponse, b: AllRequestResponse) => {
+        const priority = (status: string) => {
+          if (status === REQUEST_STATUS.IN_PROGRESS) return 1;
+          if (status === REQUEST_STATUS.ON_HOLD) return 2;
+          return 3;
+        };
+
+        const priorityA = priority(a.status);
+        const priorityB = priority(b.status);
+
+        if (priorityA < priorityB) return -1;
+        if (priorityA > priorityB) return 1;
+        return 0;
+      },
+      defaultSortOrder: "ascend",
     },
     {
       title: "Thao tác",
+      width: 300,
       key: "action",
       render: (_: any, record: AllRequestResponse) => (
         <>

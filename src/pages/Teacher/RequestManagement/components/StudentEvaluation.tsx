@@ -1,297 +1,273 @@
 import {
   Card,
-  Row,
-  Col,
   Space,
-  Typography,
   Button,
-  Rate,
   Table,
-  Statistic,
-  Progress,
   Tag,
+  Modal,
+  Form,
+  message,
+  Select,
 } from "antd";
 import {
-  UserOutlined,
-  StarOutlined,
-  CheckCircleOutlined,
-  ExclamationCircleOutlined,
-  ClockCircleOutlined,
   CommentOutlined,
   DownloadOutlined,
   FileTextOutlined,
 } from "@ant-design/icons";
-import type { SubTask } from "./TasksTable";
-import type { Document } from "./DocumentsTable";
-import type { Student } from "./StudentCard";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  getTasksByRequest,
+  getTaskDetail,
+  updateTask,
+  type TaskResponse,
+  type TaskDetailResponse,
+} from "@/services/api/task";
+import { TASK_STATUS, TASK_STATUS_LABELS } from "@/lib/constants";
+import { useState, useEffect } from "react";
+import dayjs from "dayjs";
+import TextArea from "antd/es/input/TextArea";
+import { useParams } from "react-router-dom";
+import { addFeedback } from "@/services/api/feedback";
 
-const { Title, Text, Paragraph } = Typography;
-
-interface StudentEvaluationProps {
-  student: Student | null;
-  documents: Document[];
-  onEvaluate: (student: Student) => void;
-  onTaskFeedback: (student: Student, task: SubTask) => void;
-  onUpdateProgress: (student: Student) => void;
-  onComment: (document: Document) => void;
-}
-
-const StudentEvaluation: React.FC<StudentEvaluationProps> = ({
-  student,
-  documents,
-  onEvaluate,
-  onTaskFeedback,
-  onUpdateProgress,
-  onComment,
+const EvaluationModal = ({
+  visible,
+  task,
+  taskDetail,
+  onCancel,
+  onSubmit,
+  loading,
+}: {
+  visible: boolean;
+  task: TaskResponse | null;
+  taskDetail: TaskDetailResponse | undefined;
+  onCancel: () => void;
+  onSubmit: (values: { status: string; comment: string }) => void;
+  loading: boolean;
 }) => {
-  if (!student) {
-    return (
-      <div style={{ textAlign: "center", padding: "50px 0" }}>
-        <Title level={4}>
-          Vui lòng chọn sinh viên để xem chi tiết đánh giá
-        </Title>
-      </div>
-    );
-  }
+  const [form] = Form.useForm();
 
-  const getTaskStatusTag = (status?: string) => {
-    if (!status) return <Tag>Chưa bắt đầu</Tag>;
-
-    const statusConfig = {
-      not_started: { color: "default", text: "Chưa bắt đầu" },
-      in_progress: { color: "processing", text: "Đang thực hiện" },
-      completed: { color: "success", text: "Hoàn thành" },
-      late: { color: "error", text: "Trễ hạn" },
-    };
-
-    const { color, text } =
-      statusConfig[status as keyof typeof statusConfig] ||
-      statusConfig.not_started;
-    return <Tag color={color}>{text}</Tag>;
-  };
-
-  const studentDocuments = documents.filter(
-    (doc) => doc.uploadedBy === student.name
-  );
+  useEffect(() => {
+    if (taskDetail) {
+      form.setFieldsValue({
+        status: taskDetail.status,
+        comment: taskDetail.comment,
+      });
+    }
+  }, [taskDetail, form]);
 
   return (
-    <Row gutter={[24, 24]}>
-      <Col span={24}>
-        <Card>
-          <Row gutter={24}>
-            <Col span={16}>
-              <Title level={5}>
-                <UserOutlined /> {student.name} ({student.studentId})
-              </Title>
-              {student.email && (
-                <Paragraph>
-                  <Text strong>Email: </Text>
-                  {student.email}
-                </Paragraph>
-              )}
-            </Col>
-            <Col span={8} style={{ textAlign: "right" }}>
-              <Space direction="vertical" align="end">
-                <div>
-                  <Text strong>Đánh giá hiện tại: </Text>
-                  <Rate
-                    disabled
-                    value={student.rating}
-                    style={{ marginLeft: 8 }}
-                    className={student.rating === 0 ? "not-rated" : "active"}
-                  />
-                </div>
-                <Space style={{ marginTop: 16 }}>
-                  <Button
-                    type="primary"
-                    icon={<StarOutlined />}
-                    onClick={() => onEvaluate(student)}
-                  >
-                    Đánh giá
-                  </Button>
-                </Space>
-              </Space>
-            </Col>
-          </Row>
-        </Card>
-      </Col>
+    <Modal
+      title={`Đánh giá: ${task?.task_name}`}
+      open={visible}
+      onCancel={onCancel}
+      footer={null}
+      destroyOnClose
+    >
+      {taskDetail && (
+        <Form form={form} layout="vertical" onFinish={onSubmit}>
+          <Form.Item
+            name="status"
+            label="Trạng thái"
+            rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}
+          >
+            <Select>
+              <Select.Option value={TASK_STATUS.DONE}>Hoàn thành</Select.Option>
+              <Select.Option value={TASK_STATUS.IN_PROGRESS}>
+                Đang thực hiện
+              </Select.Option>
+              <Select.Option value={TASK_STATUS.TO_DO}>
+                Chờ thực hiện
+              </Select.Option>
+            </Select>
+          </Form.Item>
 
-      <Col span={24}>
-        <Card title="Các nhiệm vụ và tiến độ">
-          <Table
-            columns={[
-              {
-                title: "Nhiệm vụ",
-                dataIndex: "name",
-                key: "name",
-                render: (text, record) => (
-                  <Space>
-                    {record.status === "completed" ? (
-                      <CheckCircleOutlined style={{ color: "green" }} />
-                    ) : record.status === "late" ? (
-                      <ExclamationCircleOutlined style={{ color: "red" }} />
-                    ) : (
-                      <ClockCircleOutlined />
-                    )}
-                    {text}
-                  </Space>
-                ),
-              },
-              {
-                title: "Mô tả",
-                dataIndex: "description",
-                key: "description",
-                ellipsis: true,
-                width: 200,
-              },
-              {
-                title: "Deadline",
-                dataIndex: "deadline",
-                key: "deadline",
-              },
-              {
-                title: "Ngày nộp",
-                dataIndex: "submittedAt",
-                key: "submittedAt",
-                render: (text) => text || "--",
-              },
-              {
-                title: "Trạng thái",
-                dataIndex: "status",
-                key: "status",
-                render: (status) => getTaskStatusTag(status),
-              },
-              {
-                title: "Thao tác",
-                key: "action",
-                render: (_, record) => (
-                  <Space>
-                    {record.status === "completed" ||
-                    record.status === "late" ? (
-                      <Button
-                        type="link"
-                        icon={<CommentOutlined />}
-                        onClick={() => onTaskFeedback(student, record)}
-                      >
-                        Đánh giá
-                      </Button>
-                    ) : (
-                      <Button type="link" disabled>
-                        Chưa nộp
-                      </Button>
-                    )}
-                    {record.status === "completed" ||
-                    record.status === "late" ? (
-                      <Button type="link" icon={<DownloadOutlined />}>
-                        Tải xuống
-                      </Button>
-                    ) : null}
-                  </Space>
-                ),
-              },
-            ]}
-            dataSource={student.submittedTasks || []}
-            pagination={false}
-            rowKey="key"
-          />
-        </Card>
-      </Col>
+          <Form.Item
+            name="comment"
+            label="Nhận xét"
+            rules={[{ required: true, message: "Vui lòng nhập nhận xét!" }]}
+          >
+            <TextArea rows={4} placeholder="Nhập nhận xét của bạn" />
+          </Form.Item>
 
-      <Col span={24}>
-        <Card title="Tài liệu sinh viên đã nộp">
-          <Table
-            columns={[
-              {
-                title: "Tên tài liệu",
-                dataIndex: "name",
-                key: "name",
-                render: (text, record) => (
-                  <Space>
-                    <FileTextOutlined />
-                    <a
-                      href={record.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      {text}
-                    </a>
-                  </Space>
-                ),
-              },
-              {
-                title: "Ngày nộp",
-                dataIndex: "uploadedAt",
-                key: "uploadedAt",
-              },
-              {
-                title: "Kích thước",
-                dataIndex: "size",
-                key: "size",
-              },
-              {
-                title: "Thao tác",
-                key: "action",
-                render: (_, record) => (
-                  <Space>
-                    <Button type="link" icon={<DownloadOutlined />}>
-                      Tải xuống
-                    </Button>
-                    <Button
-                      type="link"
-                      icon={<CommentOutlined />}
-                      onClick={() => onComment(record)}
-                    >
-                      Nhận xét
-                    </Button>
-                  </Space>
-                ),
-              },
-            ]}
-            dataSource={studentDocuments}
-            pagination={false}
-            rowKey="key"
-          />
-        </Card>
-      </Col>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" block loading={loading}>
+              Lưu đánh giá
+            </Button>
+          </Form.Item>
+        </Form>
+      )}
+    </Modal>
+  );
+};
 
-      <Col span={24}>
-        <Card title="Đánh giá tiến độ thực hiện đồ án">
-          <Row gutter={[16, 16]}>
-            <Col span={12}>
-              <Statistic
-                title="Tiến độ hoàn thành"
-                value={student.progress}
-                suffix="%"
-                valueStyle={{
-                  color:
-                    student.progress < 40
-                      ? "red"
-                      : student.progress < 70
-                      ? "orange"
-                      : "green",
-                }}
-              />
-              <Progress
-                percent={student.progress}
-                status={student.progress < 40 ? "exception" : "active"}
-                style={{ marginTop: 8 }}
-              />
-            </Col>
-            <Col span={12}>
-              <Statistic
-                title="Số nhiệm vụ đã hoàn thành"
-                value={
-                  (student.submittedTasks || []).filter(
-                    (task) => task.status === "completed"
-                  ).length
-                }
-                suffix={`/ ${student.submittedTasks?.length || 0}`}
-              />
-            </Col>
-          </Row>
-        </Card>
-      </Col>
-    </Row>
+const StudentEvaluation: React.FC<{ refetch: () => void }> = ({ refetch }) => {
+  const { id: requestId } = useParams();
+  const [isEvaluationModalVisible, setIsEvaluationModalVisible] =
+    useState(false);
+  const [selectedTask, setSelectedTask] = useState<TaskResponse | null>(null);
+
+  const { data: tasks, isLoading } = useQuery({
+    queryKey: ["tasksByRequest", requestId],
+    queryFn: () => {
+      if (!requestId) return null;
+      return getTasksByRequest(Number(requestId));
+    },
+    enabled: !!requestId,
+  });
+
+  const { data: taskDetail, refetch: refetchTaskDetail } = useQuery({
+    queryKey: ["taskDetail", selectedTask?.task_id],
+    queryFn: () => getTaskDetail(selectedTask!.task_id),
+    enabled: !!selectedTask?.task_id,
+  });
+
+  const { mutate: updateTaskMutation, isPending: isUpdating } = useMutation({
+    mutationFn: ({
+      taskId,
+      data,
+    }: {
+      taskId: number;
+      data: Partial<TaskDetailResponse>;
+    }) => updateTask(taskId, data),
+  });
+
+  const { mutate: createFeedbackMutation } = useMutation({
+    mutationFn: ({ taskId, comment }: { taskId: number; comment: string }) =>
+      addFeedback({ task_id: taskId, comment }),
+  });
+
+  const openEvaluationModal = (task: TaskResponse) => {
+    setSelectedTask(task);
+    setIsEvaluationModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setIsEvaluationModalVisible(false);
+    setSelectedTask(null);
+  };
+
+  const handleEvaluate = (values: { status: string; comment: string }) => {
+    if (!selectedTask) return;
+    try {
+      updateTaskMutation({
+        taskId: selectedTask.task_id,
+        data: {
+          status: values.status,
+          due_date: selectedTask.due_date,
+        },
+      });
+
+      createFeedbackMutation({
+        taskId: selectedTask.task_id,
+        comment: values.comment,
+      });
+      closeModal();
+      refetch();
+      refetchTaskDetail();
+      message.success("Đánh giá thành cong!");
+    } catch (err) {
+      message.error("Có lỗi xảy ra khi đánh giá!");
+    }
+  };
+
+  const handleDownloadFile = async (taskId: number) => {
+    try {
+      const detail = await getTaskDetail(taskId);
+      if (detail?.file_Path) {
+        window.open(detail.file_Path, "_blank");
+      } else {
+        message.warning("Không có file để tải.");
+      }
+    } catch (err) {
+      message.error("Tải file thất bại.");
+    }
+  };
+
+  const columns = [
+    {
+      title: "Tên công việc",
+      dataIndex: "task_name",
+      key: "task_name",
+      render: (text: string) => (
+        <Space>
+          <FileTextOutlined />
+          {text}
+        </Space>
+      ),
+    },
+    {
+      title: "Deadline",
+      dataIndex: "due_date",
+      key: "due_date",
+      width: 150,
+      render: (value: string) => dayjs(value).format("DD/MM/YYYY HH:mm"),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: 150,
+      render: (status: string) => (
+        <Tag
+          color={
+            status === TASK_STATUS.DONE
+              ? "success"
+              : status === TASK_STATUS.IN_PROGRESS
+              ? "processing"
+              : "default"
+          }
+        >
+          {TASK_STATUS_LABELS[status as keyof typeof TASK_STATUS_LABELS] ||
+            status}
+        </Tag>
+      ),
+    },
+    {
+      title: "Thao tác",
+      key: "action",
+      width: 250,
+      render: (_: unknown, record: TaskResponse) => (
+        <Space>
+          <Button
+            type="primary"
+            icon={<CommentOutlined />}
+            onClick={() => openEvaluationModal(record)}
+          >
+            Đánh giá
+          </Button>
+          <Button
+            type="link"
+            icon={<DownloadOutlined />}
+            onClick={() => handleDownloadFile(record.task_id)}
+            disabled={record.status === TASK_STATUS.TO_DO}
+          >
+            Tải file
+          </Button>
+        </Space>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <Card title="Đánh giá công việc">
+        <Table
+          columns={columns}
+          dataSource={tasks || []}
+          loading={isLoading}
+          rowKey="task_id"
+        />
+      </Card>
+
+      <EvaluationModal
+        visible={isEvaluationModalVisible}
+        task={selectedTask}
+        taskDetail={taskDetail}
+        onCancel={closeModal}
+        onSubmit={handleEvaluate}
+        loading={isUpdating}
+      />
+    </>
   );
 };
 

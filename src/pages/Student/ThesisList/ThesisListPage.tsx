@@ -128,6 +128,9 @@ const ThesisList = () => {
 
   const { mutate: handleCreateRequestMutation } = useMutation({
     mutationFn: (data: RequestDataRequest) => createRequest(data),
+    onSuccess: () => {
+      refetchAll();
+    },
   });
   // Get columns for all theses
   const getAllThesesColumns = () => [
@@ -146,6 +149,7 @@ const ThesisList = () => {
       title: "Ngày tạo",
       dataIndex: "created_at",
       key: "created_at",
+      width: 150,
       render: (value: string) => {
         return dayjs(value).format("DD/MM/YYYY");
       },
@@ -154,6 +158,7 @@ const ThesisList = () => {
       title: "Người tạo",
       dataIndex: "creator_name",
       key: "creator_name",
+      width: 150,
       render: (value: string) => <Space>{value || "--"}</Space>,
     },
 
@@ -171,6 +176,7 @@ const ThesisList = () => {
     {
       title: "Thao tác",
       key: "action",
+      width: 150,
       render: (_: unknown, record: ThesisResponse) => (
         <Button
           hidden={record.status !== THESIS_STATUS.AVAILABLE}
@@ -221,6 +227,7 @@ const ThesisList = () => {
       title: "Ngày tạo",
       dataIndex: "created_at",
       key: "created_at",
+      width: 150,
       render: (value: string) => {
         return dayjs(value).format("DD/MM/YYYY");
       },
@@ -229,6 +236,7 @@ const ThesisList = () => {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      width: 150,
       render: (status: ThesisResponse["status"]) => {
         const label =
           THESIS_STATUS_LABELS[status as keyof typeof THESIS_STATUS_LABELS];
@@ -238,6 +246,7 @@ const ThesisList = () => {
     {
       title: "Thao tác",
       key: "action",
+      width: 250,
       render: (_: unknown, record: ThesisResponse) => (
         <>
           <Button
@@ -277,7 +286,7 @@ const ThesisList = () => {
         }
       >
         <Alert
-          message="Lưu ý: Mỗi sinh viên chỉ có 1 yêu cầu đăng ký đề tài với giáo viên" 
+          message="Lưu ý: Mỗi sinh viên chỉ có 1 yêu cầu đăng ký đề tài với giáo viên"
           description="Nếu sinh viên đã có yêu cầu đăng ký giáo viên mà vẫn đăng ký thì yêu cầu cũ sẽ bị hủy "
           type="info"
           showIcon
@@ -359,7 +368,7 @@ const ThesisList = () => {
             )}
           </TabPane>
           <TabPane tab="Yêu cầu hướng dẫn" key="request">
-            <RequestTab />
+            <RequestTab keyTab={activeTab} />
           </TabPane>
         </Tabs>
       </Card>

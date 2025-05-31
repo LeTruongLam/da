@@ -41,9 +41,13 @@ const DocumentUploadModal: React.FC<DocumentUploadModalProps> = ({
       // Upload to Cloudinary first
       const fileUploaded = await uploadToCloudinary(file, "materials");
 
-      console.log("File uploaded to Cloudinary:", fileUploaded);
+      // Lấy tên gốc và đuôi file
+      const originalName = fileUploaded.original_filename;
+      const extension = file.name.split(".").pop();
+      const fileNameWithExtension = `${originalName}.${extension}`;
+
       const data = {
-        fileName: fileUploaded.original_filename,
+        fileName: fileNameWithExtension,
         filePath: fileUploaded.url,
         fileType: fileUploaded.resource_type,
         createAt: fileUploaded.created_at,

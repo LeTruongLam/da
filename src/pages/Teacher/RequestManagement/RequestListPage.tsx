@@ -1,26 +1,42 @@
-import { Card, Table, Tag, Button, Pagination } from "antd";
+import { Card, Table, Tag, Button, Checkbox, Space } from "antd";
 import { useNavigate } from "react-router-dom";
 import { EyeOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { REQUEST_STATUS_LABELS } from "@/lib/constants";
+import { REQUEST_STATUS, REQUEST_STATUS_LABELS } from "@/lib/constants";
 import {
   getRequestsAll,
   type AllRequestResponse,
 } from "@/services/api/request";
+import { useState, useMemo } from "react";
 
 const RequestListPage = () => {
   const navigate = useNavigate();
 
   const {
     data: requestData,
-    refetch,
     isLoading,
   } = useQuery({
     queryKey: ["request-all"],
     queryFn: () => getRequestsAll(),
   });
 
-  console.log(requestData);
+  // ✅ Loại bỏ mặc định các trạng thái bị từ chối hoặc bị hủy
+  const hiddenStatuses = [
+    REQUEST_STATUS.CANCEL,
+    REQUEST_STATUS.REVOKE,
+    REQUEST_STATUS.ADMIN_REJECT,
+  ];
+
+  const defaultStatuses = Object.keys(REQUEST_STATUS_LABELS).filter(
+    (status) => !hiddenStatuses.includes(status)
+  );
+
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>(defaultStatuses);
+
+  const filteredData = useMemo(() => {
+    if (!requestData) return [];
+    return requestData.filter((item) => selectedStatuses.includes(item.status));
+  }, [requestData, selectedStatuses]);
 
   const columns = [
     {
@@ -60,17 +76,27 @@ const RequestListPage = () => {
   ];
 
   return (
-    <>
-      <Card title="Quản lý danh sách đăng ký">
-        <Table
-          columns={columns}
-          dataSource={requestData || []}
-          rowKey="thesisId"
-          scroll={{ x: "max-content" }}
-          loading={isLoading}
+    <Card title="Quản lý danh sách đăng ký">
+      <Space direction="vertical" style={{ width: "100%", marginBottom: 16 }}>
+        <Checkbox.Group
+          options={Object.entries(REQUEST_STATUS_LABELS).map(([value, label]) => ({
+            label,
+            value,
+          }))}
+          value={selectedStatuses}
+          onChange={(checkedValues) => setSelectedStatuses(checkedValues as string[])}
+          style={{ display: "flex", gap: 12, flexWrap: "wrap" }}
         />
-      </Card>
-    </>
+      </Space>
+
+      <Table
+        columns={columns}
+        dataSource={filteredData}
+        rowKey="request_id"
+        scroll={{ x: "max-content" }}
+        loading={isLoading}
+      />
+    </Card>
   );
 };
 

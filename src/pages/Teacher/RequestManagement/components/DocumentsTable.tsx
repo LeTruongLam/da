@@ -1,4 +1,4 @@
-import { Card, Table, Button, Space, Spin } from "antd";
+import { Card, Table, Button, Space, Spin, Modal, message } from "antd";
 import {
   FileAddOutlined,
   DownloadOutlined,
@@ -6,11 +6,13 @@ import {
 } from "@ant-design/icons";
 import DocumentUploadModal from "./DocumentUploadModal";
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  deleteMaterial,
   getMaterialByThesis,
   type MaterialsByThesisType,
 } from "@/services/api/material";
+import { handleDownload } from "@/lib/ultils";
 
 interface DocumentsTableProps {
   thesisId: number | undefined;
@@ -19,6 +21,7 @@ interface DocumentsTableProps {
 const DocumentsTable: React.FC<DocumentsTableProps> = ({ thesisId }) => {
   const [isDocumentUploadModalVisible, setIsDocumentUploadModalVisible] =
     useState(false);
+
   const queryClient = useQueryClient();
 
   const { data: documentsData = [], isLoading: loading } = useQuery({
@@ -27,7 +30,32 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({ thesisId }) => {
       if (!thesisId) return [];
       return getMaterialByThesis(thesisId);
     },
+    enabled: !!thesisId,
   });
+
+  const { mutate: handleDeleteDocument, isPending: deleting } = useMutation({
+    mutationFn: deleteMaterial,
+    onSuccess: () => {
+      message.success("Xóa tài liệu thành công");
+      queryClient.invalidateQueries({ queryKey: ["documents", thesisId] });
+    },
+    onError: () => {
+      message.error("Xóa tài liệu thất bại");
+    },
+  });
+
+  const showDeleteConfirm = (materialId: number) => {
+    Modal.confirm({
+      title: "Xác nhận xóa",
+      content: "Bạn có chắc chắn muốn xóa tài liệu này không?",
+      okText: "Xóa",
+      okType: "danger",
+      cancelText: "Hủy",
+      onOk() {
+        handleDeleteDocument(materialId);
+      },
+    });
+  };
 
   const onUpload = () => {
     setIsDocumentUploadModalVisible(true);
@@ -48,7 +76,7 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({ thesisId }) => {
           </Button>
         }
       >
-        <Spin spinning={loading}>
+        <Spin spinning={loading || deleting}>
           <Table
             columns={[
               {
@@ -59,12 +87,38 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({ thesisId }) => {
               {
                 title: "Thao tác",
                 key: "action",
-                render: (_, record: MaterialsByThesisType) => (
+                width: 200,
+                render: (
+                  _,
+                  record: {
+                    material_id: number;
+                    file_name: string;
+                    file_path: string;
+                    file_type: string;
+                    user_public_id: number;
+                    user_name: string;
+                    thesis_id: number;
+                    create_at: string;
+                    update_at: string;
+                    deleted: boolean;
+                  }
+                ) => (
                   <Space>
-                    <Button type="link" icon={<DownloadOutlined />}>
+                    <Button
+                      type="link"
+                      icon={<DownloadOutlined />}
+                      onClick={() =>
+                        handleDownload(record.file_path, record.file_name)
+                      }
+                    >
                       Tải xuống
                     </Button>
-                    <Button type="link" danger icon={<DeleteOutlined />}>
+                    <Button
+                      type="link"
+                      danger
+                      icon={<DeleteOutlined />}
+                      onClick={() => showDeleteConfirm(record.material_id)}
+                    >
                       Xóa
                     </Button>
                   </Space>
@@ -74,10 +128,11 @@ const DocumentsTable: React.FC<DocumentsTableProps> = ({ thesisId }) => {
             dataSource={documentsData}
             pagination={false}
             size="small"
-            loading={loading}
+            rowKey="id"
           />
         </Spin>
       </Card>
+
       <DocumentUploadModal
         visible={isDocumentUploadModalVisible}
         onCancel={() => setIsDocumentUploadModalVisible(false)}

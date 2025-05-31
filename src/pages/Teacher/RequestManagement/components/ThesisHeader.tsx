@@ -1,5 +1,6 @@
 import { Card, Row, Col, Tag, Typography } from "antd";
 import type { RequestDetailResponse } from "@/services/api/request";
+import { THESIS_STATUS_LABELS } from "@/lib/constants";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -23,7 +24,7 @@ const ThesisHeader: React.FC<ThesisHeaderProps> = ({ requestData }) => {
         <Col span={8}>
           <Paragraph>
             <Text strong>Trạng thái: </Text>
-            <Tag>{requestData?.thesis.status}</Tag>
+            <Tag>{THESIS_STATUS_LABELS[requestData?.thesis.status]}</Tag>
           </Paragraph>
         </Col>
       </Row>
