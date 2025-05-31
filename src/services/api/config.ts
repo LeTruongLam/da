@@ -38,6 +38,9 @@ export const API_CONFIG = {
       EXTERNAL_LECTURERS: "/users/external-lecturers",
       DETAIL: (id: string) => `/teachers/${id}`,
     },
+    STUDENT: {
+      LIST: "/users/students",
+    },
     DASHBOARD: {
       STATS: "/dashboard/stats",
       RECENT_THESES: "/dashboard/recent-theses",

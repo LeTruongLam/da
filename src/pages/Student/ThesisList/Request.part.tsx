@@ -117,7 +117,7 @@ const RequestTab = ({ keyTab }: RequestTabProps) => {
       title: "Thao tác",
       width: 300,
       key: "action",
-      render: (_: any, record: AllRequestResponse) => (
+      render: (_, record: AllRequestResponse) => (
         <>
           <Button
             disabled={record?.status !== REQUEST_STATUS.IN_PROGRESS}

@@ -17,6 +17,7 @@ import { USER_ROLES } from "./lib/constants";
 import HomePage from "./pages/Home";
 import AdminThesisManagement from "./pages/Admin/AdminThesisManagement";
 import RequestListPage from "./pages/Teacher/RequestManagement/RequestListPage";
+import CommitteeManagement from "./pages/Admin/CommitteeManagement";
 
 const App = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -79,6 +80,10 @@ const App = () => {
                   <Route
                     path="thesis-list"
                     element={<AdminThesisManagement />}
+                  />
+                   <Route
+                    path="committee-management"
+                    element={<CommitteeManagement />}
                   />
                 </>
               )}

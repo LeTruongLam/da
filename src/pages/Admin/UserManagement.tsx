@@ -12,50 +12,60 @@ import {
 } from "antd";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import type { UserRole } from "../../store/slices/authSlice";
-import type { UserForm } from "../../types/pages/Admin/UserManagement";
 import {
   USER_ROLES,
   USER_ROLE_LABELS,
   USER_ROLE_COLORS,
   TABLE_PAGE_SIZE,
 } from "../../lib/constants";
+import {
+  getExternalLecturers,
+  getInternalLecturers,
+} from "@/services/api/teacher";
+import { getStudents } from "@/services/api/student";
+
+interface UserForm {
+  email: string;
+  name: string;
+  role: string;
+  password: string;
+}
+
+interface UserRecord {
+  user_id: number;
+  name: string;
+  email: string;
+  role_name: string;
+  isRevoke: boolean;
+}
 
 const UserManagement = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const queryClient = useQueryClient();
 
-  const { data: users, isLoading } = useQuery({
+  // Query danh sách user từ 3 nguồn API
+  const { data: users = [], isLoading } = useQuery<UserRecord[]>({
     queryKey: ["users"],
-    queryFn: () =>
-      Promise.resolve([
-        {
-          id: "1",
-          email: "student@student.edu.vn",
-          name: "Nguyễn Văn A",
-          role: "student",
-        },
-        {
-          id: "2",
-          email: "teacher@teacher.edu.vn",
-          name: "Trần Thị B",
-          role: "teacher",
-        },
-        {
-          id: "3",
-          email: "admin@admin.edu.vn",
-          name: "Lê Văn C",
-          role: "admin",
-        },
-      ]),
+    queryFn: async () => {
+      const [internalLecturers, externalLecturers, students] =
+        await Promise.all([
+          getInternalLecturers(),
+          getExternalLecturers(),
+          getStudents(),
+        ]);
+      return [...internalLecturers, ...externalLecturers, ...students];
+    },
   });
 
+  // Mutation tạo người dùng mới (demo)
   const createUserMutation = useMutation({
     mutationFn: (values: UserForm) =>
       Promise.resolve({
-        id: Math.random().toString(),
+        user_id: Math.random(),
         ...values,
+        role_name: USER_ROLE_LABELS[values.role] || values.role,
+        isRevoke: false,
       }),
     onSuccess: () => {
       message.success("Tạo người dùng thành công!");
@@ -67,6 +77,40 @@ const UserManagement = () => {
       message.error(error.message);
     },
   });
+
+  // Mutation khóa tài khoản user (giả lập API PUT)
+  const banUserMutation = useMutation({
+    mutationFn: (userId: number) =>
+      // Giả lập gọi API backend
+      new Promise<void>((resolve, reject) => {
+        setTimeout(() => {
+          // Ở đây bạn gọi API thực, ví dụ:
+          // fetch(`/api/users/${userId}/ban`, { method: "PUT" })
+          //   .then(...)
+          // Giả lập thành công:
+          resolve();
+        }, 1000);
+      }),
+    onSuccess: () => {
+      message.success("Khóa tài khoản thành công!");
+      queryClient.invalidateQueries({ queryKey: ["users"] });
+    },
+    onError: () => {
+      message.error("Khóa tài khoản thất bại!");
+    },
+  });
+
+  // Hàm xử lý Khóa tài khoản
+  const handleBanUser = (user: UserRecord) => {
+    Modal.confirm({
+      title: "Xác nhận Khóa tài khoản",
+      content: `Bạn có chắc chắn muốn khóa tài khoản "${user.name}" không?`,
+      okText: "Khóa",
+      cancelText: "Hủy",
+      okButtonProps: { danger: true },
+      onOk: () => banUserMutation.mutate(user.user_id),
+    });
+  };
 
   const columns = [
     {
@@ -81,25 +125,35 @@ const UserManagement = () => {
     },
     {
       title: "Vai trò",
-      dataIndex: "role",
-      key: "role",
-      render: (role: UserRole) => {
-        const color = USER_ROLE_COLORS[role];
-        const text = USER_ROLE_LABELS[role];
+      dataIndex: "role_name",
+      key: "role_name",
+      render: (role: string) => {
+        const color = USER_ROLE_COLORS[role] || "gray";
+        const text = USER_ROLE_LABELS[role] || role;
         return <Tag color={color}>{text}</Tag>;
       },
     },
     {
+      title: "Trạng thái",
+      key: "status",
+      render: (_: any, record: UserRecord) => (
+        <Tag color={record.isRevoke ? "red" : "green"}>
+          {record.isRevoke ? "Đã bị khóa" : "Hoạt động"}
+        </Tag>
+      ),
+    },
+    {
       title: "Thao tác",
       key: "action",
-      render: () => (
-        <Space>
-          <Button type="link">Chỉnh sửa</Button>
-          <Button type="link" danger>
-            Xóa
-          </Button>
-          <Button type="link">Reset mật khẩu</Button>
-        </Space>
+      render: (_: any, record: UserRecord) => (
+        <Button
+          type="primary"
+          danger
+          onClick={() => handleBanUser(record)}
+          disabled={record.isRevoke || banUserMutation.isPending}
+        >
+          {record.isRevoke ? "Đã bị khóa" : "Khóa tài khoản"}
+        </Button>
       ),
     },
   ];
@@ -117,7 +171,7 @@ const UserManagement = () => {
         columns={columns}
         dataSource={users}
         loading={isLoading}
-        rowKey="id"
+        rowKey="user_id"
         pagination={{ pageSize: TABLE_PAGE_SIZE }}
       />
 
@@ -160,8 +214,11 @@ const UserManagement = () => {
               <Select.Option value={USER_ROLES.STUDENT}>
                 {USER_ROLE_LABELS[USER_ROLES.STUDENT]}
               </Select.Option>
-              <Select.Option value={USER_ROLES.LECTURER}>
-                {USER_ROLE_LABELS[USER_ROLES.LECTURER]}
+              <Select.Option value={USER_ROLES.INSIDE_LECTURER}>
+                {USER_ROLE_LABELS[USER_ROLES.INSIDE_LECTURER]}
+              </Select.Option>
+              <Select.Option value={USER_ROLES.OUTSIDE_LECTURER}>
+                {USER_ROLE_LABELS[USER_ROLES.OUTSIDE_LECTURER]}
               </Select.Option>
               <Select.Option value={USER_ROLES.ADMIN}>
                 {USER_ROLE_LABELS[USER_ROLES.ADMIN]}
@@ -183,7 +240,7 @@ const UserManagement = () => {
               <Button
                 type="primary"
                 htmlType="submit"
-                loading={createUserMutation.isPending}
+                loading={createUserMutation.isLoading}
               >
                 Tạo
               </Button>

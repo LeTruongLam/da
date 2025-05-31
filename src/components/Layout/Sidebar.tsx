@@ -1,5 +1,11 @@
 import { Layout, Menu, theme } from "antd";
-import { FileTextOutlined, TeamOutlined } from "@ant-design/icons";
+import {
+  CheckCircleFilled,
+  CheckCircleOutlined,
+  FileTextOutlined,
+  GroupOutlined,
+  TeamOutlined,
+} from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import type { RootState } from "@/store";
@@ -62,8 +68,13 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
           },
           {
             key: "/approve-requests",
-            icon: <TeamOutlined />,
+            icon: <CheckCircleOutlined />,
             label: "Duyệt đăng ký",
+          },
+          {
+            key: "/committee-management",
+            icon: <GroupOutlined />,
+            label: "Quản lý hội đồng",
           },
         ]
       : []),
@@ -116,6 +127,8 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
               (user?.role_name === USER_ROLES.INSIDE_LECTURER ||
                 user?.role_name === USER_ROLES.OUTSIDE_LECTURER)
             ? "/request-list"
+            : location.pathname.includes("committee")
+            ? "/committee-management"
             : location.pathname,
         ]}
         items={menuItems}
