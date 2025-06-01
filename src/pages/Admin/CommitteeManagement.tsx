@@ -22,13 +22,6 @@ import {
 } from "@/services/api/councils";
 import dayjs from "dayjs";
 
-type UserType = {
-  user_id: number;
-  name: string;
-  code: string;
-  email: string;
-};
-
 const CommitteeManagement = () => {
   const [modal, contextHolder] = Modal.useModal();
   const [isDetailVisible, setIsDetailVisible] = useState(false);

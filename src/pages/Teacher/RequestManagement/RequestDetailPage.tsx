@@ -1,5 +1,5 @@
 import { Card, Row, Col, Tabs, Spin } from "antd";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 
@@ -11,23 +11,16 @@ import {
   StudentEvaluation,
 } from "./components";
 
-// Import types separately with type keyword
 import { getRequestDetail } from "@/services/api/request";
 
 const { TabPane } = Tabs;
-const PAGE_SIZE = 5;
-
-// Extend SubTask to include feedback and score which are needed
 
 const RequestDetailPage = () => {
   const { id: requestId } = useParams();
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get("tab") === "evaluate" ? "2" : "1";
 
-  const [documentPage, setDocumentPage] = useState(1);
   const [activeTab, setActiveTab] = useState(initialTab);
-
-  const [documentsLoading, setDocumentsLoading] = useState(false);
 
   const {
     data: requestDetailData,
@@ -37,20 +30,6 @@ const RequestDetailPage = () => {
     queryKey: ["request-detail", requestId],
     queryFn: () => getRequestDetail(requestId as unknown as number),
   });
-
-  // Add functions to use the loading states
-  const loadDocuments = () => {
-    setDocumentsLoading(true);
-    // Simulate API call to load documents
-    setTimeout(() => {
-      setDocumentsLoading(false);
-    }, 800);
-  };
-
-  // Use these functions in useEffect to load data when component mounts
-  useEffect(() => {
-    loadDocuments();
-  }, []);
 
   return (
     <Spin spinning={isLoading}>
@@ -84,9 +63,7 @@ const RequestDetailPage = () => {
               </TabPane>
 
               <TabPane tab="Đánh giá sinh viên" key="2">
-                <StudentEvaluation
-                  refetch={refetch}
-                />
+                <StudentEvaluation refetch={refetch} />
               </TabPane>
             </Tabs>
           </Col>

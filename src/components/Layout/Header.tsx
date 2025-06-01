@@ -14,13 +14,7 @@ import {
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
-import {
-  USER_ROLE_LABELS,
-  USER_ROLE_COLORS,
-  USER_ROLES,
-} from "@/lib/constants";
-import { useQuery } from "@tanstack/react-query";
-import { getUserProfile } from "@/services/api/profile";
+import { USER_ROLE_LABELS, USER_ROLES } from "@/lib/constants";
 
 interface HeaderProps {
   collapsed: boolean;
@@ -29,49 +23,24 @@ interface HeaderProps {
   onLogout: () => void;
 }
 
-const getRoleTagColor = (roleName?: string) => {
-  if (!roleName) return "default";
-  return (
-    USER_ROLE_COLORS[roleName as keyof typeof USER_ROLE_COLORS] || "default"
-  );
-};
-
-const getRoleLabel = (role?: string) => {
-  if (!role) return "";
-  return USER_ROLE_LABELS[role as keyof typeof USER_ROLE_LABELS] || role;
-};
-
 const Header = ({
   collapsed,
   setCollapsed,
   onProfileClick,
   onLogout,
 }: HeaderProps) => {
-  const { user, token } = useSelector((state: RootState) => state.auth);
+  const { user } = useSelector((state: RootState) => state.auth);
   const { token: themeToken } = theme.useToken();
 
-  const { data: userProfile } = useQuery({
-    queryKey: ["userProfile", user?.user_id],
-    queryFn: async () => {
-      if (!user) {
-        return null;
-      }
-      try {
-        const response = await getUserProfile(user.user_id);
-        return response;
-      } catch (error) {
-        console.error("Error fetching user profile:", error);
-        return null;
-      }
-    },
-    enabled: !!token && !!user,
-  });
-
   const userMenuItems: MenuProps["items"] = [
-    {
-      key: "profile",
-      label: "Hồ sơ",
-    },
+    ...(user?.role_name !== USER_ROLES.ADMIN
+      ? [
+          {
+            key: "profile",
+            label: "Hồ sơ",
+          },
+        ]
+      : []),
     {
       key: "logout",
       label: "Đăng xuất",
@@ -125,16 +94,8 @@ const Header = ({
           placement="bottomRight"
         >
           <Space style={{ cursor: "pointer" }}>
-            {(userProfile?.role || user?.role) && (
-              <Tag
-                color={getRoleTagColor(userProfile?.role || user?.role)}
-                style={{ textTransform: "capitalize" }}
-              >
-                {getRoleLabel(userProfile?.role || user?.role)}
-              </Tag>
-            )}
             <Avatar icon={<UserOutlined />} />
-            <span>{userProfile?.name || user?.name}</span>
+            <span>{user?.name}</span>
           </Space>
         </Dropdown>
       </Space>

@@ -2,13 +2,9 @@ import {
   Card,
   Row,
   Col,
-  Progress,
-  Space,
   Typography,
-  Button,
-  Rate,
 } from "antd";
-import { UserOutlined, StarOutlined } from "@ant-design/icons";
+import { UserOutlined } from "@ant-design/icons";
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -35,15 +31,6 @@ const StudentCard: React.FC<StudentCardProps> = ({ student }) => {
             {student?.email || "--"}
           </Paragraph>
         </Col>
-        {/* <Col span={8}>
-          <div style={{ marginTop: 16 }}>
-            <Text strong>Đánh giá: </Text>
-            <Rate disabled defaultValue={4} />
-          </div>
-          <Space style={{ marginTop: 24 }}>
-            <Button icon={<StarOutlined />}>Đánh giá</Button>
-          </Space>
-        </Col> */}
       </Row>
     </Card>
   );

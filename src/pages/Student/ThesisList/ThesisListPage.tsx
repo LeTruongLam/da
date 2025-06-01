@@ -17,7 +17,6 @@ import {
 import { SearchOutlined, BookOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import type { RootState } from "../../store";
 import { getAllTheses, getMyTheses } from "@/services/api/thesis";
 import type { ThesisResponse } from "@/services/api/thesis";
 import CreateRequestModal from "@/components/modals/CreateRequestModal";
@@ -32,6 +31,7 @@ import dayjs from "dayjs";
 import { createRequest, type RequestDataRequest } from "@/services/api/request";
 import SelectLecturerModal from "@/components/modals/SelectLecturerModal";
 import { getUserById } from "@/services/api";
+import type { RootState } from "@/store";
 
 const { Title, Text } = Typography;
 const { TabPane } = Tabs;
@@ -105,7 +105,7 @@ const ThesisList = () => {
       if (!user?.user_id) return undefined;
       return await getUserById(user.user_id);
     },
-    enabled: !!user?.user_id, // Chỉ chạy khi có user_id
+    enabled: !!user?.user_id, 
   });
 
   useEffect(() => {

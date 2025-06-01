@@ -1,10 +1,8 @@
 import { Card, List, Avatar, Space, Typography, Tag, Input } from "antd";
 import {
   UserOutlined,
-  BookOutlined,
   TeamOutlined,
   MailOutlined,
-  CalendarOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
@@ -13,8 +11,6 @@ import {
   getExternalLecturers,
 } from "@/services/api/teacher";
 import type { TeacherResponse } from "@/services/api/teacher";
-import { formatDate } from "@/lib/ultils";
-import { THESIS_STATUS } from "@/lib/constants";
 import { useState } from "react";
 
 const { Title, Text } = Typography;
@@ -28,10 +24,7 @@ const TeacherList = () => {
     queryFn: getInternalLecturers,
   });
 
-  const {
-    data: externalLecturers = [],
-    isLoading: isExternalLecturersLoading,
-  } = useQuery<TeacherResponse[]>({
+  const { data: externalLecturers = [] } = useQuery<TeacherResponse[]>({
     queryKey: ["externalLecturers"],
     queryFn: getExternalLecturers,
   });

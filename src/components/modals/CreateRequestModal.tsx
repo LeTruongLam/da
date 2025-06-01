@@ -61,7 +61,7 @@ const CreateRequestModal = ({
       onOk={() => form.submit()}
       okText="Tạo đề tài"
       cancelText="Hủy"
-      confirmLoading={isPending} // loading nút submit
+      confirmLoading={isPending}
       width={700}
     >
       <Form form={form} layout="vertical" onFinish={handleSubmit}>

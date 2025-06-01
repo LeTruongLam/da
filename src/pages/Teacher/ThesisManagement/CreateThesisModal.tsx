@@ -1,6 +1,6 @@
 import React from "react";
-import { Modal, Form, Input, Button, message, Spin, Select } from "antd";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { Modal, Form, Input, message, Select } from "antd";
+import { useMutation } from "@tanstack/react-query";
 import { createThesis } from "@/services/api/thesis";
 import type { ThesisCreateRequest } from "@/services/api/thesis";
 import { THESIS_STATUS, THESIS_STATUS_LABELS } from "@/lib/constants";
@@ -25,7 +25,6 @@ const CreateThesisModal: React.FC<CreateThesisModalProps> = ({
   refetch,
 }) => {
   const [form] = Form.useForm();
-  const queryClient = useQueryClient();
   const { user } = useSelector((state: RootState) => state.auth);
 
   const createThesisMutation = useMutation({

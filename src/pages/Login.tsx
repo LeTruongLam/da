@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { setCredentials } from "../store/slices/authSlice";
 import { useState } from "react";
 import { login, type LoginRequest } from "../services/api/auth";
-import { USER_ROLES } from "../lib/constants";
 
 const { Title } = Typography;
 

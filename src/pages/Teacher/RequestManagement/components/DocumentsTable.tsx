@@ -10,7 +10,6 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   deleteMaterial,
   getMaterialByThesis,
-  type MaterialsByThesisType,
 } from "@/services/api/material";
 import { handleDownload } from "@/lib/ultils";
 

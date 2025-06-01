@@ -20,7 +20,7 @@ const RequestListPage = () => {
     queryFn: () => getRequestsAll(),
   });
 
-  // ✅ Loại bỏ mặc định các trạng thái bị từ chối hoặc bị hủy
+  //  Loại bỏ mặc định các trạng thái bị từ chối hoặc bị hủy
   const hiddenStatuses = [
     REQUEST_STATUS.CANCEL,
     REQUEST_STATUS.REVOKE,

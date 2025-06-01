@@ -4,11 +4,6 @@ import { useState } from "react";
 import { CheckOutlined, CloseOutlined } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import {
-  updateRequestStatus,
-  type AllRequestResponse,
-} from "@/services/api/request";
-import {
-  REQUEST_STATUS,
   THESIS_STATUS,
   THESIS_STATUS_LABELS,
   USER_ROLE_LABELS,

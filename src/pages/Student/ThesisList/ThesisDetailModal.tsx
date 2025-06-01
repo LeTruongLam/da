@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { Button, Form, Input, message, Modal, Select } from "antd";
 import { useForm } from "antd/es/form/Form";
-import { useParams } from "react-router-dom";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   deleteThesis,
@@ -13,13 +12,6 @@ import {
 import { THESIS_STATUS, THESIS_STATUS_LABELS } from "@/lib/constants";
 
 const { TextArea } = Input;
-
-interface ThesisFormValues {
-  title: string;
-  description: string;
-  status: string;
-}
-
 interface ThesisModalProps {
   visible: boolean;
   thesis_id: number;

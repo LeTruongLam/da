@@ -1,6 +1,5 @@
 import { Layout, Menu, theme } from "antd";
 import {
-  CheckCircleFilled,
   CheckCircleOutlined,
   FileTextOutlined,
   GroupOutlined,
