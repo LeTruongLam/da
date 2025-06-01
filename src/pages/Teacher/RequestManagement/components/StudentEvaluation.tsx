@@ -146,10 +146,13 @@ const StudentEvaluation: React.FC<{ refetch: () => void }> = ({ refetch }) => {
     setSelectedTask(null);
   };
 
-  const handleEvaluate = (values: { status: string; comment: string }) => {
+  const handleEvaluate = async (values: {
+    status: string;
+    comment: string;
+  }) => {
     if (!selectedTask) return;
     try {
-      updateTaskMutation({
+      await updateTaskMutation({
         taskId: selectedTask.task_id,
         data: {
           status: values.status,
@@ -157,14 +160,14 @@ const StudentEvaluation: React.FC<{ refetch: () => void }> = ({ refetch }) => {
         },
       });
 
-      createFeedbackMutation({
+      await createFeedbackMutation({
         taskId: selectedTask.task_id,
         comment: values.comment,
       });
       closeModal();
       refetch();
       refetchTaskDetail();
-      message.success("Đánh giá thành cong!");
+      message.success("Đánh giá thành công!");
     } catch (err) {
       message.error("Có lỗi xảy ra khi đánh giá!");
     }
