@@ -19,6 +19,8 @@ import AdminThesisManagement from "./pages/Admin/AdminThesisManagement";
 import RequestListPage from "./pages/Teacher/RequestManagement/RequestListPage";
 import CommitteeManagement from "./pages/Admin/CommitteeManagement";
 import ViewCommitteeListPage from "./components/ViewCommitteeList";
+import StudentDashboard from "./pages/Student/Dashboard";
+import TeacherDashboard from "./pages/Teacher/Dashboard";
 
 const App = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -40,6 +42,7 @@ const App = () => {
               {/* Routes cho Sinh viên */}
               {user.role_name === USER_ROLES.STUDENT && (
                 <>
+                  <Route path="dashboard" element={<StudentDashboard />} />
                   <Route path="thesis-list" element={<ThesisListPage />} />
                   <Route path="teacher-list" element={<TeacherList />} />
                   <Route
@@ -58,6 +61,8 @@ const App = () => {
               {(user.role_name === USER_ROLES.INSIDE_LECTURER ||
                 user.role_name === USER_ROLES.OUTSIDE_LECTURER) && (
                 <>
+                  <Route path="dashboard" element={<TeacherDashboard />} />
+
                   <Route
                     path="thesis-management"
                     element={<ThesisManagement />}

@@ -74,8 +74,8 @@ export const createRequest = (data: RequestDataRequest) =>
 export const getRequestsCurrent = () =>
   get<CurrentRequestResponse>(API_CONFIG.ENDPOINTS.REQUEST.CURRENT);
 
-export const getRequestsAll = () =>
-  get<AllRequestResponse[]>(API_CONFIG.ENDPOINTS.REQUEST.ALL);
+export const getRequestsAll = (status?: string) =>
+  get<AllRequestResponse[]>(API_CONFIG.ENDPOINTS.REQUEST.ALL, { status });
 
 export const getRequestDetail = (id: number) =>
   get<RequestDetailResponse>(API_CONFIG.ENDPOINTS.REQUEST.DETAIL(id));

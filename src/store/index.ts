@@ -2,15 +2,17 @@ import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import authReducer from "./slices/authSlice";
+import appReducer from "./slices/appSlice";
 
 const persistConfig = {
   key: "root",
   storage,
-  whitelist: ["auth"], // Chỉ lưu trữ state auth
+  whitelist: ["auth", "app"], // Chỉ lưu trữ state auth
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
+  app: appReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

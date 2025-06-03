@@ -1,11 +1,12 @@
 import { Modal, Descriptions, Button, Form, Input, notification } from "antd";
 import { LockOutlined } from "@ant-design/icons";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "@/store";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getUserById, resetPassword } from "@/services/api/auth";
 import { USER_ROLES } from "@/lib/constants";
 import { useQuery } from "@tanstack/react-query";
+import { setCurrentRequest } from "@/store/slices/appSlice";
 
 interface ProfileModalProps {
   open: boolean;
@@ -18,6 +19,8 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
     useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [form] = Form.useForm();
+
+  const dispatch = useDispatch();
 
   const { data: userProfile } = useQuery({
     queryKey: ["userProfile"],
@@ -34,6 +37,27 @@ const ProfileModal = ({ open, onClose }: ProfileModalProps) => {
     },
     enabled: !!token && !!user && user.role_name !== USER_ROLES.ADMIN,
   });
+
+  useEffect(() => {
+    if (userProfile) {
+      const { currentRequest } = userProfile;
+
+      if (
+        currentRequest &&
+        typeof currentRequest === "object" &&
+        !Array.isArray(currentRequest) &&
+        currentRequest.thesis_id
+      ) {
+        dispatch(setCurrentRequest(currentRequest.request_id));
+      } else if (Array.isArray(currentRequest) && currentRequest.length > 0) {
+        const requestIds = currentRequest.map((req) => req.request_id);
+        dispatch(setCurrentRequest(requestIds));
+      }
+      else {
+        dispatch(setCurrentRequest(null));
+      }
+    }
+  }, [userProfile, dispatch]);
 
   if (!user || user.role_name === USER_ROLES.ADMIN) {
     return null;

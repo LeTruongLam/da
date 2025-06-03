@@ -1,6 +1,7 @@
 import { Layout, Menu, theme } from "antd";
 import {
   CheckCircleOutlined,
+  DashboardOutlined,
   FileTextOutlined,
   GroupOutlined,
   TeamOutlined,
@@ -27,6 +28,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
     ...(user?.role_name === USER_ROLES.STUDENT
       ? [
           {
+            key: "/dashboard",
+            icon: <DashboardOutlined />,
+            label: "Trang chủ",
+          },
+          {
             key: "/thesis-list",
             icon: <FileTextOutlined />,
             label: "Danh sách đồ án",
@@ -46,6 +52,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
     ...(user?.role_name === USER_ROLES.INSIDE_LECTURER ||
     user?.role_name === USER_ROLES.OUTSIDE_LECTURER
       ? [
+         {
+            key: "/dashboard",
+            icon: <DashboardOutlined />,
+            label: "Trang chủ",
+          },
           {
             key: "/thesis-management",
             icon: <FileTextOutlined />,
@@ -65,6 +76,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
       : []),
     ...(user?.role_name === USER_ROLES.ADMIN
       ? [
+         {
+            key: "/dashboard",
+            icon: <DashboardOutlined />,
+            label: "Trang chủ",
+          },
           {
             key: "/user-management",
             icon: <TeamOutlined />,

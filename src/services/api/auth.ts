@@ -71,6 +71,16 @@ export const resetPassword = async (token: string, newPassword: string) =>
     }).toString()}`
   );
 
+type CurrentRequestType = {
+  request_id: number;
+  thesis_id: number;
+  thesisTitle: string;
+  lecturerId: number;
+  lecturerName: string;
+  lecturerCode: string;
+  status: string;
+};
+
 export type UserByIdResponse = {
   user_id: number;
   name: string;
@@ -88,15 +98,7 @@ export type UserByIdResponse = {
     create_by: number;
     creator_name: string;
   }[];
-  currentRequest: {
-    request_id: number;
-    thesis_id: number;
-    thesisTitle: string;
-    lecturerId: number;
-    lecturerName: string;
-    lecturerCode: string;
-    status: string;
-  };
+  currentRequest: CurrentRequestType | null | CurrentRequestType[];
   tasks: {
     task_id: number;
     task_name: string;
