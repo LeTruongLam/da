@@ -30,7 +30,7 @@ const StudentDashboard = () => {
   const { user } = useSelector((state: RootState) => state.auth);
 
   const { data: requestData, isLoading: requestLoading } = useQuery({
-    queryKey: ["student-request", currentRequest, user?.user_id],
+    queryKey: ["student-request-dashboard", currentRequest, user?.user_id],
     queryFn: async () => {
       if (!currentRequest) return null;
 
@@ -38,6 +38,8 @@ const StudentDashboard = () => {
       return result;
     },
     enabled: !!currentRequest,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 
   const countTaskCompleted =

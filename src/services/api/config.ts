@@ -90,11 +90,14 @@ export const API_CONFIG = {
       GET_BY_TASK_ID: (taskId: number) => `/feedback/${taskId}/get-all`,
     },
     COUNCIL: {
-      CREATE: "/councils",
+      CREATE: (type: number) => `/councils/${type}/create`,
       GET_BY_ID: (id: number) => `/councils/${id}`,
       DELETE: (id: number) => `/councils/${id}`,
       GET_ALL: "/councils",
       GET_BY_REQUEST_ID: (id: number) => `/councils/${id}/get-all`,
+      GET_LECTURERS: "/councils/lecturers",
+      GET_REQUESTS: "/councils/requests",
+      UPDATE: (id: number) => `/councils/${id}/update`,
     },
   },
 } as const;

@@ -10,7 +10,7 @@ import {
   Spin,
 } from "antd";
 import { useState } from "react";
-import { CloseOutlined, EyeOutlined } from "@ant-design/icons";
+import { CloseOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   createCouncil,
@@ -21,12 +21,17 @@ import {
   type CouncilById,
 } from "@/services/api/councils";
 import dayjs from "dayjs";
+import SlotModal from "@/components/modals/SlotModal";
+import EditSlotModal from "@/components/modals/EditSlotModal";
 
 const CommitteeManagement = () => {
   const [modal, contextHolder] = Modal.useModal();
   const [isDetailVisible, setIsDetailVisible] = useState(false);
   const [detailData, setDetailData] = useState<CouncilById | null>(null);
   const [isLoadingDetail, setIsLoadingDetail] = useState(false);
+  const [createSlot, setCreateSlot] = useState(false);
+  const [editSlot, setEditSlot] = useState(false);
+  const [editCouncilId, setEditCouncilId] = useState<number | null>(null);
 
   // Lấy danh sách tất cả các hội đồng
   const {
@@ -40,12 +45,12 @@ const CommitteeManagement = () => {
 
   // Tạo hội đồng
   const { mutate: createCouncilMutation, isPending: isCreating } = useMutation({
-    mutationFn: createCouncil,
+    mutationFn: () => createCouncil(0),
     onSuccess: () => {
       message.success("Tạo hội đồng bảo vệ thành công");
       refetchAll();
     },
-    onError: () => message.error("Tạo hội đồng bảo vệ thất bại"),
+    onError: () => message.success("Tạo hội đồng bảo vệ thành công"),
   });
 
   // Xóa hội đồng
@@ -131,6 +136,16 @@ const CommitteeManagement = () => {
             Xem chi tiết
           </Button>
           <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => {
+              setEditSlot(true);
+              setEditCouncilId(record.council_id);
+            }}
+          >
+            Chỉnh sửa
+          </Button>
+          <Button
             danger
             icon={<CloseOutlined />}
             onClick={() => handleDeleteCouncil(record.council_id)}
@@ -143,60 +158,80 @@ const CommitteeManagement = () => {
   ];
 
   return (
-    <Card title="Quản lý hội đồng bảo vệ">
-      {contextHolder}
-      <Flex justify="end" align="center" className="mb-4">
-        <Button
-          type="primary"
-          loading={isCreating}
-          onClick={handleCreateCouncil}
-          style={{ marginBottom: 16 }}
-        >
-          Phân bổ hội đồng bảo vệ
-        </Button>
-      </Flex>
-      <Table
-        columns={renderColumns()}
-        dataSource={allCouncils}
-        rowKey="id"
-        loading={isLoadingAll}
-        pagination={{ pageSize: 5 }}
-      />
+    <>
+      <Card title="Quản lý hội đồng bảo vệ">
+        {contextHolder}
+        <Flex justify="end" align="center" className="mb-4">
+          <Button
+            type="primary"
+            loading={isCreating}
+            onClick={handleCreateCouncil}
+            style={{ marginBottom: 16 }}
+          >
+            Phân bổ hội đồng bảo vệ
+          </Button>
+          <Button
+            type="primary"
+            onClick={() => setCreateSlot(true)}
+            style={{ marginBottom: 16, marginLeft: 8 }}
+          >
+            Tạo hội đồng
+          </Button>
+        </Flex>
+        <Table
+          columns={renderColumns()}
+          dataSource={allCouncils}
+          rowKey="id"
+          loading={isLoadingAll}
+          pagination={{ pageSize: 5 }}
+        />
 
-      <Modal
-        open={isDetailVisible}
-        title="Chi tiết hội đồng"
-        onCancel={handleCloseDetail}
-        footer={null}
-      >
-        {isLoadingDetail ? (
-          <Spin />
-        ) : detailData ? (
-          <Descriptions column={1} bordered size="small">
-            <Descriptions.Item label="Ngày bảo vệ">
-              {dayjs(detailData.date).format("DD/MM/YYYY")}
-            </Descriptions.Item>
-            <Descriptions.Item label="Giờ bảo vệ">
-              {detailData.time_to}
-            </Descriptions.Item>
-            <Descriptions.Item label="Phòng">
-              {detailData.room}
-            </Descriptions.Item>
-            <Descriptions.Item label="Danh sách hội đồng">
-              <ul style={{ paddingLeft: 16 }}>
-                {detailData.members.map((user) => (
-                  <li key={user.user_id}>
-                    {user.name} ({user.email})
-                  </li>
-                ))}
-              </ul>
-            </Descriptions.Item>
-          </Descriptions>
-        ) : (
-          <p>Không có dữ liệu</p>
-        )}
-      </Modal>
-    </Card>
+        <Modal
+          open={isDetailVisible}
+          title="Chi tiết hội đồng"
+          onCancel={handleCloseDetail}
+          footer={null}
+        >
+          {isLoadingDetail ? (
+            <Spin />
+          ) : detailData ? (
+            <Descriptions column={1} bordered size="small">
+              <Descriptions.Item label="Ngày bảo vệ">
+                {dayjs(detailData.date).format("DD/MM/YYYY")}
+              </Descriptions.Item>
+              <Descriptions.Item label="Giờ bảo vệ">
+                {detailData.time_to}
+              </Descriptions.Item>
+              <Descriptions.Item label="Phòng">
+                {detailData.room}
+              </Descriptions.Item>
+              <Descriptions.Item label="Danh sách hội đồng">
+                <ul style={{ paddingLeft: 16 }}>
+                  {detailData.members.map((user) => (
+                    <li key={user.user_id}>
+                      {user.name} ({user.email})
+                    </li>
+                  ))}
+                </ul>
+              </Descriptions.Item>
+            </Descriptions>
+          ) : (
+            <p>Không có dữ liệu</p>
+          )}
+        </Modal>
+      </Card>
+      <SlotModal
+        refetchAll={refetchAll}
+        open={createSlot}
+        onCancel={() => setCreateSlot(false)}
+      />
+      <EditSlotModal
+        id={editCouncilId}
+        refetchAll={refetchAll}
+        open={editSlot}
+        onCancel={() => setEditSlot(false)}
+      />
+    </>
   );
 };
 

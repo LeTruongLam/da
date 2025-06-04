@@ -71,7 +71,7 @@ export const REQUEST_STATUS_LABELS = {
   [REQUEST_STATUS.ADMIN_REJECT]: "Quản trị viên từ chối",
   [REQUEST_STATUS.ON_HOLD]: "Đang chờ duyệt",
   [REQUEST_STATUS.REVOKE]: "Hệ thống hủy tư cách",
-}
+};
 
 // Task Status
 export const TASK_STATUS = {
@@ -115,3 +115,8 @@ export const ROUTES = {
   THESIS_DETAIL_TEACHER: "/thesis-detail",
   APPROVE_REQUESTS: "/approve-requests",
 };
+
+export const PERIODS = [
+  { value: 0, label: "Buổi sáng" },
+  { value: 1, label: "Buổi chiều" },
+];

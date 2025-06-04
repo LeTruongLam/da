@@ -1,8 +1,15 @@
 import { del, get, post } from "@/lib/base-api";
 import { API_CONFIG } from "./config";
 
-export const createCouncil = () => {
-  return post<unknown>(API_CONFIG.ENDPOINTS.COUNCIL.CREATE);
+export const createCouncil = (
+  type: number,
+  value?: {
+    requestIds: string;
+    list_Member: string;
+    date: string;
+  }
+) => {
+  return post<unknown>(API_CONFIG.ENDPOINTS.COUNCIL.CREATE(type), value);
 };
 
 type UserType = {
@@ -44,3 +51,49 @@ export const getCouncilById = (id: number) =>
 export const deleteCouncil = (id: number) => {
   return del<unknown>(API_CONFIG.ENDPOINTS.COUNCIL.DELETE(id));
 };
+
+export type TeachersCouncilParams = {
+  listMember?: string;
+  requestId?: number;
+  date: string;
+  session?: string;
+};
+
+export type TeachersCouncilResponse = {
+  user_id: number;
+  name: string;
+  code: string;
+  email: string;
+};
+
+export const getTeachersCouncil = (params: TeachersCouncilParams) =>
+  get<TeachersCouncilResponse[]>(
+    API_CONFIG.ENDPOINTS.COUNCIL.GET_LECTURERS,
+    params
+  );
+
+export type RequestCouncilResponse = {
+  create_at: string;
+  lecturer_code: string;
+  lecturer_name: string;
+  request_id: number;
+  status: string;
+  student_code: string;
+  student_name: string;
+  thesis_title: string;
+};
+
+export const getRequestCouncil = (value: { listMember: string }) =>
+  post<RequestCouncilResponse[]>(
+    API_CONFIG.ENDPOINTS.COUNCIL.GET_REQUESTS,
+    value
+  );
+
+export const updateCouncil = (
+  id: number,
+  data: {
+    list_Member: string;
+    requst_Id: string;
+    date: string;
+  }
+) => post<unknown>(API_CONFIG.ENDPOINTS.COUNCIL.UPDATE(id), data);
