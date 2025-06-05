@@ -8,6 +8,7 @@ import {
   Flex,
   Descriptions,
   Spin,
+  Input,
 } from "antd";
 import { useState } from "react";
 import { CloseOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
@@ -32,6 +33,7 @@ const CommitteeManagement = () => {
   const [createSlot, setCreateSlot] = useState(false);
   const [editSlot, setEditSlot] = useState(false);
   const [editCouncilId, setEditCouncilId] = useState<number | null>(null);
+  const [searchKeyword, setSearchKeyword] = useState("");
 
   // Lấy danh sách tất cả các hội đồng
   const {
@@ -42,6 +44,10 @@ const CommitteeManagement = () => {
     queryKey: ["get-all-councils"],
     queryFn: () => getAllCouncils(),
   });
+
+  const filteredCouncils = allCouncils.filter((council) =>
+    council.thesis_title?.toLowerCase().includes(searchKeyword.toLowerCase())
+  );
 
   // Tạo hội đồng
   const { mutate: createCouncilMutation, isPending: isCreating } = useMutation({
@@ -161,26 +167,36 @@ const CommitteeManagement = () => {
     <>
       <Card title="Quản lý hội đồng bảo vệ">
         {contextHolder}
-        <Flex justify="end" align="center" className="mb-4">
-          <Button
-            type="primary"
-            loading={isCreating}
-            onClick={handleCreateCouncil}
-            style={{ marginBottom: 16 }}
-          >
-            Phân bổ hội đồng bảo vệ
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => setCreateSlot(true)}
-            style={{ marginBottom: 16, marginLeft: 8 }}
-          >
-            Tạo hội đồng
-          </Button>
+
+        <Flex justify="space-between" align="center" className="mb-4">
+          <Input
+            placeholder="Tìm theo tên đề tài"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            style={{ width: 300 }}
+          />
+          <div>
+            <Button
+              type="primary"
+              loading={isCreating}
+              onClick={handleCreateCouncil}
+              style={{ marginLeft: 8 }}
+            >
+              Phân bổ hội đồng bảo vệ
+            </Button>
+            <Button
+              type="primary"
+              onClick={() => setCreateSlot(true)}
+              style={{ marginLeft: 8 }}
+            >
+              Tạo hội đồngs
+            </Button>
+          </div>
         </Flex>
+
         <Table
           columns={renderColumns()}
-          dataSource={allCouncils}
+          dataSource={filteredCouncils}
           rowKey="id"
           loading={isLoadingAll}
           pagination={{ pageSize: 5 }}
@@ -220,6 +236,7 @@ const CommitteeManagement = () => {
           )}
         </Modal>
       </Card>
+
       <SlotModal
         refetchAll={refetchAll}
         open={createSlot}
