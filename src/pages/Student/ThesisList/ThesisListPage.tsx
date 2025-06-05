@@ -293,7 +293,7 @@ const ThesisList = () => {
           style={{ marginBottom: 16 }}
         />
         <Tabs activeKey={activeTab} onChange={setActiveTab}>
-          <TabPane tab="Tất cả đồ án" key="all">
+          <TabPane tab="Tất cả đề tài" key="all">
             <div
               style={{
                 display: "flex",
@@ -325,7 +325,7 @@ const ThesisList = () => {
               />
             )}
           </TabPane>
-          <TabPane tab="Đồ án của tôi" key="my">
+          <TabPane tab="Đề tài của tôi" key="my">
             <div
               style={{
                 display: "flex",
@@ -367,7 +367,7 @@ const ThesisList = () => {
               />
             )}
           </TabPane>
-          <TabPane tab="Yêu cầu hướng dẫn" key="request">
+          <TabPane tab="Yêu cầu bảo vệ đồ án" key="request">
             <RequestTab keyTab={activeTab} />
           </TabPane>
         </Tabs>
