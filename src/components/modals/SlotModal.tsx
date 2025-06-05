@@ -65,7 +65,7 @@ const SlotModal = ({ open, onCancel, refetchAll }: SlotModalType) => {
       if (!formData) return Promise.resolve([]);
       return getTeachersCouncil({
         date: formData.date.format("YYYY-MM-DD"),
-        session: formData.slot,
+        session: String(formData.slot),
       });
     },
     enabled: false,
