@@ -106,6 +106,13 @@ const CommitteeManagement = () => {
 
   const renderColumns = () => [
     {
+      title: "Hội đồng",
+      dataIndex: "council_id",
+      key: "council_id",
+      width: 150,
+      render: (value: number) => `Hội đồng ${value}`,
+    },
+    {
       title: "Tên đề tài",
       dataIndex: "thesis_title",
       key: "thesis_title",

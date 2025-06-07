@@ -4,6 +4,7 @@ import {
   DashboardOutlined,
   FileTextOutlined,
   GroupOutlined,
+  InboxOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
 import { useSelector } from "react-redux";
@@ -52,7 +53,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
     ...(user?.role_name === USER_ROLES.INSIDE_LECTURER ||
     user?.role_name === USER_ROLES.OUTSIDE_LECTURER
       ? [
-         {
+          {
             key: "/dashboard",
             icon: <DashboardOutlined />,
             label: "Trang chủ",
@@ -68,6 +69,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             label: "Danh sách đăng ký",
           },
           {
+            key: "/finnal-submit-task-management",
+            icon: <InboxOutlined />,
+            label: "Quản lý nộp đồ án cuối",
+          },
+          {
             key: "/committee-management",
             icon: <GroupOutlined />,
             label: "Quản lý hội đồng",
@@ -76,7 +82,7 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
       : []),
     ...(user?.role_name === USER_ROLES.ADMIN
       ? [
-         {
+          {
             key: "/dashboard",
             icon: <DashboardOutlined />,
             label: "Trang chủ",
@@ -90,6 +96,11 @@ const Sidebar = ({ collapsed }: SidebarProps) => {
             key: "/thesis-list",
             icon: <FileTextOutlined />,
             label: "Danh sách đồ án",
+          },
+          {
+            key: "/finnal-submit-task-management",
+            icon: <InboxOutlined />,
+            label: "Quản lý nộp đồ án cuối",
           },
           {
             key: "/approve-requests",

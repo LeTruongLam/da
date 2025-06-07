@@ -66,6 +66,22 @@ export interface TaskDetailResponse {
   feedbacks: [];
 }
 
-
 export const getTaskDetail = (id: number) =>
   get<TaskDetailResponse>(API_CONFIG.ENDPOINTS.TASK.DETAIL(id));
+
+export type TaskFinnalResponse = {
+  task_id: number;
+  task_name: string;
+  status: string;
+  file_name: string;
+  file_path: string;
+  due_date: string;
+  num_Submit: number;
+  thesis_id: number;
+  thesis_title: string;
+  lecturer_name: string;
+  student_name: string;
+};
+
+export const getTaskFinnalList = () =>
+  get<TaskFinnalResponse[]>(API_CONFIG.ENDPOINTS.TASK.LIST);

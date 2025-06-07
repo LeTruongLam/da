@@ -21,6 +21,7 @@ import CommitteeManagement from "./pages/Admin/CommitteeManagement";
 import ViewCommitteeListPage from "./components/ViewCommitteeList";
 import StudentDashboard from "./pages/Student/Dashboard";
 import TeacherDashboard from "./pages/Teacher/Dashboard";
+import FinnalSubmitTaskManagement from "./components/FinnalSubmitTaskManagement";
 
 const App = () => {
   const { user } = useSelector((state: RootState) => state.auth);
@@ -61,6 +62,10 @@ const App = () => {
               {(user.role_name === USER_ROLES.INSIDE_LECTURER ||
                 user.role_name === USER_ROLES.OUTSIDE_LECTURER) && (
                 <>
+                  <Route
+                    path="finnal-submit-task-management"
+                    element={<FinnalSubmitTaskManagement />}
+                  />
                   <Route path="dashboard" element={<TeacherDashboard />} />
 
                   <Route
@@ -83,6 +88,10 @@ const App = () => {
               {/* Routes cho Admin */}
               {user.role_name === USER_ROLES.ADMIN && (
                 <>
+                  <Route
+                    path="finnal-submit-task-management"
+                    element={<FinnalSubmitTaskManagement />}
+                  />
                   <Route path="user-management" element={<UserManagement />} />
                   <Route
                     path="approve-requests"
