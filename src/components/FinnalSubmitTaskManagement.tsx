@@ -13,6 +13,8 @@ const FinnalSubmitTaskManagement = () => {
   const { data: finnalTasksData = [], isLoading: isLoadingAll } = useQuery({
     queryKey: ["get-finnal-tasks"],
     queryFn: () => getTaskFinnalList(),
+    refetchOnWindowFocus: false,
+    staleTime: 0,
   });
 
   const finnalTasksDataFiltered = finnalTasksData?.filter(
