@@ -6,12 +6,15 @@ import {
   getTaskFinnalList,
   type TaskFinnalResponse,
 } from "@/services/api/task";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 const FinnalSubmitTaskManagement = () => {
+  const { user } = useSelector((state: RootState) => state.auth);
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const { data: finnalTasksData = [], isLoading: isLoadingAll } = useQuery({
-    queryKey: ["get-finnal-tasks"],
+    queryKey: ["get-finnal-tasks", user?.user_id],
     queryFn: () => getTaskFinnalList(),
     refetchOnWindowFocus: false,
     staleTime: 0,
